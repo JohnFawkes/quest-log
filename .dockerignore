@@ -1,0 +1,16 @@
+pycache
+*.pyc
+*.pyo
+venv/
+.git/
+.github/
+.vscode/
+.db
+static/uploads/*
+!static/uploads/.gitkeep
+.env
+.env.example
+README.md
+!static/uploads/demo.webp
+!static/uploads/demo2.jpg
+compose.yaml

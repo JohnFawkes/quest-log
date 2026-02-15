@@ -1,0 +1,137 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    
+    <!-- Tasks Section -->
+    <div class="md:col-span-2 space-y-8">
+        
+        <!-- TODAY'S TASKS -->
+        <div>
+            <h2 class="text-2xl font-bold mb-4 flex items-center text-indigo-800 dark:text-indigo-400">
+                <i class="fas fa-calendar-day mr-2"></i> Due Today
+            </h2>
+            <div class="space-y-4">
+                {% for habit in todays_habits %}
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md border-l-4 {{ 'border-green-500' if habit.is_completed else 'border-indigo-500' }} flex justify-between items-center relative overflow-hidden transition-colors">
+                    
+                    {% if habit.is_completed %}
+                    <div class="absolute inset-0 bg-green-50 dark:bg-green-900/10 opacity-50 z-0"></div>
+                    {% endif %}
+
+                    <div class="z-10">
+                        <h3 class="text-xl font-bold {{ 'text-green-800 dark:text-green-400' if habit.is_completed else 'text-gray-800 dark:text-gray-100' }}">
+                            {{ habit.name }}
+                        </h3>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <span class="bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 text-xs px-2 py-1 rounded font-bold flex items-center gap-1">
+                                <i class="fas fa-gem text-purple-500 text-[10px]"></i> +{{ habit.points_reward }} Gems
+                            </span>
+                            {% if habit.penalty_enabled %}
+                            <span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs px-2 py-1 rounded font-bold">
+                                -{{ habit.penalty_amount }} Gems if missed
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="z-10">
+                        {% if habit.is_completed %}
+                            {% if habit.completion_status == 'approved' %}
+                            <span class="text-green-600 dark:text-green-400 font-bold px-3 py-1 bg-white dark:bg-slate-700 rounded shadow-sm border border-green-100 dark:border-green-800">
+                                <i class="fas fa-check-circle"></i> Completed
+                            </span>
+                            {% else %}
+                            <span class="text-yellow-600 dark:text-yellow-400 font-bold px-3 py-1 bg-white dark:bg-slate-700 rounded shadow-sm border border-yellow-100 dark:border-yellow-800">
+                                <i class="fas fa-clock"></i> Pending
+                            </span>
+                            {% endif %}
+                        {% else %}
+                        <form action="{{ url_for('complete_habit', habit_id=habit.id) }}" method="POST" enctype="multipart/form-data">
+                            <label class="cursor-pointer bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow transition flex items-center">
+                                <i class="fas fa-camera mr-2"></i> Prove It
+                                <input type="file" name="proof" accept="image/*" capture="environment" class="hidden" onchange="this.form.submit()">
+                            </label>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center p-10 bg-white dark:bg-slate-800 rounded shadow border-dashed border-2 border-gray-200 dark:border-slate-700">
+                    <p class="text-gray-400 dark:text-slate-500 font-bold">No quests due today. Rest by the fire, adventurer.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- UPCOMING TASKS -->
+        {% if upcoming_habits %}
+        <div>
+            <h2 class="text-xl font-bold mb-4 text-gray-500 dark:text-slate-400">Upcoming Quests</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for habit in upcoming_habits %}
+                <div class="bg-gray-100 dark:bg-slate-800 p-4 rounded-lg opacity-75 border border-gray-200 dark:border-slate-700 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-gray-700 dark:text-slate-300">{{ habit.name }}</h3>
+                        <p class="text-xs text-gray-500 dark:text-slate-500 mt-1 flex items-center gap-1">
+                            <i class="far fa-clock"></i>
+                            Due: <span class="font-semibold text-indigo-600 dark:text-indigo-400">{{ habit.next_due_display }}</span>
+                        </p>
+                    </div>
+                    {% if habit.penalty_enabled %}
+                    <div class="mt-2 pt-2 border-t border-gray-200 dark:border-slate-700">
+                        <span class="text-xs font-bold text-red-500 flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i> Penalty: -{{ habit.penalty_amount }} Gems
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="md:col-span-1">
+        <h2 class="text-xl font-bold mb-4 dark:text-slate-200">Adventure Log</h2>
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 max-h-screen overflow-y-auto border border-slate-100 dark:border-slate-700">
+            {% for c in completions %}
+            <div class="mb-4 border-b border-gray-100 dark:border-slate-700 last:border-0 pb-4">
+                <div class="flex justify-between items-start">
+                    <div class="w-full">
+                        <div class="flex justify-between w-full mb-2">
+                            <p class="font-bold text-sm text-slate-700 dark:text-slate-300">{{ c.habit_name }}</p>
+                            
+                            {% if c.status == 'approved' %}
+                                <span class="text-green-600 dark:text-green-400 text-[10px] font-bold bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded border border-green-200 dark:border-green-800">Approved</span>
+                            {% elif c.status == 'penalty' %}
+                                <span class="text-red-600 dark:text-red-400 text-[10px] font-bold bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded border border-red-200 dark:border-red-800">Missed</span>
+                            {% elif c.status == 'rejected' %}
+                                <span class="text-red-600 dark:text-red-400 text-[10px] font-bold bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded border border-red-200 dark:border-red-800">Rejected</span>
+                            {% else %}
+                                <span class="text-yellow-600 dark:text-yellow-400 text-[10px] font-bold bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 rounded border border-yellow-200 dark:border-yellow-800">Pending</span>
+                            {% endif %}
+                        </div>
+                        
+                        <p class="text-xs text-gray-400 dark:text-slate-500 mb-2">{{ c.timestamp.strftime('%m/%d %H:%M') }}</p>
+
+                        {% if c.image_filename %}
+                        <a href="{{ url_for('uploaded_file', filename=c.image_filename) }}" target="_blank" class="block group relative">
+                            <img src="{{ url_for('uploaded_file', filename=c.image_filename) }}" class="w-full h-24 object-cover rounded border border-slate-200 dark:border-slate-600 group-hover:brightness-90 transition" alt="Proof">
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20 rounded">
+                                <span class="text-white text-xs font-bold bg-black/50 px-2 py-1 rounded">View Proof</span>
+                            </div>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-gray-500 dark:text-slate-500 text-center text-sm italic">The log is empty.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

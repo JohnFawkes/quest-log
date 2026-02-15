@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-lg shadow-lg mt-10 border-l-4 border-yellow-500 dark:border-yellow-600">
+    <h1 class="text-3xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">Setup Admin Account</h1>
+    <p class="text-center text-gray-500 dark:text-slate-400 mb-6 text-sm">Since this is your first login (or you are using a default password), you <strong>must</strong> update your credentials to continue.</p>
+    
+    <form method="POST" action="{{ url_for('setup_account') }}" class="space-y-4">
+        <div>
+            <label class="block text-gray-700 dark:text-slate-300 text-sm font-bold mb-2">Display Name</label>
+            <input type="text" name="name" required placeholder="Administrator" value="{{ current_user.name }}"
+                class="shadow appearance-none border dark:border-slate-700 rounded w-full py-2 px-3 text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+            <label class="block text-gray-700 dark:text-slate-300 text-sm font-bold mb-2">New Email / Username</label>
+            <input type="text" name="email" required placeholder="admin@example.com"
+                class="shadow appearance-none border dark:border-slate-700 rounded w-full py-2 px-3 text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <p class="text-xs text-gray-400 dark:text-slate-500 mt-1">This will be your login username.</p>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 dark:text-slate-300 text-sm font-bold mb-2">New Password</label>
+            <input type="password" name="password" required 
+                class="shadow appearance-none border dark:border-slate-700 rounded w-full py-2 px-3 text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none shadow-lg transition transform hover:-translate-y-0.5">
+            Update & Continue
+        </button>
+    </form>
+</div>
+{% endblock %}

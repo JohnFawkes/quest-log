@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" class="{{ current_user.theme if current_user.is_authenticated else 'dark' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuestLog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#1e293b', 900: '#0f172a' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Theme Variables CSS -->
+    <style>
+        /* Base Theme Colors (Light Mode Defaults) */
+        :root {
+            --bg-body: #f8fafc;
+            --text-body: #1e293b;
+            --nav-bg: #ffffff;
+            --nav-border: #e2e8f0;
+            --btn-bg: #4f46e5; /* indigo-600 */
+            --btn-text: #ffffff;
+            --btn-hover: #4338ca; /* indigo-700 */
+            --accent-text: #4338ca;
+        }
+
+        /* Dark Mode Overrides for ALL themes */
+        .dark {
+            --bg-body: #0f172a;
+            --text-body: #f1f5f9;
+            --nav-bg: #1e293b;
+            --nav-border: #334155;
+        }
+
+        /* --- THEME SPECIFIC OVERRIDES --- */
+
+        /* Dark Theme (Default/Dungeon) - just relies on standard dark mode classes mainly, but enforces basics */
+        .dark.dark {
+            --bg-body: #0f172a;
+        }
+
+        /* Princess Theme */
+        .princess {
+            --btn-bg: #db2777; /* pink-600 */
+            --btn-hover: #be185d; /* pink-700 */
+            --accent-text: #be185d;
+        }
+        /* Princess Light Mode Specifics */
+        html.princess:not(.dark) {
+            --bg-body: #fff0f5; /* lavender blush */
+            --text-body: #831843;
+            --nav-bg: #fdf2f8;
+            --nav-border: #fbcfe8;
+        }
+        /* Princess Dark Mode Specifics (Darker pinks/purples) */
+        html.princess.dark {
+            --bg-body: #2e1065; /* deep purple */
+            --text-body: #fbcfe8; /* light pink text */
+            --nav-bg: #4c1d95;
+            --nav-border: #701a75;
+        }
+
+        /* Forest Theme */
+        .forest {
+            --btn-bg: #15803d; /* green-700 */
+            --btn-hover: #166534; /* green-800 */
+            --accent-text: #166534;
+        }
+        /* Forest Light Mode */
+        html.forest:not(.dark) {
+            --bg-body: #f0fdf4; /* mint cream */
+            --text-body: #14532d;
+            --nav-bg: #dcfce7;
+            --nav-border: #bbf7d0;
+        }
+        /* Forest Dark Mode */
+        html.forest.dark {
+            --bg-body: #022c22; /* deep green */
+            --text-body: #dcfce7;
+            --nav-bg: #064e3b;
+            --nav-border: #065f46;
+        }
+
+        /* Apply Variables */
+        body { background-color: var(--bg-body); color: var(--text-body); }
+        nav { background-color: var(--nav-bg) !important; border-bottom-color: var(--nav-border) !important; }
+        
+        /* Utility overrides for theme buttons */
+        .bg-indigo-600 { background-color: var(--btn-bg) !important; }
+        .hover\:bg-indigo-700:hover { background-color: var(--btn-hover) !important; }
+        .text-indigo-700 { color: var(--accent-text) !important; }
+        .dark .dark\:text-indigo-400 { color: #818cf8 !important; } /* Reset for dark mode text */
+    </style>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="min-h-screen flex flex-col transition-colors duration-200">
+
+    <nav class="shadow-lg border-b p-4 sticky top-0 z-50 transition-colors">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('dashboard') }}" class="text-2xl font-black flex items-center gap-2" style="color: var(--accent-text);">
+                <i class="fas fa-scroll"></i> QuestLog
+            </a>
+            
+            <div class="flex items-center space-x-4 md:space-x-6">
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-current transition">
+                    <i class="fas fa-sun hidden dark:block"></i>
+                    <i class="fas fa-moon block dark:hidden"></i>
+                </button>
+
+                {% if current_user.is_authenticated %}
+                    <!-- Gems Balance -->
+                    <div class="bg-indigo-50 dark:bg-slate-700 px-3 py-1 rounded-full text-indigo-800 dark:text-indigo-200 font-bold border border-indigo-200 dark:border-slate-600 flex items-center gap-2">
+                        <i class="fas fa-gem text-purple-500 dark:text-purple-400"></i> {{ current_user.points }}
+                    </div>
+                    
+                    <div class="hidden md:flex items-center space-x-6 font-medium">
+                        <a href="{{ url_for('dashboard') }}" class="hover:opacity-80 transition flex items-center gap-1">
+                            <i class="fas fa-map-marked-alt opacity-70"></i> Quests
+                        </a>
+                        <a href="{{ url_for('rewards') }}" class="hover:opacity-80 transition flex items-center gap-1">
+                            <i class="fas fa-crown text-yellow-500"></i> Rewards
+                        </a>
+                        {% if current_user.is_admin %}
+                            <a href="{{ url_for('admin_panel') }}" class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 flex items-center gap-1">
+                                <i class="fas fa-shield-alt"></i> Guild Hall
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <a href="{{ url_for('settings_profile') }}" class="flex items-center gap-2 hover:opacity-80 transition" title="Settings">
+                            {% if current_user.picture %}
+                            <img src="{{ current_user.picture }}" class="w-9 h-9 rounded-full border-2 border-current opacity-80">
+                            {% else %}
+                            <div class="w-9 h-9 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">
+                                {{ current_user.name[0] | upper }}
+                            </div>
+                            {% endif %}
+                        </a>
+                        <a href="{{ url_for('logout') }}" class="text-sm opacity-70 hover:opacity-100 ml-2">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    {% if current_user.is_authenticated %}
+    <div class="md:hidden bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 p-2 flex justify-around text-sm font-medium text-gray-600 dark:text-slate-400">
+        <a href="{{ url_for('dashboard') }}" class="flex flex-col items-center p-2 hover:text-indigo-600 dark:hover:text-indigo-400">
+            <i class="fas fa-scroll mb-1"></i> Quests
+        </a>
+        <a href="{{ url_for('rewards') }}" class="flex flex-col items-center p-2 hover:text-indigo-600 dark:hover:text-indigo-400">
+            <i class="fas fa-crown mb-1"></i> Rewards
+        </a>
+        <a href="{{ url_for('settings_profile') }}" class="flex flex-col items-center p-2 hover:text-indigo-600 dark:hover:text-indigo-400">
+            <i class="fas fa-user-cog mb-1"></i> Profile
+        </a>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('admin_panel') }}" class="flex flex-col items-center p-2 hover:text-red-600 dark:hover:text-red-400 text-red-500 dark:text-red-400">
+            <i class="fas fa-shield-alt mb-1"></i> Admin
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <main class="container mx-auto p-4 md:p-6 flex-grow">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-6 p-4 rounded-lg shadow-sm border-l-4 {{ 'bg-green-50 border-green-500 text-green-700 dark:bg-green-900/30 dark:text-green-300' if category=='success' else 'bg-amber-50 border-amber-500 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' if category=='warning' else 'bg-red-50 border-red-500 text-red-700 dark:bg-red-900/30 dark:text-red-300' }}">
+                        <p class="font-bold flex items-center gap-2">
+                            <i class="fas {{ 'fa-check-circle' if category=='success' else 'fa-exclamation-triangle' }}"></i>
+                            {{ message }}
+                        </p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-slate-800 dark:bg-slate-950 text-slate-400 p-6 text-center mt-auto border-t border-slate-700">
+        <p class="text-sm">&copy; 2026 QuestLog. Your Adventure Awaits.</p>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme_mode', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme_mode', 'dark');
+            }
+        }
+        
+        // Init theme from local storage
+        if (localStorage.getItem('theme_mode') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</body>
+</html>
