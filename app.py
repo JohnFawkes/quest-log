@@ -659,7 +659,12 @@ def admin_panel():
     # Filter: Hide Demo User from assignment list
     users = User.query.filter(User.email != DEMO_EMAIL).all()
     
-    habits = Habit.query.all()
+    # Filter: Hide Demo User's quests from admin panel
+    demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
+    if demo_user:
+        habits = Habit.query.filter(Habit.assigned_user_id != demo_user.id).all()
+    else:
+        habits = Habit.query.all()
     
     # Filter: Hide demo rewards from management list
     # Use explicit NULL checks for safety with SQLite
