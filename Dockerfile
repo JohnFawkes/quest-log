@@ -21,6 +21,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Bust layer cache when source code changes between builds
+ARG COMMIT_SHA=unknown
+RUN echo "${COMMIT_SHA}" > /dev/null
+
 # Copy application code
 COPY . .
 
