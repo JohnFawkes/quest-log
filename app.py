@@ -13,6 +13,8 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from authlib.integrations.flask_client import OAuth
 import sqlite3 # Imported for migration logic
 import mimetypes # Import to guess content types
+# Import IntegrityError to handle race conditions
+from sqlalchemy.exc import IntegrityError 
 
 # Allow OAuth over HTTP
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -287,66 +289,76 @@ def initialize_database():
         perform_db_migration() 
         
         # 3. Seed Data
-        if User.query.filter_by(is_admin=True).count() == 0:
-            print("Creating default 'admin' account...")
-            default_admin = User(
-                email="admin", name="Guild Master",
-                password_hash=generate_password_hash("admin", method='scrypt'),
-                is_admin=True, force_password_change=True, theme='dark'
-            )
-            db.session.add(default_admin)
+        # Wrap attempts in try-except IntegrityError to handle race conditions with Gunicorn workers
+        try:
+            if User.query.filter_by(is_admin=True).count() == 0:
+                print("Creating default 'admin' account...")
+                default_admin = User(
+                    email="admin", name="Guild Master",
+                    password_hash=generate_password_hash("admin", method='scrypt'),
+                    is_admin=True, force_password_change=True, theme='dark'
+                )
+                db.session.add(default_admin)
+                db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            print("Admin account already exists (race condition handled).")
             
-        demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
-        if not demo_user:
-            print("Creating Demo User and content...")
-            demo_user = User(
-                email=DEMO_EMAIL, name="Demo Adventurer",
-                password_hash=generate_password_hash("demo", method='scrypt'),
-                points=50, is_admin=False, force_password_change=False, theme='dark'
-            )
-            db.session.add(demo_user)
-            db.session.commit()
-            
-            # Fallback download
-            demo_img_1 = os.path.join(app.config['UPLOAD_FOLDER'], 'demo.webp')
-            if not os.path.exists(demo_img_1):
-                try:
-                    resp = requests.get("https://placehold.co/600x400/100150/FFF.webp?text=Walked+the+Dog", timeout=5)
-                    if resp.status_code == 200:
-                        with open(demo_img_1, 'wb') as f: f.write(resp.content)
-                except: pass
+        try:
+            demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
+            if not demo_user:
+                print("Creating Demo User and content...")
+                demo_user = User(
+                    email=DEMO_EMAIL, name="Demo Adventurer",
+                    password_hash=generate_password_hash("demo", method='scrypt'),
+                    points=50, is_admin=False, force_password_change=False, theme='dark'
+                )
+                db.session.add(demo_user)
+                db.session.commit()
+                
+                # Fallback download
+                demo_img_1 = os.path.join(app.config['UPLOAD_FOLDER'], 'demo.webp')
+                if not os.path.exists(demo_img_1):
+                    try:
+                        resp = requests.get("https://placehold.co/600x400/100150/FFF.webp?text=Walked+the+Dog", timeout=5)
+                        if resp.status_code == 200:
+                            with open(demo_img_1, 'wb') as f: f.write(resp.content)
+                    except: pass
 
-            demo_img_2 = os.path.join(app.config['UPLOAD_FOLDER'], 'demo2.jpg')
-            if not os.path.exists(demo_img_2):
-                try:
-                    resp = requests.get("https://placehold.co/600x400/501002/FFF.jpg?text=Hydration+Check", timeout=5)
-                    if resp.status_code == 200:
-                        with open(demo_img_2, 'wb') as f: f.write(resp.content)
-                except: pass
+                demo_img_2 = os.path.join(app.config['UPLOAD_FOLDER'], 'demo2.jpg')
+                if not os.path.exists(demo_img_2):
+                    try:
+                        resp = requests.get("https://placehold.co/600x400/501002/FFF.jpg?text=Hydration+Check", timeout=5)
+                        if resp.status_code == 200:
+                            with open(demo_img_2, 'wb') as f: f.write(resp.content)
+                    except: pass
 
-            habits = [
-                Habit(name="Morning Patrol (Walk the Dog)", description="Walk 15 mins", points_reward=15, assigned_user_id=demo_user.id, schedule_type='daily'),
-                Habit(name="Potion Brewing (Drink Water)", description="8 Glasses", points_reward=10, assigned_user_id=demo_user.id, schedule_type='daily'),
-                Habit(name="Clean the Armory (Dishes)", description="Empty sink", points_reward=25, assigned_user_id=demo_user.id, schedule_type='weekly', schedule_days="0,2,4,6"),
-            ]
-            db.session.add_all(habits)
-            db.session.commit()
-            
-            completions = [
-                Completion(user_id=demo_user.id, habit_id=habits[0].id, habit_name=habits[0].name, image_filename="demo.webp", status="pending", timestamp=datetime.datetime.utcnow() - timedelta(minutes=30)),
-                Completion(user_id=demo_user.id, habit_id=habits[1].id, habit_name=habits[1].name, image_filename="demo2.jpg", status="pending", timestamp=datetime.datetime.utcnow() - timedelta(hours=2))
-            ]
-            db.session.add_all(completions)
-            
-            rewards = [
-                Reward(name="Scroll of Knowledge (Book)", cost=100, description="Buy a new book", is_demo=True, icon="fas fa-book"),
-                Reward(name="Elixir of Energy (Coffee)", cost=50, description="Fancy coffee", is_demo=True, icon="fas fa-coffee"),
-                Reward(name="Feast (Pizza Night)", cost=500, description="Order pizza", is_demo=True, icon="fas fa-pizza-slice")
-            ]
-            if Reward.query.filter_by(is_demo=True).count() == 0:
-                db.session.add_all(rewards)
-            
-            db.session.commit()
+                habits = [
+                    Habit(name="Morning Patrol (Walk the Dog)", description="Walk 15 mins", points_reward=15, assigned_user_id=demo_user.id, schedule_type='daily'),
+                    Habit(name="Potion Brewing (Drink Water)", description="8 Glasses", points_reward=10, assigned_user_id=demo_user.id, schedule_type='daily'),
+                    Habit(name="Clean the Armory (Dishes)", description="Empty sink", points_reward=25, assigned_user_id=demo_user.id, schedule_type='weekly', schedule_days="0,2,4,6"),
+                ]
+                db.session.add_all(habits)
+                db.session.commit()
+                
+                completions = [
+                    Completion(user_id=demo_user.id, habit_id=habits[0].id, habit_name=habits[0].name, image_filename="demo.webp", status="pending", timestamp=datetime.datetime.utcnow() - timedelta(minutes=30)),
+                    Completion(user_id=demo_user.id, habit_id=habits[1].id, habit_name=habits[1].name, image_filename="demo2.jpg", status="pending", timestamp=datetime.datetime.utcnow() - timedelta(hours=2))
+                ]
+                db.session.add_all(completions)
+                
+                rewards = [
+                    Reward(name="Scroll of Knowledge (Book)", cost=100, description="Buy a new book", is_demo=True, icon="fas fa-book"),
+                    Reward(name="Elixir of Energy (Coffee)", cost=50, description="Fancy coffee", is_demo=True, icon="fas fa-coffee"),
+                    Reward(name="Feast (Pizza Night)", cost=500, description="Order pizza", is_demo=True, icon="fas fa-pizza-slice")
+                ]
+                if Reward.query.filter_by(is_demo=True).count() == 0:
+                    db.session.add_all(rewards)
+                
+                db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            print("Demo user already exists (race condition handled).")
 
 # Call initialization
 initialize_database()
@@ -534,13 +546,21 @@ def complete_habit(habit_id):
 @app.route('/rewards')
 @login_required
 def rewards():
+    # Filter Logic:
+    # 1. Demo User -> ONLY demo rewards
+    # 2. Others -> ONLY approved rewards that are NOT demo
+    
     if current_user.email == DEMO_EMAIL:
+        # Explicitly filter for is_demo=True/1
         rewards_list = Reward.query.filter_by(is_demo=True).all()
     else:
+        # Explicitly filter for is_demo=False/0 AND is_approved=True/1
+        # Use simple != True check which works for SQLite 0/1 and True/False
         rewards_list = Reward.query.filter(
             (Reward.is_demo == False) | (Reward.is_demo == None),
             Reward.is_approved == True
         ).all()
+        
     return render_template('rewards.html', rewards=rewards_list)
 
 @app.route('/rewards/request', methods=['POST'])
@@ -571,8 +591,8 @@ def request_reward():
 def redeem_reward(reward_id):
     reward = Reward.query.get_or_404(reward_id)
     
-    if current_user.email == DEMO_EMAIL:
-        flash("Demo account is read-only. Redemption is disabled.", "warning")
+    if current_user.email == DEMO_EMAIL and not reward.is_demo:
+        flash("Demo users can only redeem demo rewards.", "error")
         return redirect(url_for('rewards'))
 
     if current_user.points >= reward.cost:
@@ -591,20 +611,32 @@ def redeem_reward(reward_id):
 def admin_panel():
     if not current_user.is_admin: return redirect(url_for('dashboard'))
     
+    # Filter: Hide pending quests from the Demo User
     pending = Completion.query.join(User).filter(Completion.status == 'pending', User.email != DEMO_EMAIL).all()
-    users = User.query.filter(User.email != DEMO_EMAIL).all()
-    # Filter out demo user habits from the admin list
-    habits = Habit.query.join(User).filter(User.email != DEMO_EMAIL).all()
     
+    # Filter: Hide Demo User from assignment list
+    users = User.query.filter(User.email != DEMO_EMAIL).all()
+    
+    habits = Habit.query.all()
+    
+    # Filter: Hide demo rewards from management list
+    # Use explicit NULL checks for safety with SQLite
     pending_rewards = Reward.query.filter(
         Reward.is_approved == False, 
         (Reward.is_demo == False) | (Reward.is_demo == None)
     ).all()
+    
     active_rewards = Reward.query.filter(
         Reward.is_approved == True, 
         (Reward.is_demo == False) | (Reward.is_demo == None)
     ).all()
-    return render_template('admin.html', pending=pending, users=users, habits=habits, pending_rewards=pending_rewards, active_rewards=active_rewards)
+    
+    return render_template('admin.html', 
+                         pending=pending, 
+                         users=users, 
+                         habits=habits,
+                         pending_rewards=pending_rewards,
+                         active_rewards=active_rewards)
 
 @app.route('/admin/reward/create', methods=['POST'])
 @login_required

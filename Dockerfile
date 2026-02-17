@@ -27,4 +27,4 @@ EXPOSE 5000
 
 # Run with Gunicorn for production-grade performance
 # Maps to app:app (file:variable)
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--preload", "app:app"]
