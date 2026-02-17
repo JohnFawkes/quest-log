@@ -13,8 +13,8 @@ ARG PORT=5000
 ENV PORT=${PORT}
 ENV TZ=UTC
 
-# Install curl for healthcheck
-RUN apt-get update && apt-get install -y --no-install-recommends curl \
+# Install curl for healthcheck and gosu for entrypoint privilege drop
+RUN apt-get update && apt-get install -y --no-install-recommends curl gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install
@@ -35,6 +35,10 @@ RUN groupadd -r questlog && useradd -r -g questlog -s /bin/false questlog
 RUN mkdir -p /data /app/static/uploads \
     && chown -R questlog:questlog /data /app/static/uploads
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port
 EXPOSE ${PORT}
 
@@ -42,8 +46,8 @@ EXPOSE ${PORT}
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD /bin/sh -c 'curl -sf http://localhost:${PORT:-5000}/health || exit 1'
 
-# Run as non-root user
-USER questlog
+# Entrypoint fixes bind-mount permissions then drops to non-root user via gosu
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Run with Gunicorn for production-grade performance
-CMD /bin/sh -c "gunicorn -w 4 -b 0.0.0.0:${PORT:-5000} --preload app:app"
+CMD ["sh", "-c", "gunicorn -w 4 -b 0.0.0.0:${PORT:-5000} --preload app:app"]
