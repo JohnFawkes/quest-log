@@ -437,7 +437,8 @@ def settings_profile():
         
         if name:
             current_user.name = name
-        if theme:
+        valid_themes = {'dark', 'light', 'princess', 'forest', 'dragon', 'sorcerer', 'dwarven'}
+        if theme in valid_themes:
             current_user.theme = theme
             
         db.session.commit()
