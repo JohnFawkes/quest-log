@@ -6,20 +6,20 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - '.github/*'
+      - '.github/**'
       - 'Dockerfile'
       - 'app.py'
       - 'requirements.txt'
-      - 'templates/*'
+      - 'templates/**'
 
   pull_request:
     branches: [ "main" ]
     paths:
-      - '.github/*'
+      - '.github/**'
       - 'Dockerfile'
       - 'app.py'
       - 'requirements.txt'
-      - 'templates/*'
+      - 'templates/**'
 
 env:
   REGISTRY: ghcr.io
