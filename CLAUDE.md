@@ -22,7 +22,7 @@ This is a **monolithic single-file Flask application**. All models, routes, help
 | File | Purpose |
 |---|---|
 | `app.py` | Entire application: config, models, routes, helpers |
-| `requirements.txt` | Python dependencies (8 packages, unpinned) |
+| `requirements.txt` | Python dependencies (8 packages, version-ranged) |
 | `Dockerfile` | Production container image |
 | `compose.yaml` | Production deployment (pulls from ghcr.io) |
 | `compose-dev.yaml` | Local development (builds from source) |
@@ -46,6 +46,7 @@ This is a **monolithic single-file Flask application**. All models, routes, help
 - **Dashboard:** `/`, `/dashboard`, `/habit/<id>/complete`, `/settings/profile`
 - **Rewards:** `/rewards`, `/rewards/request`, `/rewards/redeem/<id>`
 - **Admin:** `/admin`, `/admin/habit/create`, `/admin/habit/delete/<id>`, `/admin/approve/<id>`, `/admin/reject/<id>`, `/admin/user/create`, `/admin/user/promote`, `/admin/reward/*`, `/setup`
+- **Infrastructure:** `/health` (Docker healthcheck endpoint)
 - **Static:** `/uploads/<filename>`
 
 ## Development Setup
@@ -134,10 +135,14 @@ curl -L http://localhost:5000  # Should return 200
 - Single `app.py` file — no blueprints or module separation
 - SQLAlchemy ORM models defined at the top of `app.py`
 - Routes use Flask decorators (`@app.route`, `@login_required`)
+- All state-changing routes require POST (no GET-based mutations)
 - Password hashing via Werkzeug's `scrypt` (generate_password_hash / check_password_hash)
 - Form-based POST requests throughout (no JSON API)
-- Flash messages for user feedback
+- Flash messages for user feedback (auto-dismiss after 5s)
 - `ProxyFix` middleware enabled for reverse proxy deployments
+- `requests` library imported as `http_requests` to avoid name collision with Flask's `request`
+- Uses `logging` module instead of bare `print()` for error reporting
+- File upload validation via `ALLOWED_EXTENSIONS` whitelist (png, jpg, jpeg, gif, webp)
 
 ### Frontend / Templates
 
@@ -167,10 +172,11 @@ Key helper functions: `is_habit_due_on_date()`, `calculate_next_due_date()`, `ch
 
 ## Important Considerations
 
-- **No pinned dependencies** — `requirements.txt` has no version pins. Builds may break if upstream packages release breaking changes.
 - **No linter or formatter configured** — no flake8, black, ruff, or pre-commit hooks.
 - **Single-file architecture** — all changes go into `app.py`. Keep this in mind when adding features; the file is already ~800 lines.
 - **SQLite limitations** — no concurrent write support beyond what SQLite provides. The app uses `IntegrityError` handling for multi-worker safety.
-- **File uploads** — stored in `static/uploads/`, served via a custom route with MIME type detection. Max upload size is 16MB.
+- **File uploads** — stored in `static/uploads/`, served via a custom route with MIME type detection. Max upload size is 16MB. Only image extensions (png, jpg, jpeg, gif, webp) are allowed.
 - **Demo user** — `demo@questlog.app` is special-cased throughout the codebase. Demo restrictions are checked inline in route handlers.
+- **Docker security** — container runs as non-root `questlog` user. Healthcheck via `/health` endpoint.
+- **Session cookies** — configured with `httponly=True` and `samesite=Lax` for security.
 - **OAuth insecure transport** — `OAUTHLIB_INSECURE_TRANSPORT=1` is set globally to allow OAuth over HTTP in development. This should be reviewed for production hardening.

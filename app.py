@@ -1,20 +1,25 @@
+import logging
+import mimetypes
 import os
-import datetime
-# Explicitly import timedelta to fix the NameError
-from datetime import timedelta, timezone
-import requests
-# Import make_response to manipulate headers
-from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory, session, make_response
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.middleware.proxy_fix import ProxyFix
+import sqlite3
+from datetime import datetime, timedelta, timezone
+
+import requests as http_requests
 from authlib.integrations.flask_client import OAuth
-import sqlite3 # Imported for migration logic
-import mimetypes # Import to guess content types
-# Import IntegrityError to handle race conditions
-from sqlalchemy.exc import IntegrityError 
+from flask import (
+    Flask, flash, make_response, redirect, render_template, request,
+    send_from_directory, session, url_for,
+)
+from flask_login import (
+    LoginManager, UserMixin, current_user, login_required, login_user, logout_user,
+)
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
+from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
+
+logger = logging.getLogger(__name__)
 
 # Allow OAuth over HTTP
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -36,13 +41,21 @@ data_dir = os.environ.get('DATA_DIR', basedir)
 db_path = os.path.join(data_dir, 'questlog.db') 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-prod')
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static/uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['DISCORD_WEBHOOK_URL'] = DISCORD_WEBHOOK_URL
 app.config['GOOGLE_CLIENT_ID'] = GOOGLE_CLIENT_ID
 app.config['GOOGLE_CLIENT_SECRET'] = GOOGLE_CLIENT_SECRET
 app.config['ADMIN_EMAIL'] = ADMIN_EMAIL
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(data_dir, exist_ok=True)
@@ -70,7 +83,7 @@ class User(UserMixin, db.Model):
     points = db.Column(db.Integer, default=0)
     is_admin = db.Column(db.Boolean, default=False)
     force_password_change = db.Column(db.Boolean, default=False)
-    last_penalty_check = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    last_penalty_check = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     theme = db.Column(db.String(50), default='dark')
     completions = db.relationship('Completion', backref='user', lazy=True)
 
@@ -85,7 +98,7 @@ class Habit(db.Model):
     interval_days = db.Column(db.Integer)    
     penalty_enabled = db.Column(db.Boolean, default=False)
     penalty_amount = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     assigned_user = db.relationship('User', foreign_keys=[assigned_user_id])
 
 class Completion(db.Model):
@@ -95,7 +108,7 @@ class Completion(db.Model):
     habit_name = db.Column(db.String(100))
     image_filename = db.Column(db.String(200))
     status = db.Column(db.String(20), default='pending') 
-    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Reward(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -114,7 +127,7 @@ class Redemption(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     reward_name = db.Column(db.String(100))
     cost = db.Column(db.Integer)
-    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 # --- Helpers ---
 @login_manager.user_loader
@@ -123,16 +136,22 @@ def load_user(user_id):
 
 def send_discord_webhook(content, image_filename=None):
     url = app.config['DISCORD_WEBHOOK_URL']
-    if not url: return
-    files = {}
-    if image_filename:
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
-        if os.path.exists(file_path):
-            files = {'file': open(file_path, 'rb')}
+    if not url:
+        return
     try:
-        requests.post(url, data={'content': content}, files=files)
+        files = {}
+        file_handle = None
+        if image_filename:
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+            if os.path.exists(file_path):
+                file_handle = open(file_path, 'rb')
+                files = {'file': file_handle}
+        http_requests.post(url, data={'content': content}, files=files, timeout=10)
     except Exception as e:
-        print(f"Discord Webhook Error: {e}")
+        logger.warning("Discord Webhook Error: %s", e)
+    finally:
+        if file_handle:
+            file_handle.close()
 
 def is_habit_due_on_date(habit, check_date):
     check_date = check_date.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -159,7 +178,7 @@ def is_habit_due_on_date(habit, check_date):
 
 def calculate_next_due_date(habit):
     """Finds the next due date for a habit starting from tomorrow."""
-    today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     check_date = today + timedelta(days=1)
     
     # Limit search to 30 days to prevent infinite loops on broken schedules
@@ -171,10 +190,10 @@ def calculate_next_due_date(habit):
 
 def check_missed_habits(user):
     if not user.last_penalty_check:
-        user.last_penalty_check = datetime.datetime.utcnow() - timedelta(days=1)
+        user.last_penalty_check = datetime.now(timezone.utc) - timedelta(days=1)
     
     last_check = user.last_penalty_check
-    now = datetime.datetime.utcnow()
+    now = datetime.now(timezone.utc)
     check_date = last_check.replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
     
@@ -320,18 +339,20 @@ def initialize_database():
                 demo_img_1 = os.path.join(app.config['UPLOAD_FOLDER'], 'demo.webp')
                 if not os.path.exists(demo_img_1):
                     try:
-                        resp = requests.get("https://placehold.co/600x400/100150/FFF.webp?text=Walked+the+Dog", timeout=5)
+                        resp = http_requests.get("https://placehold.co/600x400/100150/FFF.webp?text=Walked+the+Dog", timeout=5)
                         if resp.status_code == 200:
                             with open(demo_img_1, 'wb') as f: f.write(resp.content)
-                    except: pass
+                    except Exception as e:
+                        logger.warning("Failed to download demo image 1: %s", e)
 
                 demo_img_2 = os.path.join(app.config['UPLOAD_FOLDER'], 'demo2.jpg')
                 if not os.path.exists(demo_img_2):
                     try:
-                        resp = requests.get("https://placehold.co/600x400/501002/FFF.jpg?text=Hydration+Check", timeout=5)
+                        resp = http_requests.get("https://placehold.co/600x400/501002/FFF.jpg?text=Hydration+Check", timeout=5)
                         if resp.status_code == 200:
                             with open(demo_img_2, 'wb') as f: f.write(resp.content)
-                    except: pass
+                    except Exception as e:
+                        logger.warning("Failed to download demo image 2: %s", e)
 
                 habits = [
                     Habit(name="Morning Patrol (Walk the Dog)", description="Walk 15 mins", points_reward=15, assigned_user_id=demo_user.id, schedule_type='daily'),
@@ -342,8 +363,8 @@ def initialize_database():
                 db.session.commit()
                 
                 completions = [
-                    Completion(user_id=demo_user.id, habit_id=habits[0].id, habit_name=habits[0].name, image_filename="demo.webp", status="pending", timestamp=datetime.datetime.utcnow() - timedelta(minutes=30)),
-                    Completion(user_id=demo_user.id, habit_id=habits[1].id, habit_name=habits[1].name, image_filename="demo2.jpg", status="pending", timestamp=datetime.datetime.utcnow() - timedelta(hours=2))
+                    Completion(user_id=demo_user.id, habit_id=habits[0].id, habit_name=habits[0].name, image_filename="demo.webp", status="pending", timestamp=datetime.now(timezone.utc) - timedelta(minutes=30)),
+                    Completion(user_id=demo_user.id, habit_id=habits[1].id, habit_name=habits[1].name, image_filename="demo2.jpg", status="pending", timestamp=datetime.now(timezone.utc) - timedelta(hours=2))
                 ]
                 db.session.add_all(completions)
                 
@@ -364,6 +385,10 @@ def initialize_database():
 initialize_database()
 
 # --- Routes ---
+@app.route('/health')
+def health():
+    return {'status': 'ok'}, 200
+
 @app.route('/')
 def index():
     if current_user.is_authenticated:
@@ -479,7 +504,8 @@ def authorize():
         login_user(user)
         return redirect(url_for('index'))
     except Exception as e:
-        flash(f"Login failed: {str(e)}", 'error')
+        logger.error("Google OAuth error: %s", e)
+        flash("Login failed. Please try again.", 'error')
         return redirect(url_for('login'))
 
 @app.route('/logout')
@@ -493,7 +519,7 @@ def logout():
 def dashboard():
     check_missed_habits(current_user)
     all_assigned = Habit.query.filter_by(assigned_user_id=current_user.id).all()
-    today = datetime.datetime.utcnow()
+    today = datetime.now(timezone.utc)
     todays_habits = []
     upcoming_habits = []
     
@@ -532,9 +558,14 @@ def complete_habit(habit_id):
         return redirect(url_for('dashboard'))
 
     habit = Habit.query.get_or_404(habit_id)
-    if 'proof' not in request.files or request.files['proof'].filename == '': return redirect(url_for('dashboard'))
+    if 'proof' not in request.files or request.files['proof'].filename == '':
+        flash('Please select an image to upload.', 'warning')
+        return redirect(url_for('dashboard'))
     file = request.files['proof']
-    filename = secure_filename(f"{current_user.id}_{datetime.datetime.now().timestamp()}_{file.filename}")
+    if not allowed_file(file.filename):
+        flash('Invalid file type. Please upload an image (png, jpg, jpeg, gif, webp).', 'error')
+        return redirect(url_for('dashboard'))
+    filename = secure_filename(f"{current_user.id}_{datetime.now().timestamp()}_{file.filename}")
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     completion = Completion(user_id=current_user.id, habit_id=habit.id, habit_name=habit.name, image_filename=filename, status='pending')
     db.session.add(completion)
@@ -571,10 +602,17 @@ def request_reward():
         return redirect(url_for('rewards'))
 
     name = request.form.get('name')
-    cost = int(request.form.get('cost'))
+    try:
+        cost = int(request.form.get('cost'))
+    except (TypeError, ValueError):
+        flash('Invalid cost value.', 'error')
+        return redirect(url_for('rewards'))
+    if cost <= 0:
+        flash('Cost must be a positive number.', 'error')
+        return redirect(url_for('rewards'))
     description = request.form.get('description')
-    icon = "fas fa-gift" 
-    
+    icon = "fas fa-gift"
+
     new_reward = Reward(
         name=name, cost=cost, description=description, icon=icon,
         is_approved=False, is_demo=False, requested_by_id=current_user.id
@@ -652,7 +690,7 @@ def create_reward_admin():
     flash('Reward added to shop.', 'success')
     return redirect(url_for('admin_panel'))
 
-@app.route('/admin/reward/approve/<int:reward_id>')
+@app.route('/admin/reward/approve/<int:reward_id>', methods=['POST'])
 @login_required
 def approve_reward(reward_id):
     if not current_user.is_admin: return redirect(url_for('index'))
@@ -662,7 +700,7 @@ def approve_reward(reward_id):
     flash('Reward approved.', 'success')
     return redirect(url_for('admin_panel'))
 
-@app.route('/admin/reward/delete/<int:reward_id>')
+@app.route('/admin/reward/delete/<int:reward_id>', methods=['POST'])
 @login_required
 def delete_reward(reward_id):
     if not current_user.is_admin: return redirect(url_for('index'))
@@ -672,7 +710,7 @@ def delete_reward(reward_id):
     flash('Reward deleted.', 'info')
     return redirect(url_for('admin_panel'))
 
-@app.route('/admin/habit/delete/<int:habit_id>')
+@app.route('/admin/habit/delete/<int:habit_id>', methods=['POST'])
 @login_required
 def delete_habit(habit_id):
     if not current_user.is_admin: return redirect(url_for('index'))
@@ -733,7 +771,7 @@ def create_habit():
     flash('Quest assigned!', 'success')
     return redirect(url_for('admin_panel'))
 
-@app.route('/admin/approve/<int:completion_id>')
+@app.route('/admin/approve/<int:completion_id>', methods=['POST'])
 @login_required
 def approve_completion(completion_id):
     if not current_user.is_admin: return redirect(url_for('index'))
@@ -750,7 +788,7 @@ def approve_completion(completion_id):
         send_discord_webhook(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved)", completion.image_filename)
     return redirect(url_for('admin_panel'))
 
-@app.route('/admin/reject/<int:completion_id>')
+@app.route('/admin/reject/<int:completion_id>', methods=['POST'])
 @login_required
 def reject_completion(completion_id):
     if not current_user.is_admin: return redirect(url_for('index'))
@@ -786,7 +824,4 @@ def uploaded_file(filename):
     return response
 
 if __name__ == '__main__':
-    # Local run logic only
-    with app.app_context():
-        initialize_database()
     app.run(debug=True, host='0.0.0.0', port=5000)

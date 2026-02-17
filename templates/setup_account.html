@@ -1,31 +1,36 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-lg shadow-lg mt-10 border-l-4 border-yellow-500 dark:border-yellow-600">
-    <h1 class="text-3xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">Setup Admin Account</h1>
-    <p class="text-center text-gray-500 dark:text-slate-400 mb-6 text-sm">Since this is your first login (or you are using a default password), you <strong>must</strong> update your credentials to continue.</p>
-    
+<div class="max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-xl shadow-xl mt-10 border border-indigo-50 dark:border-slate-700">
+    <div class="text-center mb-6">
+        <div class="inline-block p-4 bg-amber-100 dark:bg-slate-700 rounded-full mb-4">
+            <i class="fas fa-key text-4xl text-amber-600 dark:text-amber-400"></i>
+        </div>
+        <h1 class="text-3xl font-black text-slate-800 dark:text-slate-100">Setup Admin Account</h1>
+        <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm">Since this is your first login (or you are using a default password), you <strong>must</strong> update your credentials to continue.</p>
+    </div>
+
     <form method="POST" action="{{ url_for('setup_account') }}" class="space-y-4">
         <div>
-            <label class="block text-gray-700 dark:text-slate-300 text-sm font-bold mb-2">Display Name</label>
-            <input type="text" name="name" required placeholder="Administrator" value="{{ current_user.name }}"
-                class="shadow appearance-none border dark:border-slate-700 rounded w-full py-2 px-3 text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <label class="block text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-2" for="setup-name">Display Name</label>
+            <input type="text" name="name" id="setup-name" required placeholder="Administrator" value="{{ current_user.name }}"
+                class="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition dark:text-white">
         </div>
 
         <div>
-            <label class="block text-gray-700 dark:text-slate-300 text-sm font-bold mb-2">New Email / Username</label>
-            <input type="text" name="email" required placeholder="admin@example.com"
-                class="shadow appearance-none border dark:border-slate-700 rounded w-full py-2 px-3 text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <p class="text-xs text-gray-400 dark:text-slate-500 mt-1">This will be your login username.</p>
+            <label class="block text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-2" for="setup-email">New Email / Username</label>
+            <input type="text" name="email" id="setup-email" required placeholder="admin@example.com"
+                class="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition dark:text-white">
+            <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">This will be your login username.</p>
         </div>
 
         <div>
-            <label class="block text-gray-700 dark:text-slate-300 text-sm font-bold mb-2">New Password</label>
-            <input type="password" name="password" required 
-                class="shadow appearance-none border dark:border-slate-700 rounded w-full py-2 px-3 text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <label class="block text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-2" for="setup-password">New Password</label>
+            <input type="password" name="password" id="setup-password" required minlength="4"
+                class="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition dark:text-white">
         </div>
 
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none shadow-lg transition transform hover:-translate-y-0.5">
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
             Update & Continue
         </button>
     </form>

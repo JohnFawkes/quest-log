@@ -50,7 +50,7 @@
                         <form action="{{ url_for('complete_habit', habit_id=habit.id) }}" method="POST" enctype="multipart/form-data">
                             <label class="cursor-pointer bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow transition flex items-center">
                                 <i class="fas fa-camera mr-2"></i> Prove It
-                                <input type="file" name="proof" accept="image/*" capture="environment" class="hidden" onchange="this.form.submit()">
+                                <input type="file" name="proof" accept=".png,.jpg,.jpeg,.gif,.webp" capture="environment" class="hidden" onchange="this.form.submit()">
                             </label>
                         </form>
                         {% endif %}
@@ -118,8 +118,8 @@
                         <p class="text-xs text-gray-400 dark:text-slate-500 mb-2">{{ c.timestamp.strftime('%m/%d %H:%M') }}</p>
 
                         {% if c.image_filename %}
-                        <a href="{{ url_for('uploaded_file', filename=c.image_filename) }}" target="_blank" class="block group relative">
-                            <img src="{{ url_for('uploaded_file', filename=c.image_filename) }}" class="w-full h-24 object-cover rounded border border-slate-200 dark:border-slate-600 group-hover:brightness-90 transition" alt="Proof">
+                        <a href="{{ url_for('uploaded_file', filename=c.image_filename) }}" target="_blank" rel="noopener noreferrer" class="block group relative">
+                            <img src="{{ url_for('uploaded_file', filename=c.image_filename) }}" class="w-full h-24 object-cover rounded border border-slate-200 dark:border-slate-600 group-hover:brightness-90 transition" alt="Proof for {{ c.habit_name }}" loading="lazy">
                             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20 rounded">
                                 <span class="text-white text-xs font-bold bg-black/50 px-2 py-1 rounded">View Proof</span>
                             </div>
