@@ -155,7 +155,8 @@ def send_discord_webhook(content, image_filename=None):
 
 def is_habit_due_on_date(habit, check_date):
     check_date = check_date.replace(hour=0, minute=0, second=0, microsecond=0)
-    habit_start = habit.created_at.replace(hour=0, minute=0, second=0, microsecond=0)
+    created = habit.created_at if habit.created_at.tzinfo else habit.created_at.replace(tzinfo=timezone.utc)
+    habit_start = created.replace(hour=0, minute=0, second=0, microsecond=0)
     
     if habit.schedule_type == 'daily':
         return True
@@ -193,6 +194,8 @@ def check_missed_habits(user):
         user.last_penalty_check = datetime.now(timezone.utc) - timedelta(days=1)
     
     last_check = user.last_penalty_check
+    if last_check.tzinfo is None:
+        last_check = last_check.replace(tzinfo=timezone.utc)
     now = datetime.now(timezone.utc)
     check_date = last_check.replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -207,7 +210,8 @@ def check_missed_habits(user):
     current_check = check_date
     while current_check <= yesterday:
         for habit in habits:
-            if habit.created_at > current_check: continue 
+            created = habit.created_at if habit.created_at.tzinfo else habit.created_at.replace(tzinfo=timezone.utc)
+            if created > current_check: continue
             if is_habit_due_on_date(habit, current_check):
                 start_of_day = current_check
                 end_of_day = current_check + timedelta(days=1)
