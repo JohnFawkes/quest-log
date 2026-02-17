@@ -102,6 +102,8 @@ A read-only demo user (`demo@questlog.app`) is auto-created with sample data. De
 | `APPRISE_URLS` | No | Comma-separated Apprise notification URLs |
 | `DISCORD_WEBHOOK_URL` | No | Discord webhook for direct notifications |
 | `DATA_DIR` | No | Directory for SQLite database (default: app directory) |
+| `PORT` | No | Port the application listens on (default: `5000`) |
+| `TZ` | No | Timezone in IANA format (default: `UTC`) |
 
 ## CI/CD
 

@@ -8,6 +8,11 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DATA_DIR=/data
 
+# Configurable port and timezone
+ARG PORT=5000
+ENV PORT=${PORT}
+ENV TZ=UTC
+
 # Install curl for healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
@@ -27,14 +32,14 @@ RUN mkdir -p /data /app/static/uploads \
     && chown -R questlog:questlog /data /app/static/uploads
 
 # Expose port
-EXPOSE 5000
+EXPOSE ${PORT}
 
 # Healthcheck using the /health endpoint
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD /bin/sh -c 'curl -sf http://localhost:${PORT:-5000}/health || exit 1'
 
 # Run as non-root user
 USER questlog
 
 # Run with Gunicorn for production-grade performance
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--preload", "app:app"]
+CMD /bin/sh -c "gunicorn -w 4 -b 0.0.0.0:${PORT:-5000} --preload app:app"
