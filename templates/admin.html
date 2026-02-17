@@ -30,20 +30,24 @@
                             <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">{{ p.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
                         </div>
                         {% if p.image_filename %}
-                        <a href="{{ url_for('uploaded_file', filename=p.image_filename) }}" target="_blank" class="block mb-4 group relative">
-                            <img src="{{ url_for('uploaded_file', filename=p.image_filename) }}" class="w-full h-32 object-cover rounded border border-slate-200 dark:border-slate-600 group-hover:brightness-90 transition">
+                        <a href="{{ url_for('uploaded_file', filename=p.image_filename) }}" target="_blank" rel="noopener noreferrer" class="block mb-4 group relative">
+                            <img src="{{ url_for('uploaded_file', filename=p.image_filename) }}" class="w-full h-32 object-cover rounded border border-slate-200 dark:border-slate-600 group-hover:brightness-90 transition" alt="Quest proof from {{ p.user.name }}">
                             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                                 <i class="fas fa-search-plus text-white text-2xl drop-shadow-lg"></i>
                             </div>
                         </a>
                         {% endif %}
                         <div class="mt-auto flex gap-2">
-                            <a href="{{ url_for('approve_completion', completion_id=p.id) }}" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-center py-2 rounded text-sm font-bold transition shadow-sm">
-                                <i class="fas fa-check mr-1"></i> Approve
-                            </a>
-                            <a href="{{ url_for('reject_completion', completion_id=p.id) }}" class="flex-1 bg-red-500 hover:bg-red-600 text-white text-center py-2 rounded text-sm font-bold transition shadow-sm">
-                                <i class="fas fa-times mr-1"></i> Reject
-                            </a>
+                            <form action="{{ url_for('approve_completion', completion_id=p.id) }}" method="POST" class="flex-1">
+                                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-center py-2 rounded text-sm font-bold transition shadow-sm">
+                                    <i class="fas fa-check mr-1"></i> Approve
+                                </button>
+                            </form>
+                            <form action="{{ url_for('reject_completion', completion_id=p.id) }}" method="POST" class="flex-1">
+                                <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white text-center py-2 rounded text-sm font-bold transition shadow-sm">
+                                    <i class="fas fa-times mr-1"></i> Reject
+                                </button>
+                            </form>
                         </div>
                     </div>
                     {% endfor %}
@@ -64,27 +68,26 @@
             <i class="fas fa-feather-alt text-indigo-500"></i> Assign New Quest
         </h3>
         <form action="{{ url_for('create_habit') }}" method="POST" class="space-y-5">
-            <!-- Habit form fields same as before... -->
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Quest Name</label>
-                    <input type="text" name="name" placeholder="e.g. Slay the Dragon (Dishes)" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
+                    <label for="habit-name" class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Quest Name</label>
+                    <input type="text" name="name" id="habit-name" placeholder="e.g. Slay the Dragon (Dishes)" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Gem Reward</label>
-                    <input type="number" name="points" placeholder="10" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
+                    <label for="habit-points" class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Gem Reward</label>
+                    <input type="number" name="points" id="habit-points" placeholder="10" min="1" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
                 </div>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Assign Adventurer</label>
-                <select name="assigned_user_id" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
+                <label for="habit-user" class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Assign Adventurer</label>
+                <select name="assigned_user_id" id="habit-user" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
                     {% for u in users %}
                     <option value="{{ u.id }}">{{ u.name }} ({{ u.email }})</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Schedule</label>
+                <label for="scheduleType" class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Schedule</label>
                 <select name="schedule_type" id="scheduleType" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded mb-3 dark:text-white" onchange="toggleSchedule()">
                     <option value="daily">Daily Quest</option>
                     <option value="weekly">Weekly Schedule</option>
@@ -101,22 +104,22 @@
                     <label class="flex items-center gap-1"><input type="checkbox" name="days" value="6"> Sun</label>
                 </div>
                 <div id="intervalSelector" class="hidden mt-2">
-                    <input type="number" name="interval_days" placeholder="Days (e.g. 2)" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
+                    <input type="number" name="interval_days" placeholder="Days (e.g. 2)" min="1" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
                 </div>
             </div>
             <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-100 dark:border-red-900/50">
                 <div class="flex items-center justify-between mb-2">
-                    <label class="font-bold text-red-700 dark:text-red-400 text-sm flex items-center gap-2">Enable Penalty?</label>
+                    <label for="penaltyCheck" class="font-bold text-red-700 dark:text-red-400 text-sm flex items-center gap-2">Enable Penalty?</label>
                     <input type="checkbox" name="penalty_enabled" id="penaltyCheck" onchange="togglePenalty()" class="w-5 h-5 accent-red-600">
                 </div>
                 <div id="penaltyAmount" class="hidden mt-2">
-                    <input type="number" name="penalty_amount" placeholder="Gems to deduct" class="w-full p-2 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 rounded dark:text-white">
+                    <input type="number" name="penalty_amount" placeholder="Gems to deduct" min="0" class="w-full p-2 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 rounded dark:text-white">
                 </div>
             </div>
-            <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-bold shadow-md">Post Quest</button>
+            <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-bold shadow-md transition">Post Quest</button>
         </form>
 
-        <!-- NEW: Active Quests List -->
+        <!-- Active Quests List -->
         <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
             <h4 class="font-bold text-md mb-4 text-slate-700 dark:text-slate-300">Active Quests</h4>
             <div class="space-y-3 max-h-[300px] overflow-y-auto">
@@ -125,14 +128,16 @@
                     <div>
                         <p class="font-bold text-sm text-slate-800 dark:text-slate-200">{{ h.name }}</p>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
-                            <i class="fas fa-user-tag"></i> {{ h.assigned_user.name if h.assigned_user else 'Unassigned' }} 
-                            &bull; 
+                            <i class="fas fa-user-tag"></i> {{ h.assigned_user.name if h.assigned_user else 'Unassigned' }}
+                            &bull;
                             <span class="capitalize">{{ h.schedule_type }}</span>
                         </p>
                     </div>
-                    <a href="{{ url_for('delete_habit', habit_id=h.id) }}" class="text-red-400 hover:text-red-600 p-2" onclick="return confirm('Delete this quest? All history for it will be lost.')">
-                        <i class="fas fa-trash"></i>
-                    </a>
+                    <form action="{{ url_for('delete_habit', habit_id=h.id) }}" method="POST" onsubmit="return confirm('Delete this quest? All history for it will be lost.')">
+                        <button type="submit" class="text-red-400 hover:text-red-600 p-2" title="Delete quest">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
                 </div>
                 {% else %}
                 <p class="text-slate-400 dark:text-slate-600 text-sm text-center">No active quests.</p>
@@ -141,7 +146,7 @@
         </div>
     </div>
 
-    <!-- 3. User Management (Moved Up) -->
+    <!-- 3. User Management -->
     <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 border border-slate-200 dark:border-slate-700 h-fit">
         <h3 class="font-bold text-lg mb-4 text-slate-800 dark:text-slate-100 border-b dark:border-slate-700 pb-2 flex items-center gap-2">
             <i class="fas fa-users-cog text-indigo-500"></i> Recruit & Promote
@@ -150,8 +155,8 @@
             <form action="{{ url_for('create_user_admin') }}" method="POST" class="space-y-3">
                 <input type="text" name="name" placeholder="Full Name" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
                 <input type="email" name="email" placeholder="Email" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
-                <input type="password" name="password" placeholder="Password" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
-                <button type="submit" class="w-full bg-slate-700 text-white py-2 rounded hover:bg-slate-800 text-sm font-bold">Create User</button>
+                <input type="password" name="password" placeholder="Password" required minlength="4" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
+                <button type="submit" class="w-full bg-slate-700 text-white py-2 rounded hover:bg-slate-800 text-sm font-bold transition">Create User</button>
             </form>
             <div class="border-t dark:border-slate-700 pt-4">
                 <form action="{{ url_for('promote_user') }}" method="POST" class="flex gap-2">
@@ -160,15 +165,15 @@
                         <option value="{{ u.id }}">{{ u.name }} {% if u.is_admin %}(Admin){% endif %}</option>
                         {% endfor %}
                     </select>
-                    <button type="submit" class="bg-indigo-600 text-white px-3 rounded hover:bg-indigo-700 text-sm font-bold">Promote</button>
+                    <button type="submit" class="bg-indigo-600 text-white px-3 rounded hover:bg-indigo-700 text-sm font-bold transition">Promote</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- 4. Reward Management (Below Requests) -->
+    <!-- 4. Reward Management -->
     <div class="lg:col-span-2 space-y-8">
-        
+
         <!-- Reward Requests -->
         {% if pending_rewards %}
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border border-slate-200 dark:border-slate-700">
@@ -192,8 +197,12 @@
                             <span>Cost: {{ r.cost }} Gems</span>
                         </div>
                         <div class="flex gap-2">
-                            <a href="{{ url_for('approve_reward', reward_id=r.id) }}" class="flex-1 bg-green-500 text-white text-center py-1 rounded hover:bg-green-600 text-sm">Approve</a>
-                            <a href="{{ url_for('delete_reward', reward_id=r.id) }}" class="flex-1 bg-red-500 text-white text-center py-1 rounded hover:bg-red-600 text-sm">Reject</a>
+                            <form action="{{ url_for('approve_reward', reward_id=r.id) }}" method="POST" class="flex-1">
+                                <button type="submit" class="w-full bg-green-500 text-white text-center py-1 rounded hover:bg-green-600 text-sm transition">Approve</button>
+                            </form>
+                            <form action="{{ url_for('delete_reward', reward_id=r.id) }}" method="POST" class="flex-1">
+                                <button type="submit" class="w-full bg-red-500 text-white text-center py-1 rounded hover:bg-red-600 text-sm transition">Reject</button>
+                            </form>
                         </div>
                     </div>
                     {% endfor %}
@@ -211,18 +220,18 @@
                 </h3>
                 <form action="{{ url_for('create_reward_admin') }}" method="POST" class="space-y-4">
                     <input type="text" name="name" placeholder="Reward Name" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
-                    <input type="number" name="cost" placeholder="Cost (Gems)" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
+                    <input type="number" name="cost" placeholder="Cost (Gems)" min="1" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
                     <textarea name="description" placeholder="Description" rows="2" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white"></textarea>
-                    
+
                     <div>
                         <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Icon (FontAwesome Class)</label>
                         <div class="flex gap-2">
                             <input type="text" name="icon" placeholder="fas fa-gift" value="fas fa-gift" class="flex-1 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
-                            <a href="https://fontawesome.com/search?o=r&m=free" target="_blank" class="bg-slate-200 dark:bg-slate-700 px-3 py-2 rounded text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"><i class="fas fa-search"></i></a>
+                            <a href="https://fontawesome.com/search?o=r&m=free" target="_blank" rel="noopener noreferrer" class="bg-slate-200 dark:bg-slate-700 px-3 py-2 rounded text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition"><i class="fas fa-search"></i></a>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 font-bold">Add to Shop</button>
+                    <button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 font-bold transition">Add to Shop</button>
                 </form>
             </div>
 
@@ -239,9 +248,11 @@
                                 <p class="text-xs text-slate-500 dark:text-slate-400">{{ r.cost }} Gems</p>
                             </div>
                         </div>
-                        <a href="{{ url_for('delete_reward', reward_id=r.id) }}" class="text-red-400 hover:text-red-600 p-2" onclick="return confirm('Delete this reward?')">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                        <form action="{{ url_for('delete_reward', reward_id=r.id) }}" method="POST" onsubmit="return confirm('Delete this reward?')">
+                            <button type="submit" class="text-red-400 hover:text-red-600 p-2" title="Delete reward">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
                     </div>
                     {% else %}
                     <p class="text-slate-400 dark:text-slate-600 text-sm text-center">Shop is empty.</p>
@@ -258,7 +269,7 @@ function toggleSchedule() {
     const type = document.getElementById('scheduleType').value;
     document.getElementById('daysSelector').classList.add('hidden');
     document.getElementById('intervalSelector').classList.add('hidden');
-    
+
     if (type === 'weekly' || type === 'biweekly') {
         document.getElementById('daysSelector').classList.remove('hidden');
     } else if (type === 'interval') {
@@ -267,7 +278,7 @@ function toggleSchedule() {
 }
 function togglePenalty() {
     const checked = document.getElementById('penaltyCheck').checked;
-    if(checked) document.getElementById('penaltyAmount').classList.remove('hidden');
+    if (checked) document.getElementById('penaltyAmount').classList.remove('hidden');
     else document.getElementById('penaltyAmount').classList.add('hidden');
 }
 </script>

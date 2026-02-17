@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="QuestLog - Gamified Habit Tracker">
     <title>QuestLog</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -112,7 +113,7 @@
             
             <div class="flex items-center space-x-4 md:space-x-6">
                 <!-- Theme Toggle -->
-                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-current transition">
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-current transition" aria-label="Toggle light/dark mode" title="Toggle theme">
                     <i class="fas fa-sun hidden dark:block"></i>
                     <i class="fas fa-moon block dark:hidden"></i>
                 </button>
@@ -140,14 +141,14 @@
                     <div class="flex items-center space-x-3">
                         <a href="{{ url_for('settings_profile') }}" class="flex items-center gap-2 hover:opacity-80 transition" title="Settings">
                             {% if current_user.picture %}
-                            <img src="{{ current_user.picture }}" class="w-9 h-9 rounded-full border-2 border-current opacity-80">
+                            <img src="{{ current_user.picture }}" class="w-9 h-9 rounded-full border-2 border-current opacity-80" alt="{{ current_user.name }}" referrerpolicy="no-referrer">
                             {% else %}
                             <div class="w-9 h-9 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">
                                 {{ current_user.name[0] | upper }}
                             </div>
                             {% endif %}
                         </a>
-                        <a href="{{ url_for('logout') }}" class="text-sm opacity-70 hover:opacity-100 ml-2">
+                        <a href="{{ url_for('logout') }}" class="text-sm opacity-70 hover:opacity-100 ml-2" title="Logout" aria-label="Logout">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                     </div>
@@ -180,11 +181,12 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="mb-6 p-4 rounded-lg shadow-sm border-l-4 {{ 'bg-green-50 border-green-500 text-green-700 dark:bg-green-900/30 dark:text-green-300' if category=='success' else 'bg-amber-50 border-amber-500 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' if category=='warning' else 'bg-red-50 border-red-500 text-red-700 dark:bg-red-900/30 dark:text-red-300' }}">
+                    <div class="flash-message mb-6 p-4 rounded-lg shadow-sm border-l-4 flex justify-between items-start {{ 'bg-green-50 border-green-500 text-green-700 dark:bg-green-900/30 dark:text-green-300' if category=='success' else 'bg-amber-50 border-amber-500 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' if category=='warning' else 'bg-red-50 border-red-500 text-red-700 dark:bg-red-900/30 dark:text-red-300' }}" role="alert">
                         <p class="font-bold flex items-center gap-2">
                             <i class="fas {{ 'fa-check-circle' if category=='success' else 'fa-exclamation-triangle' }}"></i>
                             {{ message }}
                         </p>
+                        <button onclick="this.parentElement.remove()" class="ml-4 opacity-60 hover:opacity-100 transition" aria-label="Dismiss">&times;</button>
                     </div>
                 {% endfor %}
             {% endif %}
@@ -207,13 +209,22 @@
                 localStorage.setItem('theme_mode', 'dark');
             }
         }
-        
+
         // Init theme from local storage
         if (localStorage.getItem('theme_mode') === 'light') {
             document.documentElement.classList.remove('dark');
         } else {
             document.documentElement.classList.add('dark');
         }
+
+        // Auto-dismiss flash messages after 5 seconds
+        document.querySelectorAll('.flash-message').forEach(function(el) {
+            setTimeout(function() {
+                el.style.transition = 'opacity 0.3s ease';
+                el.style.opacity = '0';
+                setTimeout(function() { el.remove(); }, 300);
+            }, 5000);
+        });
     </script>
 </body>
 </html>
