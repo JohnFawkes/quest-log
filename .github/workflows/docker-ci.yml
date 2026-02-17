@@ -6,7 +6,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - '.gitbhub/*'
+      - '.github/*'
       - 'Dockerfile'
       - 'app.py'
       - 'requirements.txt'
@@ -15,7 +15,7 @@ on:
   pull_request:
     branches: [ "main" ]
     paths:
-      - '.gitbhub/*'
+      - '.github/*'
       - 'Dockerfile'
       - 'app.py'
       - 'requirements.txt'
