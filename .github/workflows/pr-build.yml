@@ -20,6 +20,9 @@ jobs:
         github.event.comment.author_association == 'COLLABORATOR'
       )
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     outputs:
       should_build: ${{ steps.parse.outputs.should_build }}
       should_push: ${{ steps.parse.outputs.should_push }}
