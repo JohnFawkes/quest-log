@@ -36,7 +36,7 @@ Option 1: Docker (Recommended)
 
 1. Clone the repo:
 
-``git clone [https://github.com/johnfawkes/quest-log.git](https://github.com/johnfawkes/quest-log.git)``
+``git clone https://github.com/johnfawkes/quest-log.git`
 ``cd questlog``
 
 
