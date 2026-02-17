@@ -1,112 +1,124 @@
-📜 QuestLog
+<p align="center">
+  <img src="https://img.shields.io/badge/%F0%9F%8F%B0-Quest%20Log-7c3aed?style=for-the-badge" alt="Quest Log">
+</p>
 
-QuestLog is a gamified habit tracker that turns your daily chores and tasks into an RPG-style adventure. Users complete quests (habits), upload photo proof, earn Gems, and redeem them for real-world rewards set by the Guild Master (Admin).
+# Quest Log
 
-✨ Features
+> *"Every great adventurer keeps a record of their deeds."*
 
-🛡️  Role-Based Access: Admins (Guild Masters) assign quests; Users (Adventurers) complete them.
+Quest Log is a gamified habit tracker that transforms your daily tasks into an RPG adventure. Adventurers complete quests, upload proof of their exploits, earn Gems, and spend them on real-world rewards — all under the watchful eye of the Guild Master.
 
-📸 Proof of Work: Users must upload a photo to complete a quest.
+---
 
-🔔 Notifications: Real-time notifications via Apprise (Discord, Telegram, Slack, etc.) for completions, approvals, and rewards.
+## The Adventurer's Handbook
 
-💎 Economy System: Earn Gems for tasks, spend them in the Reward Shop.
+### Core Mechanics
 
-📅 Advanced Scheduling: Daily, Weekly (e.g., Mon/Wed/Fri), Interval (Every X days), or Bi-Weekly schedules.
+| Feature | Description |
+|---|---|
+| **Guild Roles** | Guild Masters (admins) assign quests; Adventurers (users) complete them |
+| **Proof of Valor** | Upload a photo to prove a quest is done — no honor system here |
+| **Gem Economy** | Earn Gems for completed quests, spend them in the Reward Shop |
+| **Quest Schedules** | Daily, Weekly (e.g. Mon/Wed/Fri), Bi-Weekly, or Interval (every X days) |
+| **Penalties** | Miss a critical quest? The Guild Master can set Gem deductions |
+| **Notifications** | Alerts via Discord, Telegram, Slack, and more through Apprise |
+| **Flexible Auth** | Local email/password or Google OAuth |
+| **Themes** | Multiple medieval-inspired themes — Dungeon, Royal Court, Ranger's Lodge, Dragon's Lair, and more |
 
-⚔️  Penalties: Option to deduct Gems if a critical quest is missed.
+---
 
-🔐 Flexible Auth: Login via Google OAuth or local Email/Password.
+## Forged With
 
-🎨 Themes: Customize your experience with multiple themes including Dark Mode, Light Mode, Royal Court, and Ranger's Lodge.
+- **Backend:** Python, Flask, SQLAlchemy (SQLite)
+- **Frontend:** Jinja2, Tailwind CSS, FontAwesome
+- **Deployment:** Docker, Docker Compose
+- **CI/CD:** GitHub Actions (auto build, test, version, publish)
 
-🛠️ Tech Stack
+---
 
-Backend: Python, Flask, SQLAlchemy (SQLite)
+## Embark on Your Quest
 
-Frontend: HTML5, Tailwind CSS, FontAwesome
+### Option 1: Docker (Recommended)
 
-Containerization: Docker, Docker Compose
+```bash
+# Clone the guild's archives
+git clone https://github.com/johnfawkes/quest-log.git
+cd quest-log
 
-CI/CD: GitHub Actions
+# Prepare your scrolls of configuration
+cp .env.example .env
+nano .env  # Set your SECRET_KEY, OAuth keys, webhook URLs, etc.
 
-🚀 Quick Start
+# Raise the fortress
+docker compose up -d
+```
 
-Option 1: Docker (Recommended)
+The guild hall opens at **http://localhost:5000**.
 
-1. Clone the repo:
+### Option 2: Local Setup
 
-``git clone https://github.com/johnfawkes/quest-log.git`
-``cd questlog``
+```bash
+pip install -r requirements.txt
 
+# Configure your environment
+cp .env.example .env
+nano .env
 
-2. Configure Environment: Copy the example environment file and edit it with your keys.
+# Open the gates
+python app.py
+```
 
-``cp .env.example .env``
-# Edit the file with your Google keys, Webhook URL, etc.
-``nano .env`` 
+---
 
-3. Run:
+## Guild Master's Guide
 
-``docker compose up --build -d``
+### First Login
 
-The app will be available at http://localhost:5000.
+The realm creates a default Guild Master on first startup:
+- **User:** `admin`
+- **Password:** `admin`
 
-Option 2: Local Python Setup
+You will be required to change your credentials immediately. Alternatively, set `ADMIN_EMAIL` in `.env` and log in with that Google account to claim the throne.
 
-1. Install Dependencies:
+### Assigning Quests
 
-``pip install -r requirements.txt``
+1. Enter the **Guild Hall** (Admin Panel)
+2. Create a new Quest — choose the adventurer, set the schedule, and decide the Gem reward
+3. Optionally enable **penalties** for missed quests
 
+### Reviewing Submissions
 
-2. Set Environment Variables: (Or create the .env file as shown above if using a loader, otherwise export them manually)
+When an adventurer submits proof, it appears in the **Quest Review Board**. Approve to award Gems, or reject to send them back.
 
-``export APPRISE_URLS="discord://webhook_id/webhook_token"``
-``export GOOGLE_CLIENT_ID="your_id"``
-``export GOOGLE_CLIENT_SECRET="your_secret"``
+---
 
+## Scrolls of Configuration
 
-3. Run the App:
+| Variable | Required | Description |
+|---|---|---|
+| `SECRET_KEY` | Yes | Flask session secret (`openssl rand -hex 32`) |
+| `GOOGLE_CLIENT_ID` | No | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret |
+| `ADMIN_EMAIL` | No | Email that auto-receives Guild Master rights |
+| `PUBLIC_DOMAIN` | No | Public URL for OAuth redirects |
+| `APPRISE_URLS` | No | Comma-separated Apprise notification URLs |
+| `DISCORD_WEBHOOK_URL` | No | Discord webhook for direct notifications |
+| `DATA_DIR` | No | Directory for the SQLite database |
+| `PORT` | No | Application port (default: `5000`) |
+| `TZ` | No | Timezone in IANA format (default: `UTC`) |
 
-``python app.py``
+---
 
+## Join the Guild
 
-👑 Admin Usage
+Pull requests are welcome from all adventurers!
 
-1. First Login:
+1. **Branch** — forge your feature branch
+2. **Test** — ensure the Docker build succeeds (CI included)
+3. **Style** — keep the RPG theme alive
 
-  - If no admin exists, use the default credentials:
+---
 
-    - User: admin
+## License
 
-    - Pass: admin
-
-  - You will be forced to update your email and password immediately.
-
-  - Alternatively, set ADMIN_EMAIL in your .env file and login with that Google account to instantly become Admin.
-
-2. Assigning Quests:
-
-  - Go to the "Guild Hall" (Admin Panel).
-
-  - Create a Habit, select the user, set the schedule (e.g., "Every other day"), and set the Gem reward.
-
-3. Approvals:
-
-  - When a user submits proof, it appears in the "Pending" queue.
-
-  - Approve to award Gems; Reject to send them back to the drawing board.
-
-🤝 Contributing
-
-Pull requests are welcome!
-
-  - Branch: Create a feature branch.
-
-  - Tests: Ensure the Docker build passes (GitHub Action included).
-
-  - Style: Keep the RPG theme alive!
-
-📄 License
-
-MIT License.
+MIT License

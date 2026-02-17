@@ -9,24 +9,25 @@
             </h1>
             <p class="text-slate-500 dark:text-slate-400 text-sm">Customize your journey.</p>
         </div>
-        
+
         <form method="POST" action="{{ url_for('settings_profile') }}" class="p-6 space-y-8">
-            
+
             <!-- Display Name -->
             <div>
                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Display Name</label>
-                <input type="text" name="name" value="{{ current_user.name }}" required 
+                <input type="text" name="name" value="{{ current_user.name }}" required
                     class="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
                 <p class="text-xs text-slate-500 mt-1">How you appear in the guild hall.</p>
             </div>
 
             <!-- Theme Selection -->
             <div>
-                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-4">Select Theme</label>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Select Theme</label>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Click a theme to preview it live. Hit Save to keep it.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
+
                     <!-- Dark (Default) -->
-                    <label class="relative cursor-pointer group">
+                    <label class="relative cursor-pointer group" onclick="previewTheme('dark')">
                         <input type="radio" name="theme" value="dark" class="peer sr-only" {% if current_user.theme == 'dark' %}checked{% endif %}>
                         <div class="p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 peer-checked:border-indigo-500 peer-checked:bg-slate-50 dark:peer-checked:bg-slate-700 transition hover:border-indigo-300">
                             <div class="flex items-center gap-3">
@@ -34,7 +35,7 @@
                                     <i class="fas fa-moon"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-800 dark:text-white">Dungeon (Default)</h3>
+                                    <h3 class="font-bold text-slate-800 dark:text-white">Dungeon</h3>
                                     <p class="text-xs text-slate-500">Dark mode for deep delving.</p>
                                 </div>
                             </div>
@@ -42,7 +43,7 @@
                     </label>
 
                     <!-- Light -->
-                    <label class="relative cursor-pointer group">
+                    <label class="relative cursor-pointer group" onclick="previewTheme('light')">
                         <input type="radio" name="theme" value="light" class="peer sr-only" {% if current_user.theme == 'light' %}checked{% endif %}>
                         <div class="p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 peer-checked:border-indigo-500 peer-checked:bg-slate-50 dark:peer-checked:bg-slate-700 transition hover:border-indigo-300">
                             <div class="flex items-center gap-3">
@@ -58,7 +59,7 @@
                     </label>
 
                     <!-- Princess -->
-                    <label class="relative cursor-pointer group">
+                    <label class="relative cursor-pointer group" onclick="previewTheme('princess')">
                         <input type="radio" name="theme" value="princess" class="peer sr-only" {% if current_user.theme == 'princess' %}checked{% endif %}>
                         <div class="p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 peer-checked:border-pink-500 peer-checked:bg-pink-50 dark:peer-checked:bg-slate-700 transition hover:border-pink-300">
                             <div class="flex items-center gap-3">
@@ -74,7 +75,7 @@
                     </label>
 
                     <!-- Forest -->
-                    <label class="relative cursor-pointer group">
+                    <label class="relative cursor-pointer group" onclick="previewTheme('forest')">
                         <input type="radio" name="theme" value="forest" class="peer sr-only" {% if current_user.theme == 'forest' %}checked{% endif %}>
                         <div class="p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 peer-checked:border-green-500 peer-checked:bg-green-50 dark:peer-checked:bg-slate-700 transition hover:border-green-300">
                             <div class="flex items-center gap-3">
@@ -84,6 +85,54 @@
                                 <div>
                                     <h3 class="font-bold text-slate-800 dark:text-white">Ranger's Lodge</h3>
                                     <p class="text-xs text-slate-500">Natural greens.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Dragon -->
+                    <label class="relative cursor-pointer group" onclick="previewTheme('dragon')">
+                        <input type="radio" name="theme" value="dragon" class="peer sr-only" {% if current_user.theme == 'dragon' %}checked{% endif %}>
+                        <div class="p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-slate-700 transition hover:border-red-300">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-red-100 border border-red-200 flex items-center justify-center text-red-600">
+                                    <i class="fas fa-fire"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-800 dark:text-white">Dragon's Lair</h3>
+                                    <p class="text-xs text-slate-500">Forged in fire and fury.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Sorcerer -->
+                    <label class="relative cursor-pointer group" onclick="previewTheme('sorcerer')">
+                        <input type="radio" name="theme" value="sorcerer" class="peer sr-only" {% if current_user.theme == 'sorcerer' %}checked{% endif %}>
+                        <div class="p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 peer-checked:border-violet-500 peer-checked:bg-violet-50 dark:peer-checked:bg-slate-700 transition hover:border-violet-300">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-violet-100 border border-violet-200 flex items-center justify-center text-violet-600">
+                                    <i class="fas fa-hat-wizard"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-800 dark:text-white">Sorcerer's Tower</h3>
+                                    <p class="text-xs text-slate-500">Arcane violet mysticism.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Dwarven -->
+                    <label class="relative cursor-pointer group" onclick="previewTheme('dwarven')">
+                        <input type="radio" name="theme" value="dwarven" class="peer sr-only" {% if current_user.theme == 'dwarven' %}checked{% endif %}>
+                        <div class="p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 peer-checked:border-amber-500 peer-checked:bg-amber-50 dark:peer-checked:bg-slate-700 transition hover:border-amber-300">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700">
+                                    <i class="fas fa-hammer"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-800 dark:text-white">Dwarven Forge</h3>
+                                    <p class="text-xs text-slate-500">Warm amber and bronze.</p>
                                 </div>
                             </div>
                         </div>
@@ -100,4 +149,30 @@
         </form>
     </div>
 </div>
+
+<script>
+    const ALL_THEMES = ['dark', 'light', 'princess', 'forest', 'dragon', 'sorcerer', 'dwarven'];
+    const savedThemeMode = localStorage.getItem('theme_mode'); // 'light' or 'dark'
+
+    function previewTheme(theme) {
+        const html = document.documentElement;
+
+        // Remove all theme classes
+        ALL_THEMES.forEach(function(t) { html.classList.remove(t); });
+
+        // 'light' theme = no theme class, just remove 'dark'
+        // everything else = add the theme class + keep dark/light mode
+        if (theme === 'light') {
+            html.classList.remove('dark');
+        } else {
+            html.classList.add(theme);
+            // Restore dark/light preference (default to dark)
+            if (savedThemeMode === 'light') {
+                html.classList.remove('dark');
+            } else {
+                html.classList.add('dark');
+            }
+        }
+    }
+</script>
 {% endblock %}

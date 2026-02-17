@@ -90,6 +90,69 @@
             --nav-border: #065f46;
         }
 
+        /* Dragon Theme */
+        .dragon {
+            --btn-bg: #dc2626; /* red-600 */
+            --btn-hover: #b91c1c; /* red-700 */
+            --accent-text: #b91c1c;
+        }
+        /* Dragon Light Mode */
+        html.dragon:not(.dark) {
+            --bg-body: #fef2f2;
+            --text-body: #7f1d1d;
+            --nav-bg: #fee2e2;
+            --nav-border: #fecaca;
+        }
+        /* Dragon Dark Mode */
+        html.dragon.dark {
+            --bg-body: #1a0a0a;
+            --text-body: #fecaca;
+            --nav-bg: #450a0a;
+            --nav-border: #7f1d1d;
+        }
+
+        /* Sorcerer Theme */
+        .sorcerer {
+            --btn-bg: #7c3aed; /* violet-600 */
+            --btn-hover: #6d28d9; /* violet-700 */
+            --accent-text: #6d28d9;
+        }
+        /* Sorcerer Light Mode */
+        html.sorcerer:not(.dark) {
+            --bg-body: #f5f3ff;
+            --text-body: #4c1d95;
+            --nav-bg: #ede9fe;
+            --nav-border: #ddd6fe;
+        }
+        /* Sorcerer Dark Mode */
+        html.sorcerer.dark {
+            --bg-body: #0f0720;
+            --text-body: #ddd6fe;
+            --nav-bg: #2e1065;
+            --nav-border: #4c1d95;
+        }
+
+        /* Dwarven Theme */
+        .dwarven {
+            --btn-bg: #b45309; /* amber-700 */
+            --btn-hover: #92400e; /* amber-800 */
+            --accent-text: #92400e;
+        }
+        /* Dwarven Light Mode */
+        html.dwarven:not(.dark) {
+            --bg-body: #fffbeb;
+            --text-body: #78350f;
+            --nav-bg: #fef3c7;
+            --nav-border: #fde68a;
+        }
+        /* Dwarven Dark Mode */
+        html.dwarven.dark {
+            --bg-body: #1a1000;
+            --text-body: #fde68a;
+            --nav-bg: #451a03;
+            --nav-border: #78350f;
+        }
+
         /* Apply Variables */
         body { background-color: var(--bg-body); color: var(--text-body); }
         nav { background-color: var(--nav-bg) !important; border-bottom-color: var(--nav-border) !important; }
