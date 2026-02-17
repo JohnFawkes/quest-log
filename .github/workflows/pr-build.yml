@@ -1,0 +1,224 @@
+name: PR Build on Comment
+
+# Triggered by PR comments containing specific keywords
+on:
+  issue_comment:
+    types: [created]
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  check-comment:
+    # Only run on PR comments (not issue comments) from users with write access
+    if: >
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/build') &&
+      (
+        github.event.comment.author_association == 'OWNER' ||
+        github.event.comment.author_association == 'MEMBER' ||
+        github.event.comment.author_association == 'COLLABORATOR'
+      )
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.parse.outputs.should_build }}
+      should_push: ${{ steps.parse.outputs.should_push }}
+    steps:
+      - name: Parse comment command
+        id: parse
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+          echo "Comment: $COMMENT"
+
+          # /build        -> build + test only
+          # /build push   -> build + test + push to registry
+          if echo "$COMMENT" | grep -qi '/build.*push'; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            echo "should_push=true" >> "$GITHUB_OUTPUT"
+          elif echo "$COMMENT" | grep -qi '/build'; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            echo "should_push=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            echo "should_push=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: React to comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket'
+            });
+
+  build-test:
+    needs: check-comment
+    if: needs.check-comment.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Get PR branch
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            core.setOutput('ref', pr.data.head.ref);
+            core.setOutput('sha', pr.data.head.sha);
+            core.setOutput('number', context.issue.number);
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.pr.outputs.ref }}
+
+      - name: Lowercase Image Name
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> "${GITHUB_ENV}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=pr-${{ steps.pr.outputs.number }}
+            type=raw,value=pr-${{ steps.pr.outputs.number }}-${{ steps.pr.outputs.sha }}
+
+      - name: Build Docker image (Load Local)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Container for Testing
+        run: |
+          TAGS="${{ steps.meta.outputs.tags }}"
+          TEST_TAG=$(echo "$TAGS" | head -n 1)
+
+          echo "Starting container with tag: $TEST_TAG"
+          docker run -d -p 5000:5000 --name test-container "$TEST_TAG"
+
+      - name: Wait for container to start (with retry)
+        run: |
+          echo "Waiting for service to be ready..."
+          for i in {1..10}; do
+            if curl -s -o /dev/null http://localhost:5000; then
+              echo "Service is up!"
+              exit 0
+            fi
+            echo "Waiting..."
+            sleep 2
+          done
+          echo "Service failed to start in time."
+          docker logs test-container
+          exit 1
+
+      - name: Test Homepage Availability
+        run: |
+          echo "Testing homepage access..."
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}\n" -L http://localhost:5000)
+          echo "HTTP Status: $HTTP_STATUS"
+
+          if [ "$HTTP_STATUS" -eq "200" ]; then
+            echo "Test Passed: Website is up and accessible."
+          else
+            echo "Test Failed: Website returned status $HTTP_STATUS"
+            echo "--- Container Logs ---"
+            docker logs test-container
+            exit 1
+          fi
+
+      - name: Test Health Endpoint
+        run: |
+          echo "Testing /health endpoint..."
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}\n" http://localhost:5000/health)
+          echo "HTTP Status: $HTTP_STATUS"
+
+          if [ "$HTTP_STATUS" -eq "200" ]; then
+            echo "Test Passed: Health endpoint responding."
+          else
+            echo "Test Failed: Health endpoint returned status $HTTP_STATUS"
+            docker logs test-container
+            exit 1
+          fi
+
+      - name: Stop Test Container
+        if: always()
+        run: docker rm -f test-container
+
+      # Push to registry only when '/build push' was used
+      - name: Push Docker image
+        if: needs.check-comment.outputs.should_push == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Comment result on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const success = '${{ job.status }}' === 'success';
+            const pushed = '${{ needs.check-comment.outputs.should_push }}' === 'true';
+            const sha = '${{ steps.pr.outputs.sha }}'.substring(0, 7);
+            const image = '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ steps.pr.outputs.number }}';
+
+            let body;
+            if (success) {
+              body = `### Build ${pushed ? '& Push ' : ''}Successful\n\n`;
+              body += `| | |\n|---|---|\n`;
+              body += `| **Commit** | \`${sha}\` |\n`;
+              body += `| **Status** | Passed |\n`;
+              if (pushed) {
+                body += `| **Image** | \`${image}\` |\n`;
+                body += `\n\`\`\`bash\ndocker pull ${image}\n\`\`\`\n`;
+              } else {
+                body += `\n> Image was **not pushed**. Use \`/build push\` to push to the registry.\n`;
+              }
+            } else {
+              body = `### Build Failed\n\n`;
+              body += `| | |\n|---|---|\n`;
+              body += `| **Commit** | \`${sha}\` |\n`;
+              body += `| **Status** | Failed |\n`;
+              body += `\nCheck the [workflow run](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}) for details.\n`;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr.outputs.number }},
+              body: body
+            });
