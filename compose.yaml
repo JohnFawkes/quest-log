@@ -1,6 +1,6 @@
 services:
   questlog:
-    image: ghcr.io/johnfawkes/quest-log:pr-7-79f2d4027dabb2a398da2939de64aa4894fc9aaa
+    image: ghcr.io/johnfawkes/quest-log:latest
     restart: always
     ports:
       - "${PORT:-5000}:${PORT:-5000}"
