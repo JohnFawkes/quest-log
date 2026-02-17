@@ -1,6 +1,6 @@
 services:
   web:
-    image: ghcr.io/johnfawkes/quest-log:sha-7a12fb5
+    image: ghcr.io/johnfawkes/quest-log:pr-7
     restart: always
     ports:
       - "5000:5000"
