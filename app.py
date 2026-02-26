@@ -763,6 +763,7 @@ def promote_user():
 def create_habit():
     if not current_user.is_admin: return redirect(url_for('index'))
     name = request.form.get('name')
+    description = request.form.get('description')
     points = int(request.form.get('points'))
     assigned_user_id = request.form.get('assigned_user_id')
     schedule_type = request.form.get('schedule_type')
@@ -772,7 +773,7 @@ def create_habit():
     penalty_amount = int(request.form.get('penalty_amount') or 0)
 
     new_habit = Habit(
-        name=name, points_reward=points, assigned_user_id=assigned_user_id,
+        name=name, description=description, points_reward=points, assigned_user_id=assigned_user_id,
         schedule_type=schedule_type, schedule_days=schedule_days,
         interval_days=interval_days, penalty_enabled=penalty_enabled, penalty_amount=penalty_amount
     )
