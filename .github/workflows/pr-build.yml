@@ -66,7 +66,7 @@ jobs:
             type=raw,value=pr-${{ steps.pr.outputs.number }}-${{ steps.pr.outputs.sha }}
 
       - name: Build Docker image (Load Local)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: false
@@ -135,7 +135,7 @@ jobs:
       # Push to registry only when PUSH label was used
       - name: Push Docker image
         if: steps.mode.outputs.should_push == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
