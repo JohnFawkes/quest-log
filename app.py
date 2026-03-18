@@ -146,6 +146,7 @@ def load_user(user_id):
 def send_discord_webhook(content, image_filename=None):
     url = app.config['DISCORD_WEBHOOK_URL']
     if not url:
+        logger.warning("Discord webhook not configured (DISCORD_WEBHOOK_URL is empty)")
         return
     try:
         files = {}
@@ -155,7 +156,11 @@ def send_discord_webhook(content, image_filename=None):
             if os.path.exists(file_path):
                 file_handle = open(file_path, 'rb')
                 files = {'file': file_handle}
-        http_requests.post(url, data={'content': content}, files=files, timeout=10)
+        resp = http_requests.post(url, data={'content': content}, files=files, timeout=10)
+        if not resp.ok:
+            logger.warning("Discord webhook returned %s: %s", resp.status_code, resp.text)
+        else:
+            logger.info("Discord webhook sent OK (%s)", resp.status_code)
     except Exception as e:
         logger.warning("Discord Webhook Error: %s", e)
     finally:
@@ -755,6 +760,18 @@ def redeem_reward(reward_id):
     return redirect(url_for('rewards'))
 
 # --- ADMIN ROUTES ---
+
+@app.route('/admin/test-webhook', methods=['POST'])
+@login_required
+def test_webhook():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    url = app.config.get('DISCORD_WEBHOOK_URL', '')
+    if not url:
+        flash('DISCORD_WEBHOOK_URL is not configured.', 'error')
+    else:
+        send_discord_webhook("🔔 Quest Log test notification — webhook is working!")
+        flash('Test notification sent. Check your Discord channel.', 'success')
+    return redirect(url_for('admin_panel'))
 
 @app.route('/admin')
 @login_required
