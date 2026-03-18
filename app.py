@@ -839,6 +839,31 @@ def promote_user():
         flash(f'{user.name} promoted to Admin.', 'success')
     return redirect(url_for('admin_panel'))
 
+@app.route('/admin/user/adjust-gems', methods=['POST'])
+@login_required
+def adjust_gems():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    user_id = request.form.get('user_id')
+    try:
+        amount = int(request.form.get('amount', 0))
+    except (TypeError, ValueError):
+        flash('Invalid gem amount.', 'error')
+        return redirect(url_for('admin_panel'))
+    if amount == 0:
+        flash('Amount cannot be zero.', 'error')
+        return redirect(url_for('admin_panel'))
+    user = db.session.get(User, int(user_id))
+    if not user or user.email == DEMO_EMAIL:
+        flash('User not found.', 'error')
+        return redirect(url_for('admin_panel'))
+    user.points += amount
+    if user.points < 0:
+        user.points = 0
+    db.session.commit()
+    action = f"+{amount}" if amount > 0 else str(amount)
+    flash(f'{action} gems applied to {user.name}. New total: {user.points} gems.', 'success')
+    return redirect(url_for('admin_panel'))
+
 @app.route('/admin/habit/create', methods=['POST'])
 @login_required
 def create_habit():
@@ -964,4 +989,5 @@ def uploaded_file(filename):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug, host='0.0.0.0', port=port)
