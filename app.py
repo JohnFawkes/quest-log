@@ -270,9 +270,16 @@ def get_habit_streak(user_id, habit_id, exclude_id=None):
 @app.before_request
 def check_setup_required():
     if current_user.is_authenticated and current_user.force_password_change:
-        if request.endpoint in ['setup_account', 'static', 'logout']: return
-        flash("Setup required: Please update your account details.", "warning")
-        return redirect(url_for('setup_account'))
+        # Initial admin setup (default 'admin' account) → full setup page
+        if current_user.email == 'admin':
+            if request.endpoint in ['setup_account', 'static', 'logout']: return
+            flash("Setup required: Please update your account details.", "warning")
+            return redirect(url_for('setup_account'))
+        # Password was reset by an admin → simple change-password page
+        else:
+            if request.endpoint in ['change_password', 'static', 'logout']: return
+            flash("Your password has been reset. Please choose a new password.", "warning")
+            return redirect(url_for('change_password'))
 
 # --- Initialization Function ---
 def perform_db_migration():
@@ -517,6 +524,25 @@ def setup_account():
             db.session.commit()
             return redirect(url_for('admin_panel'))
     return render_template('setup_account.html')
+
+@app.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if not current_user.force_password_change: return redirect(url_for('index'))
+    if request.method == 'POST':
+        password = request.form.get('password', '').strip()
+        confirm = request.form.get('confirm_password', '').strip()
+        if len(password) < 4:
+            flash('Password must be at least 4 characters.', 'error')
+        elif password != confirm:
+            flash('Passwords do not match.', 'error')
+        else:
+            current_user.password_hash = generate_password_hash(password, method='scrypt')
+            current_user.force_password_change = False
+            db.session.commit()
+            flash('Password updated successfully.', 'success')
+            return redirect(url_for('index'))
+    return render_template('change_password.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
