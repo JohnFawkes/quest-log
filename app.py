@@ -2,6 +2,7 @@ import logging
 import mimetypes
 import os
 import sqlite3
+import types
 from datetime import datetime, timedelta, timezone
 
 import requests as http_requests
@@ -87,12 +88,17 @@ class User(UserMixin, db.Model):
     theme = db.Column(db.String(50), default='dark')
     completions = db.relationship('Completion', backref='user', lazy=True)
 
+habit_users = db.Table('habit_users',
+    db.Column('habit_id', db.Integer, db.ForeignKey('habit.id'), primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
+)
+
 class Habit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     points_reward = db.Column(db.Integer, default=10)
-    assigned_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    assigned_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # legacy, kept for migration
     schedule_type = db.Column(db.String(20), default='daily')
     schedule_days = db.Column(db.String(50))
     interval_days = db.Column(db.Integer)
@@ -102,7 +108,7 @@ class Habit(db.Model):
     streak_milestone = db.Column(db.Integer, default=5)
     streak_multiplier = db.Column(db.Float, default=2.0)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    assigned_user = db.relationship('User', foreign_keys=[assigned_user_id])
+    assigned_users = db.relationship('User', secondary=habit_users, backref='assigned_habits')
 
 class Completion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -208,7 +214,10 @@ def check_missed_habits(user):
         db.session.commit()
         return 
         
-    habits = Habit.query.filter_by(assigned_user_id=user.id, penalty_enabled=True).all()
+    habits = Habit.query.filter(
+        Habit.assigned_users.any(User.id == user.id),
+        Habit.penalty_enabled == True
+    ).all()
     
     current_check = check_date
     while current_check <= yesterday:
@@ -304,6 +313,25 @@ def perform_db_migration():
         if col_name not in habit_cols:
             cursor.execute(f"ALTER TABLE habit ADD COLUMN {col_name} {col_type}")
 
+    # habit_users junction table (many-to-many) — migrate from legacy assigned_user_id
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='habit_users'")
+    if not cursor.fetchone():
+        cursor.execute("""
+            CREATE TABLE habit_users (
+                habit_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                PRIMARY KEY (habit_id, user_id),
+                FOREIGN KEY (habit_id) REFERENCES habit (id),
+                FOREIGN KEY (user_id) REFERENCES user (id)
+            )
+        """)
+    # Always migrate legacy assigned_user_id rows (idempotent via INSERT OR IGNORE)
+    cursor.execute("""
+        INSERT OR IGNORE INTO habit_users (habit_id, user_id)
+        SELECT id, assigned_user_id FROM habit
+        WHERE assigned_user_id IS NOT NULL
+    """)
+
     # Reward Table
     cursor.execute("PRAGMA table_info(reward)")
     reward_cols = [col[1] for col in cursor.fetchall()]
@@ -383,9 +411,9 @@ def initialize_database():
                         logger.warning("Failed to download demo image 2: %s", e)
 
                 habits = [
-                    Habit(name="Morning Patrol (Walk the Dog)", description="Walk 15 mins", points_reward=15, assigned_user_id=demo_user.id, schedule_type='daily'),
-                    Habit(name="Potion Brewing (Drink Water)", description="8 Glasses", points_reward=10, assigned_user_id=demo_user.id, schedule_type='daily'),
-                    Habit(name="Clean the Armory (Dishes)", description="Empty sink", points_reward=25, assigned_user_id=demo_user.id, schedule_type='weekly', schedule_days="0,2,4,6"),
+                    Habit(name="Morning Patrol (Walk the Dog)", description="Walk 15 mins", points_reward=15, assigned_users=[demo_user], schedule_type='daily'),
+                    Habit(name="Potion Brewing (Drink Water)", description="8 Glasses", points_reward=10, assigned_users=[demo_user], schedule_type='daily'),
+                    Habit(name="Clean the Armory (Dishes)", description="Empty sink", points_reward=25, assigned_users=[demo_user], schedule_type='weekly', schedule_days="0,2,4,6"),
                 ]
                 db.session.add_all(habits)
                 db.session.commit()
@@ -551,47 +579,57 @@ def dashboard():
     todays_habits = []
     upcoming_habits = []
 
+    demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
     if current_user.is_admin:
-        demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
-        habit_query = Habit.query
-        if demo_user:
-            habit_query = habit_query.filter(Habit.assigned_user_id != demo_user.id)
-        all_assigned = habit_query.all()
+        all_habits = Habit.query.all()
         completions_query = Completion.query.join(User, Completion.user_id == User.id).filter(User.email != DEMO_EMAIL)
         my_completions = completions_query.order_by(Completion.timestamp.desc()).limit(10).all()
     else:
-        all_assigned = Habit.query.filter_by(assigned_user_id=current_user.id).all()
+        all_habits = Habit.query.filter(Habit.assigned_users.any(User.id == current_user.id)).all()
         my_completions = Completion.query.filter_by(user_id=current_user.id).order_by(Completion.timestamp.desc()).limit(10).all()
 
-    for h in all_assigned:
-        if h.streak_enabled and h.streak_milestone:
-            h.current_streak = get_habit_streak(h.assigned_user_id, h.id)
-            h.next_milestone = h.streak_milestone - (h.current_streak % h.streak_milestone)
+    is_due_today_cache = {}
+    for h in all_habits:
+        is_due_today_cache[h.id] = is_habit_due_on_date(h, today)
+        # Determine users to show for this habit
+        if current_user.is_admin:
+            users_for_habit = [u for u in h.assigned_users if not demo_user or u.id != demo_user.id]
         else:
-            h.current_streak = 0
-            h.next_milestone = None
+            users_for_habit = [current_user]
 
-        if is_habit_due_on_date(h, today):
-            start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
-            end_of_day = start_of_day + timedelta(days=1)
-            done = Completion.query.filter(
-                Completion.habit_id == h.id,
-                Completion.user_id == h.assigned_user_id,
-                Completion.timestamp >= start_of_day,
-                Completion.timestamp < end_of_day,
-                Completion.status != 'rejected'
-            ).first()
-            h.is_completed = bool(done)
-            h.completion_status = done.status if done else None
-            todays_habits.append(h)
-        else:
-            # Calculate next due date
-            next_due = calculate_next_due_date(h)
-            if next_due:
-                h.next_due_display = next_due.strftime("%a, %b %d")
+        for assigned_user in users_for_habit:
+            entry = types.SimpleNamespace(
+                id=h.id, name=h.name, description=h.description,
+                points_reward=h.points_reward, assigned_user_id=assigned_user.id,
+                assigned_user=assigned_user, schedule_type=h.schedule_type,
+                schedule_days=h.schedule_days, interval_days=h.interval_days,
+                created_at=h.created_at, penalty_enabled=h.penalty_enabled,
+                penalty_amount=h.penalty_amount, streak_enabled=h.streak_enabled,
+                streak_milestone=h.streak_milestone, streak_multiplier=h.streak_multiplier,
+                current_streak=0, next_milestone=None,
+                is_completed=False, completion_status=None, next_due_display=None,
+            )
+            if h.streak_enabled and h.streak_milestone:
+                entry.current_streak = get_habit_streak(assigned_user.id, h.id)
+                entry.next_milestone = h.streak_milestone - (entry.current_streak % h.streak_milestone)
+
+            if is_due_today_cache[h.id]:
+                start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
+                end_of_day = start_of_day + timedelta(days=1)
+                done = Completion.query.filter(
+                    Completion.habit_id == h.id,
+                    Completion.user_id == assigned_user.id,
+                    Completion.timestamp >= start_of_day,
+                    Completion.timestamp < end_of_day,
+                    Completion.status != 'rejected'
+                ).first()
+                entry.is_completed = bool(done)
+                entry.completion_status = done.status if done else None
+                todays_habits.append(entry)
             else:
-                h.next_due_display = "Unknown"
-            upcoming_habits.append(h)
+                next_due = calculate_next_due_date(h)
+                entry.next_due_display = next_due.strftime("%a, %b %d") if next_due else "Unknown"
+                upcoming_habits.append(entry)
 
     return render_template('dashboard.html', todays_habits=todays_habits, upcoming_habits=upcoming_habits, completions=my_completions)
 
@@ -603,6 +641,9 @@ def complete_habit(habit_id):
         return redirect(url_for('dashboard'))
 
     habit = Habit.query.get_or_404(habit_id)
+    if current_user.id not in [u.id for u in habit.assigned_users]:
+        flash('You are not assigned to this quest.', 'error')
+        return redirect(url_for('dashboard'))
     if 'proof' not in request.files or request.files['proof'].filename == '':
         flash('Please select an image to upload.', 'warning')
         return redirect(url_for('dashboard'))
@@ -703,7 +744,7 @@ def admin_panel():
     # Filter: Hide Demo User's quests from admin panel
     demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
     if demo_user:
-        habits = Habit.query.filter(Habit.assigned_user_id != demo_user.id).all()
+        habits = Habit.query.filter(~Habit.assigned_users.any(User.id == demo_user.id)).all()
     else:
         habits = Habit.query.all()
     
@@ -798,6 +839,31 @@ def promote_user():
         flash(f'{user.name} promoted to Admin.', 'success')
     return redirect(url_for('admin_panel'))
 
+@app.route('/admin/user/adjust-gems', methods=['POST'])
+@login_required
+def adjust_gems():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    user_id = request.form.get('user_id')
+    try:
+        amount = int(request.form.get('amount', 0))
+    except (TypeError, ValueError):
+        flash('Invalid gem amount.', 'error')
+        return redirect(url_for('admin_panel'))
+    if amount == 0:
+        flash('Amount cannot be zero.', 'error')
+        return redirect(url_for('admin_panel'))
+    user = db.session.get(User, int(user_id))
+    if not user or user.email == DEMO_EMAIL:
+        flash('User not found.', 'error')
+        return redirect(url_for('admin_panel'))
+    user.points += amount
+    if user.points < 0:
+        user.points = 0
+    db.session.commit()
+    action = f"+{amount}" if amount > 0 else str(amount)
+    flash(f'{action} gems applied to {user.name}. New total: {user.points} gems.', 'success')
+    return redirect(url_for('admin_panel'))
+
 @app.route('/admin/habit/create', methods=['POST'])
 @login_required
 def create_habit():
@@ -805,7 +871,11 @@ def create_habit():
     name = request.form.get('name')
     description = request.form.get('description')
     points = int(request.form.get('points'))
-    assigned_user_id = request.form.get('assigned_user_id')
+    user_ids = request.form.getlist('assigned_user_ids')
+    if not user_ids:
+        flash('Please assign at least one adventurer.', 'error')
+        return redirect(url_for('admin_panel'))
+    assigned_users = User.query.filter(User.id.in_(user_ids)).all()
     schedule_type = request.form.get('schedule_type')
     schedule_days = ",".join(request.form.getlist('days')) if schedule_type in ['weekly', 'biweekly'] else None
     interval_days = int(request.form.get('interval_days')) if schedule_type == 'interval' else None
@@ -816,10 +886,11 @@ def create_habit():
     streak_multiplier = float(request.form.get('streak_multiplier') or 2.0)
 
     new_habit = Habit(
-        name=name, description=description, points_reward=points, assigned_user_id=assigned_user_id,
+        name=name, description=description, points_reward=points,
         schedule_type=schedule_type, schedule_days=schedule_days,
         interval_days=interval_days, penalty_enabled=penalty_enabled, penalty_amount=penalty_amount,
-        streak_enabled=streak_enabled, streak_milestone=streak_milestone, streak_multiplier=streak_multiplier
+        streak_enabled=streak_enabled, streak_milestone=streak_milestone, streak_multiplier=streak_multiplier,
+        assigned_users=assigned_users
     )
     db.session.add(new_habit)
     db.session.commit()
@@ -835,10 +906,14 @@ def edit_habit(habit_id):
     users = User.query.filter(User.email != DEMO_EMAIL).all()
 
     if request.method == 'POST':
+        user_ids = request.form.getlist('assigned_user_ids')
+        if not user_ids:
+            flash('Please assign at least one adventurer.', 'error')
+            return render_template('edit_habit.html', habit=habit, users=users)
         habit.name = request.form.get('name')
         habit.description = request.form.get('description')
         habit.points_reward = int(request.form.get('points'))
-        habit.assigned_user_id = request.form.get('assigned_user_id')
+        habit.assigned_users = User.query.filter(User.id.in_(user_ids)).all()
         schedule_type = request.form.get('schedule_type')
         habit.schedule_type = schedule_type
         habit.schedule_days = ",".join(request.form.getlist('days')) if schedule_type in ['weekly', 'biweekly'] else None
@@ -914,4 +989,5 @@ def uploaded_file(filename):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug, host='0.0.0.0', port=port)
