@@ -1143,19 +1143,21 @@ def admin_notification_settings():
 @login_required
 def cleanup_rejected_images():
     if not current_user.is_admin: return redirect(url_for('index'))
-    rejected = Completion.query.filter_by(status='rejected').filter(Completion.image_filename != None).all()
-    count = 0
+    rejected = Completion.query.filter_by(status='rejected').all()
+    file_count = 0
+    entry_count = len(rejected)
     for c in rejected:
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], c.image_filename)
-        if os.path.exists(file_path):
-            try:
-                os.remove(file_path)
-                count += 1
-            except OSError as e:
-                logger.warning("Could not delete %s: %s", file_path, e)
-        c.image_filename = None
+        if c.image_filename:
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], c.image_filename)
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                    file_count += 1
+                except OSError as e:
+                    logger.warning("Could not delete %s: %s", file_path, e)
+        db.session.delete(c)
     db.session.commit()
-    flash(f'Cleaned up {count} rejected image(s).', 'success')
+    flash(f'Removed {entry_count} rejected log entr{"y" if entry_count == 1 else "ies"} and {file_count} image file(s).', 'success')
     return redirect(url_for('admin_panel'))
 
 # UPDATED: Add header for inline image display and guess MIME type
