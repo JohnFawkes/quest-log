@@ -1,6 +1,8 @@
 import logging
 import mimetypes
 import os
+import re
+import secrets
 import sqlite3
 import types
 from datetime import datetime, timedelta, timezone
@@ -118,8 +120,14 @@ class Completion(db.Model):
     habit_id = db.Column(db.Integer, db.ForeignKey('habit.id'), nullable=False)
     habit_name = db.Column(db.String(100))
     image_filename = db.Column(db.String(200))
-    status = db.Column(db.String(20), default='pending') 
+    status = db.Column(db.String(20), default='pending')
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    action_token = db.Column(db.String(64))  # single-use token for webhook approve/reject links
+
+class AppSetting(db.Model):
+    """Key-value store for app-wide configuration set via the UI."""
+    key = db.Column(db.String(100), primary_key=True)
+    value = db.Column(db.Text)
 
 class Reward(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -145,20 +153,42 @@ class Redemption(db.Model):
 def load_user(user_id):
     return db.session.get(User, int(user_id))
 
+def get_setting(key, default=None):
+    s = db.session.get(AppSetting, key)
+    return s.value if s else default
+
+def set_setting(key, value):
+    s = db.session.get(AppSetting, key)
+    if s:
+        s.value = value
+    else:
+        db.session.add(AppSetting(key=key, value=value))
+    db.session.commit()
+
 def _build_apprise():
-    """Build an Apprise instance from configured URLs."""
+    """Build an Apprise instance from configured URLs, injecting icon URL where supported."""
     ap = apprise.Apprise()
+    icon_url = get_setting('notification_icon_url', '')
     if APPRISE_URLS:
         for url in APPRISE_URLS.split(','):
             url = url.strip()
             if url:
                 ap.add(url)
     if DISCORD_WEBHOOK_URL:
-        ap.add(DISCORD_WEBHOOK_URL)
+        # Convert to Apprise Discord URL format so we can inject avatar_url
+        m = re.match(r'https://discord(?:app)?\.com/api/webhooks/(\d+)/([^?]+)', DISCORD_WEBHOOK_URL)
+        if m and icon_url:
+            ap.add(f"discord://{m.group(1)}/{m.group(2)}?avatar_url={icon_url}")
+        else:
+            ap.add(DISCORD_WEBHOOK_URL)
     return ap
 
-def send_notification(content, image_filename=None):
-    """Send a notification via Apprise to all configured services."""
+def send_notification(content, image_filename=None, completion_id=None, action_token=None):
+    """Send a notification via Apprise. Appends approve/reject links when token info provided."""
+    if completion_id and action_token and PUBLIC_DOMAIN:
+        approve_url = f"{PUBLIC_DOMAIN}/quest/approve/{completion_id}/{action_token}"
+        reject_url = f"{PUBLIC_DOMAIN}/quest/reject/{completion_id}/{action_token}"
+        content += f"\n✅ **Approve:** {approve_url}\n❌ **Reject:** {reject_url}"
     ap = _build_apprise()
     if not len(ap):
         logger.warning("No notification services configured (set APPRISE_URLS or DISCORD_WEBHOOK_URL)")
@@ -353,6 +383,22 @@ def perform_db_migration():
         SELECT id, assigned_user_id FROM habit
         WHERE assigned_user_id IS NOT NULL
     """)
+
+    # Completion Table
+    cursor.execute("PRAGMA table_info(completion)")
+    completion_cols = [col[1] for col in cursor.fetchall()]
+    if completion_cols and 'action_token' not in completion_cols:
+        cursor.execute("ALTER TABLE completion ADD COLUMN action_token VARCHAR(64)")
+
+    # AppSetting Table
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='app_setting'")
+    if not cursor.fetchone():
+        cursor.execute("""
+            CREATE TABLE app_setting (
+                key VARCHAR(100) NOT NULL PRIMARY KEY,
+                value TEXT
+            )
+        """)
 
     # Reward Table
     cursor.execute("PRAGMA table_info(reward)")
@@ -694,10 +740,11 @@ def complete_habit(habit_id):
         return redirect(url_for('dashboard'))
     filename = secure_filename(f"{current_user.id}_{datetime.now().timestamp()}_{file.filename}")
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    completion = Completion(user_id=current_user.id, habit_id=habit.id, habit_name=habit.name, image_filename=filename, status='pending')
+    token = secrets.token_urlsafe(32)
+    completion = Completion(user_id=current_user.id, habit_id=habit.id, habit_name=habit.name, image_filename=filename, status='pending', action_token=token)
     db.session.add(completion)
     db.session.commit()
-    send_notification(f"📸 **{current_user.name}** quest update: **{habit.name}**! (Pending Review)", filename)
+    send_notification(f"📸 **{current_user.name}** quest update: **{habit.name}**! (Pending Review)", filename, completion_id=completion.id, action_token=token)
     flash('Quest submitted for review!', 'success')
     return redirect(url_for('dashboard'))
 
@@ -813,12 +860,14 @@ def admin_panel():
         (Reward.is_demo == False) | (Reward.is_demo == None)
     ).all()
     
-    return render_template('admin.html', 
-                         pending=pending, 
-                         users=users, 
+    notification_icon_url = get_setting('notification_icon_url', '')
+    return render_template('admin.html',
+                         pending=pending,
+                         users=users,
                          habits=habits,
                          pending_rewards=pending_rewards,
-                         active_rewards=active_rewards)
+                         active_rewards=active_rewards,
+                         notification_icon_url=notification_icon_url)
 
 @app.route('/admin/reward/create', methods=['POST'])
 @login_required
@@ -1035,6 +1084,78 @@ def reject_completion(completion_id):
         return redirect(url_for('admin_panel'))
     completion.status = 'rejected'
     db.session.commit()
+    return redirect(url_for('admin_panel'))
+
+@app.route('/quest/approve/<int:completion_id>/<token>')
+def quick_approve(completion_id, token):
+    """Token-based approval link — no login required (used in Discord/notification links)."""
+    completion = Completion.query.get_or_404(completion_id)
+    if not token or completion.action_token != token:
+        return "Invalid or expired approval link.", 403
+    if completion.status != 'pending':
+        return f"Quest already {completion.status}.", 200
+    user = db.session.get(User, completion.user_id)
+    if not user or user.email == DEMO_EMAIL:
+        return "Cannot approve this quest.", 403
+    completion.status = 'approved'
+    habit = db.session.get(Habit, completion.habit_id)
+    bonus_msg = ""
+    if habit:
+        points = habit.points_reward
+        if habit.streak_enabled and habit.streak_milestone:
+            prev_streak = get_habit_streak(user.id, habit.id, exclude_id=completion.id)
+            new_streak = prev_streak + 1
+            if new_streak % habit.streak_milestone == 0:
+                points = int(points * habit.streak_multiplier)
+                bonus_msg = f" 🔥 {new_streak}-quest streak! {habit.streak_multiplier}x gem bonus!"
+        user.points += points
+    completion.action_token = None  # invalidate token
+    db.session.commit()
+    send_notification(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved via link){bonus_msg}", completion.image_filename)
+    return f"<html><body style='font-family:sans-serif;text-align:center;padding:2rem'><h2>✅ Quest Approved!</h2><p><strong>{user.name}</strong> — <em>{completion.habit_name}</em></p><p>Gems awarded.{bonus_msg}</p></body></html>", 200
+
+@app.route('/quest/reject/<int:completion_id>/<token>')
+def quick_reject(completion_id, token):
+    """Token-based rejection link — no login required (used in Discord/notification links)."""
+    completion = Completion.query.get_or_404(completion_id)
+    if not token or completion.action_token != token:
+        return "Invalid or expired rejection link.", 403
+    if completion.status != 'pending':
+        return f"Quest already {completion.status}.", 200
+    user = db.session.get(User, completion.user_id)
+    if not user or user.email == DEMO_EMAIL:
+        return "Cannot reject this quest.", 403
+    completion.status = 'rejected'
+    completion.action_token = None  # invalidate token
+    db.session.commit()
+    return f"<html><body style='font-family:sans-serif;text-align:center;padding:2rem'><h2>❌ Quest Rejected</h2><p><strong>{user.name}</strong> — <em>{completion.habit_name}</em></p></body></html>", 200
+
+@app.route('/admin/settings/notification', methods=['POST'])
+@login_required
+def admin_notification_settings():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    icon_url = request.form.get('notification_icon_url', '').strip()
+    set_setting('notification_icon_url', icon_url)
+    flash('Notification settings saved.', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/cleanup-rejected-images', methods=['POST'])
+@login_required
+def cleanup_rejected_images():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    rejected = Completion.query.filter_by(status='rejected').filter(Completion.image_filename != None).all()
+    count = 0
+    for c in rejected:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], c.image_filename)
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+                count += 1
+            except OSError as e:
+                logger.warning("Could not delete %s: %s", file_path, e)
+        c.image_filename = None
+    db.session.commit()
+    flash(f'Cleaned up {count} rejected image(s).', 'success')
     return redirect(url_for('admin_panel'))
 
 # UPDATED: Add header for inline image display and guess MIME type
