@@ -839,6 +839,25 @@ def promote_user():
         flash(f'{user.name} promoted to Admin.', 'success')
     return redirect(url_for('admin_panel'))
 
+@app.route('/admin/user/reset-password', methods=['POST'])
+@login_required
+def reset_user_password():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    user_id = request.form.get('user_id')
+    new_password = request.form.get('new_password', '').strip()
+    if len(new_password) < 4:
+        flash('Password must be at least 4 characters.', 'error')
+        return redirect(url_for('admin_panel'))
+    user = db.session.get(User, int(user_id))
+    if not user or user.email == DEMO_EMAIL:
+        flash('User not found.', 'error')
+        return redirect(url_for('admin_panel'))
+    user.password_hash = generate_password_hash(new_password, method='scrypt')
+    user.force_password_change = True
+    db.session.commit()
+    flash(f'Password reset for {user.name}. They will be prompted to change it on next login.', 'success')
+    return redirect(url_for('admin_panel'))
+
 @app.route('/admin/user/adjust-gems', methods=['POST'])
 @login_required
 def adjust_gems():
