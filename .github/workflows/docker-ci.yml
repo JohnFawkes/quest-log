@@ -96,7 +96,7 @@ jobs:
 
       # Build and Load into local Docker daemon for testing
       - name: Build Docker image (Load Local)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: false
@@ -158,7 +158,7 @@ jobs:
 
       # If tests passed, build again (cached) and push to registry
       - name: Push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
