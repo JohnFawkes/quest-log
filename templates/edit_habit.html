@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-6 flex items-center gap-3">
+        <a href="{{ url_for('admin_panel') }}" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 class="text-2xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <i class="fas fa-edit text-indigo-500"></i> Edit Quest
+        </h1>
+    </div>
+
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 border border-slate-200 dark:border-slate-700">
+        <form action="{{ url_for('edit_habit', habit_id=habit.id) }}" method="POST" class="space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Quest Name</label>
+                    <input type="text" name="name" value="{{ habit.name }}" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Gem Reward</label>
+                    <input type="number" name="points" value="{{ habit.points_reward }}" min="1" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Description</label>
+                <textarea name="description" rows="2" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white resize-none">{{ habit.description or '' }}</textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Assign Adventurer</label>
+                <select name="assigned_user_id" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
+                    {% for u in users %}
+                    <option value="{{ u.id }}" {{ 'selected' if u.id == habit.assigned_user_id else '' }}>{{ u.name }} ({{ u.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Schedule</label>
+                <select name="schedule_type" id="scheduleType" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded mb-3 dark:text-white" onchange="toggleSchedule()">
+                    <option value="daily" {{ 'selected' if habit.schedule_type == 'daily' else '' }}>Daily Quest</option>
+                    <option value="weekly" {{ 'selected' if habit.schedule_type == 'weekly' else '' }}>Weekly Schedule</option>
+                    <option value="biweekly" {{ 'selected' if habit.schedule_type == 'biweekly' else '' }}>Bi-Weekly Schedule</option>
+                    <option value="interval" {{ 'selected' if habit.schedule_type == 'interval' else '' }}>Interval (Every X Days)</option>
+                </select>
+                {% set selected_days = habit.schedule_days.split(',') if habit.schedule_days else [] %}
+                <div id="daysSelector" class="{{ '' if habit.schedule_type in ['weekly', 'biweekly'] else 'hidden' }} grid grid-cols-4 gap-2 text-sm mt-2 text-slate-700 dark:text-slate-300">
+                    <label class="flex items-center gap-1"><input type="checkbox" name="days" value="0" {{ 'checked' if '0' in selected_days }}> Mon</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="days" value="1" {{ 'checked' if '1' in selected_days }}> Tue</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="days" value="2" {{ 'checked' if '2' in selected_days }}> Wed</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="days" value="3" {{ 'checked' if '3' in selected_days }}> Thu</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="days" value="4" {{ 'checked' if '4' in selected_days }}> Fri</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="days" value="5" {{ 'checked' if '5' in selected_days }}> Sat</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="days" value="6" {{ 'checked' if '6' in selected_days }}> Sun</label>
+                </div>
+                <div id="intervalSelector" class="{{ '' if habit.schedule_type == 'interval' else 'hidden' }} mt-2">
+                    <input type="number" name="interval_days" placeholder="Days (e.g. 2)" min="1" value="{{ habit.interval_days or '' }}" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
+                </div>
+            </div>
+            <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-100 dark:border-red-900/50">
+                <div class="flex items-center justify-between mb-2">
+                    <label for="penaltyCheck" class="font-bold text-red-700 dark:text-red-400 text-sm">Enable Penalty?</label>
+                    <input type="checkbox" name="penalty_enabled" id="penaltyCheck" onchange="togglePenalty()" {{ 'checked' if habit.penalty_enabled }} class="w-5 h-5 accent-red-600">
+                </div>
+                <div id="penaltyAmount" class="{{ '' if habit.penalty_enabled else 'hidden' }} mt-2">
+                    <input type="number" name="penalty_amount" placeholder="Gems to deduct" min="0" value="{{ habit.penalty_amount or 0 }}" class="w-full p-2 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 rounded dark:text-white">
+                </div>
+            </div>
+
+            {% if habit.streak_enabled %}
+            <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-100 dark:border-amber-900/50">
+                <p class="font-bold text-amber-700 dark:text-amber-400 text-sm flex items-center gap-2 mb-1">
+                    <i class="fas fa-fire text-orange-500"></i> Streak Bonus (locked)
+                </p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Every <strong>{{ habit.streak_milestone }}</strong> completions in a row earns <strong>{{ habit.streak_multiplier }}x</strong> gems. Streak settings cannot be changed after creation.</p>
+            </div>
+            {% endif %}
+
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-bold shadow-md transition">Save Changes</button>
+                <a href="{{ url_for('admin_panel') }}" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 font-bold transition text-center">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleSchedule() {
+    const type = document.getElementById('scheduleType').value;
+    document.getElementById('daysSelector').classList.add('hidden');
+    document.getElementById('intervalSelector').classList.add('hidden');
+    if (type === 'weekly' || type === 'biweekly') {
+        document.getElementById('daysSelector').classList.remove('hidden');
+    } else if (type === 'interval') {
+        document.getElementById('intervalSelector').classList.remove('hidden');
+    }
+}
+function togglePenalty() {
+    const checked = document.getElementById('penaltyCheck').checked;
+    if (checked) document.getElementById('penaltyAmount').classList.remove('hidden');
+    else document.getElementById('penaltyAmount').classList.add('hidden');
+}
+</script>
+{% endblock %}

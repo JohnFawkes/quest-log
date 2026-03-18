@@ -92,12 +92,15 @@ class Habit(db.Model):
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     points_reward = db.Column(db.Integer, default=10)
-    assigned_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True) 
-    schedule_type = db.Column(db.String(20), default='daily') 
-    schedule_days = db.Column(db.String(50)) 
-    interval_days = db.Column(db.Integer)    
+    assigned_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    schedule_type = db.Column(db.String(20), default='daily')
+    schedule_days = db.Column(db.String(50))
+    interval_days = db.Column(db.Integer)
     penalty_enabled = db.Column(db.Boolean, default=False)
     penalty_amount = db.Column(db.Integer, default=0)
+    streak_enabled = db.Column(db.Boolean, default=False)
+    streak_milestone = db.Column(db.Integer, default=5)
+    streak_multiplier = db.Column(db.Float, default=2.0)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     assigned_user = db.relationship('User', foreign_keys=[assigned_user_id])
 
@@ -237,6 +240,24 @@ def check_missed_habits(user):
     user.last_penalty_check = now
     db.session.commit()
 
+def get_habit_streak(user_id, habit_id, exclude_id=None):
+    """Count the current consecutive approved completion streak for a habit."""
+    query = Completion.query.filter(
+        Completion.user_id == user_id,
+        Completion.habit_id == habit_id,
+        Completion.status.in_(['approved', 'rejected', 'penalty'])
+    )
+    if exclude_id:
+        query = query.filter(Completion.id != exclude_id)
+    completions = query.order_by(Completion.timestamp.desc()).all()
+    streak = 0
+    for c in completions:
+        if c.status == 'approved':
+            streak += 1
+        else:
+            break
+    return streak
+
 @app.before_request
 def check_setup_required():
     if current_user.is_authenticated and current_user.force_password_change:
@@ -274,7 +295,10 @@ def perform_db_migration():
         ('interval_days', 'INTEGER'),
         ('penalty_enabled', 'BOOLEAN'),
         ('penalty_amount', 'INTEGER'),
-        ('created_at', 'TIMESTAMP')
+        ('created_at', 'TIMESTAMP'),
+        ('streak_enabled', 'BOOLEAN'),
+        ('streak_milestone', 'INTEGER'),
+        ('streak_multiplier', 'FLOAT'),
     ]
     for col_name, col_type in habit_updates:
         if col_name not in habit_cols:
@@ -540,6 +564,13 @@ def dashboard():
         my_completions = Completion.query.filter_by(user_id=current_user.id).order_by(Completion.timestamp.desc()).limit(10).all()
 
     for h in all_assigned:
+        if h.streak_enabled and h.streak_milestone:
+            h.current_streak = get_habit_streak(h.assigned_user_id, h.id)
+            h.next_milestone = h.streak_milestone - (h.current_streak % h.streak_milestone)
+        else:
+            h.current_streak = 0
+            h.next_milestone = None
+
         if is_habit_due_on_date(h, today):
             start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
             end_of_day = start_of_day + timedelta(days=1)
@@ -780,16 +811,45 @@ def create_habit():
     interval_days = int(request.form.get('interval_days')) if schedule_type == 'interval' else None
     penalty_enabled = 'penalty_enabled' in request.form
     penalty_amount = int(request.form.get('penalty_amount') or 0)
+    streak_enabled = 'streak_enabled' in request.form
+    streak_milestone = int(request.form.get('streak_milestone') or 5)
+    streak_multiplier = float(request.form.get('streak_multiplier') or 2.0)
 
     new_habit = Habit(
         name=name, description=description, points_reward=points, assigned_user_id=assigned_user_id,
         schedule_type=schedule_type, schedule_days=schedule_days,
-        interval_days=interval_days, penalty_enabled=penalty_enabled, penalty_amount=penalty_amount
+        interval_days=interval_days, penalty_enabled=penalty_enabled, penalty_amount=penalty_amount,
+        streak_enabled=streak_enabled, streak_milestone=streak_milestone, streak_multiplier=streak_multiplier
     )
     db.session.add(new_habit)
     db.session.commit()
     flash('Quest assigned!', 'success')
     return redirect(url_for('admin_panel'))
+
+@app.route('/admin/habit/edit/<int:habit_id>', methods=['GET', 'POST'])
+@login_required
+def edit_habit(habit_id):
+    if not current_user.is_admin: return redirect(url_for('index'))
+    habit = Habit.query.get_or_404(habit_id)
+    demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
+    users = User.query.filter(User.email != DEMO_EMAIL).all()
+
+    if request.method == 'POST':
+        habit.name = request.form.get('name')
+        habit.description = request.form.get('description')
+        habit.points_reward = int(request.form.get('points'))
+        habit.assigned_user_id = request.form.get('assigned_user_id')
+        schedule_type = request.form.get('schedule_type')
+        habit.schedule_type = schedule_type
+        habit.schedule_days = ",".join(request.form.getlist('days')) if schedule_type in ['weekly', 'biweekly'] else None
+        habit.interval_days = int(request.form.get('interval_days')) if schedule_type == 'interval' else None
+        habit.penalty_enabled = 'penalty_enabled' in request.form
+        habit.penalty_amount = int(request.form.get('penalty_amount') or 0)
+        db.session.commit()
+        flash('Quest updated!', 'success')
+        return redirect(url_for('admin_panel'))
+
+    return render_template('edit_habit.html', habit=habit, users=users)
 
 @app.route('/admin/approve/<int:completion_id>', methods=['POST'])
 @login_required
@@ -803,9 +863,18 @@ def approve_completion(completion_id):
     if completion.status == 'pending':
         completion.status = 'approved'
         habit = db.session.get(Habit, completion.habit_id)
-        if habit: user.points += habit.points_reward
+        if habit:
+            points = habit.points_reward
+            bonus_msg = ""
+            if habit.streak_enabled and habit.streak_milestone:
+                prev_streak = get_habit_streak(user.id, habit.id, exclude_id=completion.id)
+                new_streak = prev_streak + 1
+                if new_streak % habit.streak_milestone == 0:
+                    points = int(points * habit.streak_multiplier)
+                    bonus_msg = f" 🔥 **{new_streak}-quest streak! {habit.streak_multiplier}x gem bonus!**"
+            user.points += points
         db.session.commit()
-        send_discord_webhook(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved)", completion.image_filename)
+        send_discord_webhook(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved){bonus_msg}", completion.image_filename)
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/reject/<int:completion_id>', methods=['POST'])

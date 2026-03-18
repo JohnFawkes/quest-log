@@ -31,13 +31,23 @@
                         {% if habit.description %}
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ habit.description }}</p>
                         {% endif %}
-                        <div class="flex items-center space-x-2 mt-1">
+                        <div class="flex items-center flex-wrap gap-2 mt-1">
                             <span class="bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 text-xs px-2 py-1 rounded font-bold flex items-center gap-1">
                                 <i class="fas fa-gem text-purple-500 text-[10px]"></i> +{{ habit.points_reward }} Gems
                             </span>
                             {% if habit.penalty_enabled %}
                             <span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs px-2 py-1 rounded font-bold">
                                 -{{ habit.penalty_amount }} Gems if missed
+                            </span>
+                            {% endif %}
+                            {% if habit.streak_enabled %}
+                            <span class="bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-300 text-xs px-2 py-1 rounded font-bold flex items-center gap-1" title="Every {{ habit.streak_milestone }} completions in a row earns {{ habit.streak_multiplier }}x gems">
+                                <i class="fas fa-fire text-orange-500 text-[10px]"></i>
+                                {% if habit.current_streak > 0 %}
+                                    {{ habit.current_streak }} streak &bull; {{ habit.next_milestone }} to {{ habit.streak_multiplier }}x
+                                {% else %}
+                                    Every {{ habit.streak_milestone }} = {{ habit.streak_multiplier }}x gems
+                                {% endif %}
                             </span>
                             {% endif %}
                         </div>

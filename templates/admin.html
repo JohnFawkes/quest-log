@@ -120,6 +120,28 @@
                     <input type="number" name="penalty_amount" placeholder="Gems to deduct" min="0" class="w-full p-2 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 rounded dark:text-white">
                 </div>
             </div>
+            <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-100 dark:border-amber-900/50">
+                <div class="flex items-center justify-between mb-2">
+                    <label for="streakCheck" class="font-bold text-amber-700 dark:text-amber-400 text-sm flex items-center gap-2">
+                        <i class="fas fa-fire text-orange-500"></i> Enable Streak Bonus?
+                    </label>
+                    <input type="checkbox" name="streak_enabled" id="streakCheck" onchange="toggleStreak()" class="w-5 h-5 accent-amber-500">
+                </div>
+                <p class="text-xs text-amber-600 dark:text-amber-500 mb-2">Cannot be changed after quest creation.</p>
+                <div id="streakOptions" class="hidden space-y-2 mt-2">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Completions before bonus</label>
+                            <input type="number" name="streak_milestone" placeholder="e.g. 5" min="2" value="5" class="w-full p-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-900 rounded dark:text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Gem multiplier</label>
+                            <input type="number" name="streak_multiplier" placeholder="e.g. 3" min="1.1" step="0.1" value="2" class="w-full p-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-900 rounded dark:text-white text-sm">
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 italic">Example: every 5 completions in a row earns 2x gems.</p>
+                </div>
+            </div>
             <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-bold shadow-md transition">Post Quest</button>
         </form>
 
@@ -130,18 +152,28 @@
                 {% for h in habits %}
                 <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded border border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
                     <div>
-                        <p class="font-bold text-sm text-slate-800 dark:text-slate-200">{{ h.name }}</p>
+                        <p class="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                            {{ h.name }}
+                            {% if h.streak_enabled %}
+                            <span class="text-orange-500" title="Streak: every {{ h.streak_milestone }} completions = {{ h.streak_multiplier }}x gems"><i class="fas fa-fire text-xs"></i></span>
+                            {% endif %}
+                        </p>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             <i class="fas fa-user-tag"></i> {{ h.assigned_user.name if h.assigned_user else 'Unassigned' }}
                             &bull;
                             <span class="capitalize">{{ h.schedule_type }}</span>
                         </p>
                     </div>
-                    <form action="{{ url_for('delete_habit', habit_id=h.id) }}" method="POST" onsubmit="return confirm('Delete this quest? All history for it will be lost.')">
-                        <button type="submit" class="text-red-400 hover:text-red-600 p-2" title="Delete quest">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
+                    <div class="flex items-center gap-1">
+                        <a href="{{ url_for('edit_habit', habit_id=h.id) }}" class="text-indigo-400 hover:text-indigo-600 p-2" title="Edit quest">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="{{ url_for('delete_habit', habit_id=h.id) }}" method="POST" onsubmit="return confirm('Delete this quest? All history for it will be lost.')">
+                            <button type="submit" class="text-red-400 hover:text-red-600 p-2" title="Delete quest">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
                 {% else %}
                 <p class="text-slate-400 dark:text-slate-600 text-sm text-center">No active quests.</p>
@@ -284,6 +316,11 @@ function togglePenalty() {
     const checked = document.getElementById('penaltyCheck').checked;
     if (checked) document.getElementById('penaltyAmount').classList.remove('hidden');
     else document.getElementById('penaltyAmount').classList.add('hidden');
+}
+function toggleStreak() {
+    const checked = document.getElementById('streakCheck').checked;
+    if (checked) document.getElementById('streakOptions').classList.remove('hidden');
+    else document.getElementById('streakOptions').classList.add('hidden');
 }
 </script>
 {% endblock %}
