@@ -20,10 +20,13 @@ Quest Log is a gamified habit tracker that transforms your daily tasks into an R
 | **Proof of Valor** | Upload a photo to prove a quest is done — no honor system here |
 | **Gem Economy** | Earn Gems for completed quests, spend them in the Reward Shop |
 | **Quest Schedules** | Daily, Weekly (e.g. Mon/Wed/Fri), Bi-Weekly, or Interval (every X days) |
+| **Streak Bonuses** | Award a gem multiplier every N consecutive completions per quest |
 | **Penalties** | Miss a critical quest? The Guild Master can set Gem deductions |
-| **Notifications** | Alerts via Discord, Telegram, Slack, and more through Apprise |
+| **Apprise Notifications** | Alerts via Discord, Telegram, Slack, Ntfy, Gotify, and [100+ more](https://github.com/caronc/apprise/wiki) through Apprise |
+| **One-Click Approvals** | Approve or reject quest submissions directly from Discord/Telegram via a link — no login needed |
+| **Notification Avatar** | Configure a custom icon URL shown as the bot avatar in Discord and other services |
 | **Flexible Auth** | Local email/password or Google OAuth |
-| **Themes** | Multiple medieval-inspired themes — Dungeon, Royal Court, Ranger's Lodge, Dragon's Lair, and more |
+| **Themes** | Multiple medieval-inspired themes — Dungeon, Royal Court, Ranger's Lodge, and more |
 
 ---
 
@@ -90,6 +93,18 @@ You will be required to change your credentials immediately. Alternatively, set 
 
 When an adventurer submits proof, it appears in the **Quest Review Board**. Approve to award Gems, or reject to send them back.
 
+If notifications are configured, each submission also delivers a message containing **one-click Approve / Reject links** — click directly from Discord, Telegram, or any notification channel to act without opening the app.
+
+### Notifications
+
+Set `APPRISE_URLS` to a comma-separated list of [Apprise-compatible URLs](https://github.com/caronc/apprise/wiki) to receive alerts on any supported platform. `DISCORD_WEBHOOK_URL` is also supported for convenience.
+
+Optionally set a **Notification Avatar URL** in the Guild Hall (*Notification Settings*) to display a custom icon alongside bot messages in Discord and other services.
+
+### Maintenance
+
+The **Maintenance** section of the Guild Hall provides tools for routine upkeep, including a button to purge image files from rejected quest submissions and free up disk space.
+
 ---
 
 ## Scrolls of Configuration
@@ -101,8 +116,8 @@ When an adventurer submits proof, it appears in the **Quest Review Board**. Appr
 | `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret |
 | `ADMIN_EMAIL` | No | Email that auto-receives Guild Master rights |
 | `PUBLIC_DOMAIN` | No | Public URL for OAuth redirects |
-| `APPRISE_URLS` | No | Comma-separated Apprise notification URLs |
-| `DISCORD_WEBHOOK_URL` | No | Discord webhook for direct notifications |
+| `APPRISE_URLS` | No | Comma-separated [Apprise URLs](https://github.com/caronc/apprise/wiki) (Discord, Telegram, Slack, etc.) |
+| `DISCORD_WEBHOOK_URL` | No | Discord webhook URL (automatically converted to Apprise format) |
 | `DATA_DIR` | No | Directory for the SQLite database |
 | `PORT` | No | Application port (default: `5000`) |
 | `TZ` | No | Timezone in IANA format (default: `UTC`) |
