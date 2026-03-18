@@ -5,6 +5,7 @@ import sqlite3
 import types
 from datetime import datetime, timedelta, timezone
 
+import apprise
 import requests as http_requests
 from authlib.integrations.flask_client import OAuth
 from flask import (
@@ -27,6 +28,7 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # --- CONFIGURATION ---
 DISCORD_WEBHOOK_URL = os.environ.get('DISCORD_WEBHOOK_URL', "")
+APPRISE_URLS = os.environ.get('APPRISE_URLS', "")
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', "")
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', "")
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', "")
@@ -143,29 +145,37 @@ class Redemption(db.Model):
 def load_user(user_id):
     return db.session.get(User, int(user_id))
 
-def send_discord_webhook(content, image_filename=None):
-    url = app.config['DISCORD_WEBHOOK_URL']
-    if not url:
-        logger.warning("Discord webhook not configured (DISCORD_WEBHOOK_URL is empty)")
+def _build_apprise():
+    """Build an Apprise instance from configured URLs."""
+    ap = apprise.Apprise()
+    if APPRISE_URLS:
+        for url in APPRISE_URLS.split(','):
+            url = url.strip()
+            if url:
+                ap.add(url)
+    if DISCORD_WEBHOOK_URL:
+        ap.add(DISCORD_WEBHOOK_URL)
+    return ap
+
+def send_notification(content, image_filename=None):
+    """Send a notification via Apprise to all configured services."""
+    ap = _build_apprise()
+    if not len(ap):
+        logger.warning("No notification services configured (set APPRISE_URLS or DISCORD_WEBHOOK_URL)")
         return
+    attach = None
+    if image_filename:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+        if os.path.exists(file_path):
+            attach = apprise.AppriseAttachment(file_path)
     try:
-        files = {}
-        file_handle = None
-        if image_filename:
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
-            if os.path.exists(file_path):
-                file_handle = open(file_path, 'rb')
-                files = {'file': file_handle}
-        resp = http_requests.post(url, data={'content': content}, files=files, timeout=10)
-        if not resp.ok:
-            logger.warning("Discord webhook returned %s: %s", resp.status_code, resp.text)
+        result = ap.notify(body=content, attach=attach)
+        if result:
+            logger.info("Notification sent OK")
         else:
-            logger.info("Discord webhook sent OK (%s)", resp.status_code)
+            logger.warning("Apprise notification failed (check your URLs and service config)")
     except Exception as e:
-        logger.warning("Discord Webhook Error: %s", e)
-    finally:
-        if file_handle:
-            file_handle.close()
+        logger.warning("Notification error: %s", e)
 
 def is_habit_due_on_date(habit, check_date):
     check_date = check_date.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -687,7 +697,7 @@ def complete_habit(habit_id):
     completion = Completion(user_id=current_user.id, habit_id=habit.id, habit_name=habit.name, image_filename=filename, status='pending')
     db.session.add(completion)
     db.session.commit()
-    send_discord_webhook(f"📸 **{current_user.name}** quest update: **{habit.name}**! (Pending Review)", filename)
+    send_notification(f"📸 **{current_user.name}** quest update: **{habit.name}**! (Pending Review)", filename)
     flash('Quest submitted for review!', 'success')
     return redirect(url_for('dashboard'))
 
@@ -737,7 +747,7 @@ def request_reward():
     db.session.add(new_reward)
     db.session.commit()
     
-    send_discord_webhook(f"💡 **{current_user.name}** requested a new reward: **{name}** ({cost} Gems).")
+    send_notification(f"💡 **{current_user.name}** requested a new reward: **{name}** ({cost} Gems).")
     flash('Reward requested! Waiting for Guild Master approval.', 'success')
     return redirect(url_for('rewards'))
 
@@ -754,7 +764,7 @@ def redeem_reward(reward_id):
         current_user.points -= reward.cost
         db.session.add(Redemption(user_id=current_user.id, reward_name=reward.name, cost=reward.cost))
         db.session.commit()
-        send_discord_webhook(f"🎁 **{current_user.name}** claimed **{reward.name}**!")
+        send_notification(f"🎁 **{current_user.name}** claimed **{reward.name}**!")
         flash('Reward Claimed!', 'success')
     else: flash('Not enough Gems.', 'error')
     return redirect(url_for('rewards'))
@@ -765,12 +775,12 @@ def redeem_reward(reward_id):
 @login_required
 def test_webhook():
     if not current_user.is_admin: return redirect(url_for('index'))
-    url = app.config.get('DISCORD_WEBHOOK_URL', '')
-    if not url:
-        flash('DISCORD_WEBHOOK_URL is not configured.', 'error')
+    ap = _build_apprise()
+    if not len(ap):
+        flash('No notification services configured. Set APPRISE_URLS or DISCORD_WEBHOOK_URL.', 'error')
     else:
-        send_discord_webhook("🔔 Quest Log test notification — webhook is working!")
-        flash('Test notification sent. Check your Discord channel.', 'success')
+        send_notification("🔔 Quest Log test notification — working!")
+        flash('Test notification sent. Check your configured channels.', 'success')
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin')
@@ -1011,7 +1021,7 @@ def approve_completion(completion_id):
                     bonus_msg = f" 🔥 **{new_streak}-quest streak! {habit.streak_multiplier}x gem bonus!**"
             user.points += points
         db.session.commit()
-        send_discord_webhook(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved){bonus_msg}", completion.image_filename)
+        send_notification(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved){bonus_msg}", completion.image_filename)
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/reject/<int:completion_id>', methods=['POST'])
