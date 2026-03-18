@@ -523,18 +523,29 @@ def logout():
 @login_required
 def dashboard():
     check_missed_habits(current_user)
-    all_assigned = Habit.query.filter_by(assigned_user_id=current_user.id).all()
     today = datetime.now(timezone.utc)
     todays_habits = []
     upcoming_habits = []
-    
+
+    if current_user.is_admin:
+        demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
+        habit_query = Habit.query
+        if demo_user:
+            habit_query = habit_query.filter(Habit.assigned_user_id != demo_user.id)
+        all_assigned = habit_query.all()
+        completions_query = Completion.query.join(User, Completion.user_id == User.id).filter(User.email != DEMO_EMAIL)
+        my_completions = completions_query.order_by(Completion.timestamp.desc()).limit(10).all()
+    else:
+        all_assigned = Habit.query.filter_by(assigned_user_id=current_user.id).all()
+        my_completions = Completion.query.filter_by(user_id=current_user.id).order_by(Completion.timestamp.desc()).limit(10).all()
+
     for h in all_assigned:
         if is_habit_due_on_date(h, today):
             start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
             end_of_day = start_of_day + timedelta(days=1)
             done = Completion.query.filter(
-                Completion.habit_id == h.id, 
-                Completion.user_id == current_user.id,
+                Completion.habit_id == h.id,
+                Completion.user_id == h.assigned_user_id,
                 Completion.timestamp >= start_of_day,
                 Completion.timestamp < end_of_day,
                 Completion.status != 'rejected'
@@ -551,8 +562,6 @@ def dashboard():
                 h.next_due_display = "Unknown"
             upcoming_habits.append(h)
 
-    my_completions = Completion.query.filter_by(user_id=current_user.id).order_by(Completion.timestamp.desc()).limit(10).all()
-    
     return render_template('dashboard.html', todays_habits=todays_habits, upcoming_habits=upcoming_habits, completions=my_completions)
 
 @app.route('/habit/<int:habit_id>/complete', methods=['POST'])

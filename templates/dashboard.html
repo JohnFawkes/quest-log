@@ -20,6 +20,11 @@
                     {% endif %}
 
                     <div class="z-10">
+                        {% if current_user.is_admin and habit.assigned_user_id != current_user.id %}
+                        <p class="text-xs text-slate-400 dark:text-slate-500 mb-1 flex items-center gap-1">
+                            <i class="fas fa-user"></i> {{ habit.assigned_user.name }}
+                        </p>
+                        {% endif %}
                         <h3 class="text-xl font-bold {{ 'text-green-800 dark:text-green-400' if habit.is_completed else 'text-gray-800 dark:text-gray-100' }}">
                             {{ habit.name }}
                         </h3>
@@ -49,13 +54,15 @@
                                 <i class="fas fa-clock"></i> Pending
                             </span>
                             {% endif %}
-                        {% else %}
+                        {% elif habit.assigned_user_id == current_user.id %}
                         <form action="{{ url_for('complete_habit', habit_id=habit.id) }}" method="POST" enctype="multipart/form-data">
                             <label class="cursor-pointer bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow transition flex items-center">
                                 <i class="fas fa-camera mr-2"></i> Prove It
                                 <input type="file" name="proof" accept=".png,.jpg,.jpeg,.gif,.webp" capture="environment" class="hidden" onchange="this.form.submit()">
                             </label>
                         </form>
+                        {% else %}
+                        <span class="text-slate-400 dark:text-slate-500 text-sm italic">Not completed</span>
                         {% endif %}
                     </div>
                 </div>
@@ -75,6 +82,11 @@
                 {% for habit in upcoming_habits %}
                 <div class="bg-gray-100 dark:bg-slate-800 p-4 rounded-lg opacity-75 border border-gray-200 dark:border-slate-700 flex flex-col justify-between">
                     <div>
+                        {% if current_user.is_admin and habit.assigned_user_id != current_user.id %}
+                        <p class="text-xs text-slate-400 dark:text-slate-500 mb-1 flex items-center gap-1">
+                            <i class="fas fa-user"></i> {{ habit.assigned_user.name }}
+                        </p>
+                        {% endif %}
                         <h3 class="font-bold text-gray-700 dark:text-slate-300">{{ habit.name }}</h3>
                         <p class="text-xs text-gray-500 dark:text-slate-500 mt-1 flex items-center gap-1">
                             <i class="far fa-clock"></i>
@@ -105,7 +117,12 @@
                 <div class="flex justify-between items-start">
                     <div class="w-full">
                         <div class="flex justify-between w-full mb-2">
-                            <p class="font-bold text-sm text-slate-700 dark:text-slate-300">{{ c.habit_name }}</p>
+                            <div>
+                                <p class="font-bold text-sm text-slate-700 dark:text-slate-300">{{ c.habit_name }}</p>
+                                {% if current_user.is_admin %}
+                                <p class="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1"><i class="fas fa-user"></i> {{ c.user.name }}</p>
+                                {% endif %}
+                            </div>
                             
                             {% if c.status == 'approved' %}
                                 <span class="text-green-600 dark:text-green-400 text-[10px] font-bold bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded border border-green-200 dark:border-green-800">Approved</span>
