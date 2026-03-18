@@ -227,6 +227,21 @@
                     <p class="text-xs text-slate-400 dark:text-slate-500">Use negative numbers to deduct gems.</p>
                 </form>
             </div>
+            <div class="border-t dark:border-slate-700 pt-4">
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-1"><i class="fas fa-key text-amber-500"></i> Reset Password</p>
+                <form action="{{ url_for('reset_user_password') }}" method="POST" class="space-y-2">
+                    <select name="user_id" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
+                        {% for u in users %}
+                        <option value="{{ u.id }}">{{ u.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="flex gap-2">
+                        <input type="password" name="new_password" placeholder="New temporary password" required minlength="4" class="flex-1 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
+                        <button type="submit" class="bg-amber-600 text-white px-3 rounded hover:bg-amber-700 text-sm font-bold transition whitespace-nowrap">Reset</button>
+                    </div>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">User will be forced to change their password on next login.</p>
+                </form>
+            </div>
         </div>
     </div>
 
