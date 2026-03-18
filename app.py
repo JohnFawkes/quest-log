@@ -1155,7 +1155,7 @@ def cleanup_rejected_images():
                     file_count += 1
                 except OSError as e:
                     logger.warning("Could not delete %s: %s", file_path, e)
-        db.session.delete(c)
+    Completion.query.filter_by(status='rejected').delete(synchronize_session=False)
     db.session.commit()
     flash(f'Removed {entry_count} rejected log entr{"y" if entry_count == 1 else "ies"} and {file_count} image file(s).', 'success')
     return redirect(url_for('admin_panel'))
