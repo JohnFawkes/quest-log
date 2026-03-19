@@ -9,11 +9,11 @@
   <rect x="150" y="10" width="2" height="128" fill="#E8F0F5" rx="1" opacity="0.6"/>
   <!-- Blade tip -->
   <polygon points="141,8 151,8 146,-6" fill="#A8B8C4"/>
-  <!-- Crossguard (large, wide) -->
-  <rect x="106" y="140" width="80" height="10" fill="#C49A28" rx="3"/>
+  <!-- Crossguard (proportionate, centered on blade) -->
+  <rect x="121" y="140" width="50" height="10" fill="#C49A28" rx="3"/>
   <!-- Crossguard end ornaments -->
-  <ellipse cx="106" cy="145" rx="7" ry="6" fill="#A07820"/>
-  <ellipse cx="186" cy="145" rx="7" ry="6" fill="#A07820"/>
+  <ellipse cx="121" cy="145" rx="7" ry="6" fill="#A07820"/>
+  <ellipse cx="171" cy="145" rx="7" ry="6" fill="#A07820"/>
   <!-- Grip (long, two-handed) - centred on blade -->
   <rect x="140" y="150" width="12" height="56" fill="#3B2A1A" rx="3"/>
   <!-- Grip leather wrap bands -->

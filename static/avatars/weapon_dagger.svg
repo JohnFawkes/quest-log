@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
   <g transform="translate(0,36)">
   <!-- Curved Dagger - grip at right hand (cy≈164) -->
-  <!-- Blade (curved) -->
-  <path d="M152 175 Q158 115 148 55" stroke="#C0CDD3" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <!-- Blade (curved, starts at crossguard) -->
+  <path d="M150 147 Q158 110 148 55" stroke="#C0CDD3" stroke-width="6" fill="none" stroke-linecap="round"/>
   <!-- Blade edge (sharp) -->
-  <path d="M150 173 Q155 113 146 55" stroke="#E8F0F5" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <path d="M148 147 Q155 108 146 55" stroke="#E8F0F5" stroke-width="1.5" fill="none" opacity="0.7"/>
   <!-- Blade tip -->
   <polygon points="148,55 143,67 153,67" fill="#A8B8C4"/>
   <!-- Crossguard (curved) -->

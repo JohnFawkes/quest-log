@@ -10,12 +10,12 @@
   <line x1="148" y1="89" x2="148" y2="240" stroke="#F5F0E8" stroke-width="1.5"/>
   <!-- Handle grip wrap -->
   <rect x="146" y="157" width="18" height="14" fill="#5C3317" rx="2"/>
-  <!-- Arrow (nocked) -->
-  <line x1="148" y1="164" x2="120" y2="127" stroke="#8B6914" stroke-width="2"/>
-  <!-- Arrow fletching -->
-  <path d="M120 127 L115 120 L122 123 M120 127 L116 123 L119 130" fill="#C0392B"/>
-  <!-- Arrow tip -->
-  <polygon points="148,164 152,157 154,165" fill="#A8B8C4"/>
+  <!-- Arrow (nocked, pointing right away from body) -->
+  <line x1="148" y1="162" x2="184" y2="148" stroke="#8B6914" stroke-width="2"/>
+  <!-- Arrow fletching (at string end) -->
+  <path d="M148 162 L143 155 L149 159 M148 162 L143 167 L149 163" fill="#C0392B"/>
+  <!-- Arrow tip (right end) -->
+  <polygon points="184,148 177,145 177,151" fill="#A8B8C4"/>
   <!-- Bow decorative wrapping -->
   <rect x="153" y="127" width="6" height="5" fill="#C49A28" rx="1"/>
   <rect x="153" y="192" width="6" height="5" fill="#C49A28" rx="1"/>
