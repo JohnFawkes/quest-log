@@ -6,9 +6,9 @@
   <!-- Puff sleeves -->
   <ellipse cx="65" cy="78" rx="18" ry="16" fill="#C97BB2"/>
   <ellipse cx="135" cy="78" rx="18" ry="16" fill="#C97BB2"/>
-  <!-- Sleeve lower (narrow) -->
-  <rect x="57" y="90" width="14" height="42" fill="#9B2D7A" rx="3"/>
-  <rect x="129" y="90" width="14" height="42" fill="#9B2D7A" rx="3"/>
+  <!-- Sleeve lower (matches body arm width and puff sleeve colour) -->
+  <rect x="56" y="90" width="18" height="42" fill="#C97BB2" rx="3"/>
+  <rect x="126" y="90" width="18" height="42" fill="#C97BB2" rx="3"/>
   <!-- Skirt flare -->
   <path d="M68 130 L50 280 L150 280 L132 130 Z" fill="#C97BB2"/>
   <!-- Skirt layers / petticoat -->
