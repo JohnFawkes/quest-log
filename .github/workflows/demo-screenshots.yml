@@ -57,9 +57,10 @@ jobs:
           BASE = "http://localhost:5000"
 
           PAGES = [
-              ("quests",  "/"),
-              ("rewards", "/rewards"),
-              ("avatar",  "/avatar"),
+              ("quests",    "/"),
+              ("rewards",   "/rewards"),
+              ("avatar",    "/avatar"),
+              ("settings",  "/settings/profile"),
           ]
 
           async def main():

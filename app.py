@@ -645,12 +645,17 @@ def initialize_database():
                 if not AvatarItem.query.filter_by(svg_filename=item_data['svg_filename']).first():
                     db.session.add(AvatarItem(**item_data))
             db.session.commit()
-            # Grant starters to all existing non-demo users
+            # Grant starters to all existing users (including demo)
             starters = AvatarItem.query.filter_by(is_starter=True).all()
-            for u in User.query.filter(User.email != DEMO_EMAIL).all():
+            for u in User.query.all():
                 for item in starters:
                     if item not in u.avatar_items:
                         u.avatar_items.append(item)
+            db.session.commit()
+            # Ensure demo user has default items equipped
+            demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
+            if demo_user:
+                _grant_starter_items(demo_user)
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
@@ -743,9 +748,9 @@ def convert_to_local():
 @app.route('/settings/profile', methods=['GET', 'POST'])
 @login_required
 def settings_profile():
-    if current_user.email == DEMO_EMAIL:
+    if current_user.email == DEMO_EMAIL and request.method == 'POST':
         flash("Settings are read-only for the Demo user.", "warning")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('settings_profile'))
 
     if request.method == 'POST':
         name = request.form.get('name')
