@@ -544,6 +544,28 @@ def login_demo():
     flash("Demo user not found.", "error")
     return redirect(url_for('login'))
 
+@app.route('/settings/convert-to-local', methods=['POST'])
+@login_required
+def convert_to_local():
+    if current_user.email == DEMO_EMAIL:
+        flash("Settings are read-only for the Demo user.", "warning")
+        return redirect(url_for('settings_profile'))
+    if current_user.password_hash:
+        flash("This account already has a password set.", "info")
+        return redirect(url_for('settings_profile'))
+    password = request.form.get('password', '').strip()
+    confirm = request.form.get('confirm_password', '').strip()
+    if len(password) < 4:
+        flash("Password must be at least 4 characters.", "error")
+        return redirect(url_for('settings_profile'))
+    if password != confirm:
+        flash("Passwords do not match.", "error")
+        return redirect(url_for('settings_profile'))
+    current_user.password_hash = generate_password_hash(password, method='scrypt')
+    db.session.commit()
+    flash("Password set! You can now log in with your email and password without Google.", "success")
+    return redirect(url_for('settings_profile'))
+
 @app.route('/settings/profile', methods=['GET', 'POST'])
 @login_required
 def settings_profile():
