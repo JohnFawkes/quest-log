@@ -11,7 +11,9 @@ on:
       - 'app.py'
       - 'requirements.txt'
       - 'templates/**'
-
+      
+  workflow_dispatch:
+  
   pull_request:
     branches: [ "main" ]
     paths:
