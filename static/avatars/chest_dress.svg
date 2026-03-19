@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Princess Dress -->
+  <!-- Bodice -->
+  <rect x="74" y="67" width="52" height="72" fill="#9B2D7A" rx="4"/>
+  <!-- Puff sleeves -->
+  <ellipse cx="65" cy="78" rx="18" ry="16" fill="#C97BB2"/>
+  <ellipse cx="135" cy="78" rx="18" ry="16" fill="#C97BB2"/>
+  <!-- Sleeve lower (narrow) -->
+  <rect x="57" y="90" width="14" height="42" fill="#9B2D7A" rx="3"/>
+  <rect x="129" y="90" width="14" height="42" fill="#9B2D7A" rx="3"/>
+  <!-- Skirt flare -->
+  <path d="M68 130 L50 280 L150 280 L132 130 Z" fill="#C97BB2"/>
+  <!-- Skirt layers / petticoat -->
+  <path d="M64 175 L52 280 L148 280 L136 175 Z" fill="#E8A8D4" opacity="0.6"/>
+  <!-- Bodice neckline -->
+  <path d="M86 67 Q100 74 114 67" fill="#8B2468" stroke="#7A1A58" stroke-width="1"/>
+  <!-- Bodice lace/corset lines -->
+  <line x1="92" y1="70" x2="108" y2="70" stroke="#F5B8DC" stroke-width="1" opacity="0.7"/>
+  <line x1="88" y1="80" x2="112" y2="80" stroke="#F5B8DC" stroke-width="1" opacity="0.7"/>
+  <line x1="88" y1="90" x2="112" y2="90" stroke="#F5B8DC" stroke-width="1" opacity="0.7"/>
+  <!-- Corset tie -->
+  <path d="M100 68 L96 80 M100 68 L104 80" stroke="#F5B8DC" stroke-width="1.5"/>
+  <!-- Waist ribbon -->
+  <rect x="68" y="126" width="64" height="10" fill="#7A1A58" rx="3"/>
+  <!-- Ribbon bow -->
+  <path d="M100 126 Q90 120 82 126 Q90 132 100 126 Q110 120 118 126 Q110 132 100 126" fill="#F5B8DC"/>
+  <!-- Skirt sparkle pattern -->
+  <text x="68" y="200" font-size="10" fill="#F5B8DC" opacity="0.5">✦</text>
+  <text x="112" y="185" font-size="9" fill="#F5B8DC" opacity="0.5">✦</text>
+  <text x="85" y="230" font-size="8" fill="#F5B8DC" opacity="0.4">✦</text>
+  <!-- Sleeve puff highlight -->
+  <path d="M50 76 Q58 68 68 74" stroke="#F0A8D8" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M132 74 Q142 68 150 76" stroke="#F0A8D8" stroke-width="1.5" fill="none" opacity="0.6"/>
+</svg>

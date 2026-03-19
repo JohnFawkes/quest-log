@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Shadow Aura -->
+  <!-- Dark wisps rising from ground around feet -->
+  <path d="M72 280 Q64 265 70 252 Q62 268 68 274 Q60 258 72 248 Q65 262 78 270 Q70 255 82 248 Q74 265 80 278" fill="#6B2D8B" opacity="0.7"/>
+  <path d="M128 280 Q136 265 130 252 Q138 268 132 274 Q140 258 128 248 Q135 262 122 270 Q130 255 118 248 Q126 265 120 278" fill="#6B2D8B" opacity="0.7"/>
+  <!-- Tendrils curling up body -->
+  <path d="M60 240 Q50 220 58 200 Q52 215 60 225 Q54 208 64 195" stroke="#4A1870" stroke-width="3" fill="none" opacity="0.6"/>
+  <path d="M140 240 Q150 220 142 200 Q148 215 140 225 Q146 208 136 195" stroke="#4A1870" stroke-width="3" fill="none" opacity="0.6"/>
+  <!-- Wraith wisps floating -->
+  <path d="M68 160 Q58 148 66 136 Q60 148 66 152 Q58 140 70 130" stroke="#6B2D8B" stroke-width="2.5" fill="none" opacity="0.5"/>
+  <path d="M132 160 Q142 148 134 136 Q140 148 134 152 Q142 140 130 130" stroke="#6B2D8B" stroke-width="2.5" fill="none" opacity="0.5"/>
+  <!-- Dark eye glow effects (small glowing dots) -->
+  <circle cx="68" cy="135" r="3" fill="#9B59B6" opacity="0.5"/>
+  <circle cx="134" cy="130" r="2.5" fill="#9B59B6" opacity="0.5"/>
+  <circle cx="58" cy="195" r="2" fill="#6B2D8B" opacity="0.4"/>
+  <circle cx="144" cy="200" r="2.5" fill="#6B2D8B" opacity="0.4"/>
+  <!-- Ground shadow pool -->
+  <ellipse cx="100" cy="272" rx="48" ry="11" fill="#2C0A3E" opacity="0.4"/>
+  <!-- Dark particles floating upward -->
+  <circle cx="82" cy="200" r="2.5" fill="#4A1870" opacity="0.5"/>
+  <circle cx="120" cy="190" r="2" fill="#6B2D8B" opacity="0.4"/>
+  <circle cx="90" cy="168" r="2" fill="#9B59B6" opacity="0.35"/>
+  <circle cx="112" cy="175" r="2.5" fill="#4A1870" opacity="0.4"/>
+  <!-- Subtle body dark haze -->
+  <ellipse cx="100" cy="165" rx="52" ry="100" fill="#2C0A3E" opacity="0.06"/>
+</svg>

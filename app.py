@@ -105,11 +105,21 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(100))
     picture = db.Column(db.String(200))
     points = db.Column(db.Integer, default=0)
+    coins = db.Column(db.Integer, default=0)
     is_admin = db.Column(db.Boolean, default=False)
     force_password_change = db.Column(db.Boolean, default=False)
     last_penalty_check = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     theme = db.Column(db.String(50), default='dark')
+    # Avatar
+    avatar_body = db.Column(db.String(10), default='male')
+    avatar_role = db.Column(db.String(20), default='knight')
+    avatar_head_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
+    avatar_chest_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
+    avatar_weapon_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
+    avatar_offhand_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
+    avatar_spell_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
     completions = db.relationship('Completion', backref='user', lazy=True)
+    avatar_items = db.relationship('AvatarItem', secondary='user_avatar_items', backref='owners')
 
 habit_users = db.Table('habit_users',
     db.Column('habit_id', db.Integer, db.ForeignKey('habit.id'), primary_key=True),
@@ -130,6 +140,8 @@ class Habit(db.Model):
     streak_enabled = db.Column(db.Boolean, default=False)
     streak_milestone = db.Column(db.Integer, default=5)
     streak_multiplier = db.Column(db.Float, default=2.0)
+    coins_reward = db.Column(db.Integer, default=1)
+    coins_streak_bonus = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     assigned_users = db.relationship('User', secondary=habit_users, backref='assigned_habits')
 
@@ -166,6 +178,21 @@ class Redemption(db.Model):
     reward_name = db.Column(db.String(100))
     cost = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+user_avatar_items = db.Table('user_avatar_items',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('avatar_item_id', db.Integer, db.ForeignKey('avatar_item.id'), primary_key=True)
+)
+
+class AvatarItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(300))
+    item_type = db.Column(db.String(20), nullable=False)  # head/chest/weapon/offhand/spell
+    svg_filename = db.Column(db.String(100), nullable=False)
+    coin_cost = db.Column(db.Integer, default=0)
+    is_starter = db.Column(db.Boolean, default=False)
+    rarity = db.Column(db.String(20), default='common')  # common/rare/epic/legendary
 
 # --- Helpers ---
 @login_manager.user_loader
@@ -367,6 +394,19 @@ def perform_db_migration():
         cursor.execute("ALTER TABLE user ADD COLUMN force_password_change BOOLEAN DEFAULT 0")
     if 'theme' not in user_cols:
         cursor.execute("ALTER TABLE user ADD COLUMN theme VARCHAR(50) DEFAULT 'dark'")
+    # Avatar + coins columns
+    for col_name, col_def in [
+        ('coins', 'INTEGER DEFAULT 0'),
+        ('avatar_body', "VARCHAR(10) DEFAULT 'male'"),
+        ('avatar_role', "VARCHAR(20) DEFAULT 'knight'"),
+        ('avatar_head_id', 'INTEGER'),
+        ('avatar_chest_id', 'INTEGER'),
+        ('avatar_weapon_id', 'INTEGER'),
+        ('avatar_offhand_id', 'INTEGER'),
+        ('avatar_spell_id', 'INTEGER'),
+    ]:
+        if col_name not in user_cols:
+            cursor.execute(f"ALTER TABLE user ADD COLUMN {col_name} {col_def}")
 
     # Habit Table
     cursor.execute("PRAGMA table_info(habit)")
@@ -382,6 +422,8 @@ def perform_db_migration():
         ('streak_enabled', 'BOOLEAN'),
         ('streak_milestone', 'INTEGER'),
         ('streak_multiplier', 'FLOAT'),
+        ('coins_reward', 'INTEGER DEFAULT 1'),
+        ('coins_streak_bonus', 'INTEGER DEFAULT 0'),
     ]
     for col_name, col_type in habit_updates:
         if col_name not in habit_cols:
@@ -411,6 +453,31 @@ def perform_db_migration():
     completion_cols = [col[1] for col in cursor.fetchall()]
     if completion_cols and 'action_token' not in completion_cols:
         cursor.execute("ALTER TABLE completion ADD COLUMN action_token VARCHAR(64)")
+
+    # AvatarItem table
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='avatar_item'")
+    if not cursor.fetchone():
+        cursor.execute("""CREATE TABLE avatar_item (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(100) NOT NULL,
+            description VARCHAR(300),
+            item_type VARCHAR(20) NOT NULL,
+            svg_filename VARCHAR(100) NOT NULL,
+            coin_cost INTEGER DEFAULT 0,
+            is_starter BOOLEAN DEFAULT 0,
+            rarity VARCHAR(20) DEFAULT 'common'
+        )""")
+
+    # user_avatar_items junction table
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='user_avatar_items'")
+    if not cursor.fetchone():
+        cursor.execute("""CREATE TABLE user_avatar_items (
+            user_id INTEGER NOT NULL,
+            avatar_item_id INTEGER NOT NULL,
+            PRIMARY KEY (user_id, avatar_item_id),
+            FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+            FOREIGN KEY (avatar_item_id) REFERENCES avatar_item(id) ON DELETE CASCADE
+        )""")
 
     # AppSetting Table
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='app_setting'")
@@ -526,6 +593,91 @@ def initialize_database():
         except IntegrityError:
             db.session.rollback()
             print("Demo user already exists (race condition handled).")
+
+        # Seed Avatar Items
+        ALL_AVATAR_ITEMS = [
+            # Head - starter
+            dict(name="Iron Helm", description="A simple iron helmet. Trusty and reliable.", item_type="head", svg_filename="head_iron_helm.svg", coin_cost=0, is_starter=True, rarity="common"),
+            # Head - shop
+            dict(name="Royal Crown", description="A magnificent gold crown studded with gems.", item_type="head", svg_filename="head_crown.svg", coin_cost=80, is_starter=False, rarity="epic"),
+            dict(name="Silver Tiara", description="An ornate silver tiara fit for royalty.", item_type="head", svg_filename="head_tiara.svg", coin_cost=60, is_starter=False, rarity="rare"),
+            dict(name="Knight's Helm", description="A full-face great helm with a red plume.", item_type="head", svg_filename="head_knight_helm.svg", coin_cost=50, is_starter=False, rarity="rare"),
+            dict(name="Wizard's Hat", description="A tall pointed hat adorned with stars and moons.", item_type="head", svg_filename="head_wizard_hat.svg", coin_cost=45, is_starter=False, rarity="rare"),
+            dict(name="Ranger's Hood", description="A leather hood that blends into the forest.", item_type="head", svg_filename="head_ranger_hood.svg", coin_cost=35, is_starter=False, rarity="common"),
+            dict(name="Dwarven Helm", description="A horned helmet with fierce glowing eye-slits.", item_type="head", svg_filename="head_dwarven_helm.svg", coin_cost=70, is_starter=False, rarity="epic"),
+            # Chest - starter
+            dict(name="Plain Tunic", description="A simple cloth tunic. Nothing fancy, but it'll do.", item_type="chest", svg_filename="chest_tunic.svg", coin_cost=0, is_starter=True, rarity="common"),
+            # Chest - shop
+            dict(name="Chainmail Hauberk", description="Interlocked iron rings offering solid protection.", item_type="chest", svg_filename="chest_chainmail.svg", coin_cost=40, is_starter=False, rarity="common"),
+            dict(name="Shining Plate Armor", description="Gleaming steel plate armor with a golden emblem.", item_type="chest", svg_filename="chest_plate_armor.svg", coin_cost=100, is_starter=False, rarity="legendary"),
+            dict(name="Wizard's Robe", description="A deep purple robe embroidered with arcane symbols.", item_type="chest", svg_filename="chest_robe.svg", coin_cost=55, is_starter=False, rarity="rare"),
+            dict(name="Royal Tabard", description="A blue and gold tabard with a cape in royal crimson.", item_type="chest", svg_filename="chest_royal.svg", coin_cost=75, is_starter=False, rarity="epic"),
+            dict(name="Leather Jerkin", description="Sturdy leather armor with buckled straps.", item_type="chest", svg_filename="chest_leather.svg", coin_cost=30, is_starter=False, rarity="common"),
+            dict(name="Princess Dress", description="An elegant gown with puffed sleeves and a flowing skirt.", item_type="chest", svg_filename="chest_dress.svg", coin_cost=65, is_starter=False, rarity="rare"),
+            dict(name="Dwarven Plate", description="Heavy bronze plate with a rune-engraved boss.", item_type="chest", svg_filename="chest_dwarven_armor.svg", coin_cost=90, is_starter=False, rarity="epic"),
+            # Weapon - starter
+            dict(name="Short Sword", description="A trusty adventurer's blade. Simple but effective.", item_type="weapon", svg_filename="weapon_sword.svg", coin_cost=0, is_starter=True, rarity="common"),
+            # Weapon - shop
+            dict(name="Longsword", description="A great two-handed sword for powerful strikes.", item_type="weapon", svg_filename="weapon_longsword.svg", coin_cost=60, is_starter=False, rarity="rare"),
+            dict(name="Crystal Staff", description="A wooden staff topped with a glowing arcane crystal.", item_type="weapon", svg_filename="weapon_staff.svg", coin_cost=70, is_starter=False, rarity="epic"),
+            dict(name="Recurve Bow", description="A nimble recurve bow with an arrow at the ready.", item_type="weapon", svg_filename="weapon_bow.svg", coin_cost=50, is_starter=False, rarity="rare"),
+            dict(name="Battle Axe", description="A fearsome double-headed axe etched with runes.", item_type="weapon", svg_filename="weapon_battle_axe.svg", coin_cost=55, is_starter=False, rarity="rare"),
+            dict(name="Curved Dagger", description="A quick curved dagger favored by rogues.", item_type="weapon", svg_filename="weapon_dagger.svg", coin_cost=35, is_starter=False, rarity="common"),
+            dict(name="Enchanted Wand", description="A wand crackling with magical energy and sparks.", item_type="weapon", svg_filename="weapon_wand.svg", coin_cost=80, is_starter=False, rarity="epic"),
+            # Offhand - starter
+            dict(name="Wooden Shield", description="A sturdy round shield banded with iron.", item_type="offhand", svg_filename="offhand_wooden_shield.svg", coin_cost=0, is_starter=True, rarity="common"),
+            # Offhand - shop
+            dict(name="Kite Shield", description="A heraldic kite shield with a noble crest.", item_type="offhand", svg_filename="offhand_kite_shield.svg", coin_cost=65, is_starter=False, rarity="epic"),
+            dict(name="Spellbook", description="An open tome filled with arcane diagrams.", item_type="offhand", svg_filename="offhand_spellbook.svg", coin_cost=55, is_starter=False, rarity="rare"),
+            dict(name="Torch", description="A lit torch to light the way through dark dungeons.", item_type="offhand", svg_filename="offhand_torch.svg", coin_cost=20, is_starter=False, rarity="common"),
+            dict(name="Steel Buckler", description="A small but sturdy spiked steel buckler.", item_type="offhand", svg_filename="offhand_buckler.svg", coin_cost=40, is_starter=False, rarity="common"),
+            # Spell - starter
+            dict(name="No Aura", description="No enchantment. Pure skill.", item_type="spell", svg_filename="spell_none.svg", coin_cost=0, is_starter=True, rarity="common"),
+            # Spell - shop
+            dict(name="Fire Aura", description="Wreathed in flames that lick at your feet.", item_type="spell", svg_filename="spell_fire.svg", coin_cost=75, is_starter=False, rarity="epic"),
+            dict(name="Ice Aura", description="Surrounded by drifting ice crystals and frost.", item_type="spell", svg_filename="spell_ice.svg", coin_cost=75, is_starter=False, rarity="epic"),
+            dict(name="Lightning Aura", description="Electric arcs crackle around your body.", item_type="spell", svg_filename="spell_lightning.svg", coin_cost=85, is_starter=False, rarity="legendary"),
+            dict(name="Holy Light", description="A divine halo and golden motes of sacred light.", item_type="spell", svg_filename="spell_holy.svg", coin_cost=90, is_starter=False, rarity="legendary"),
+            dict(name="Shadow Wraith", description="Dark purple wisps curl around you ominously.", item_type="spell", svg_filename="spell_shadow.svg", coin_cost=85, is_starter=False, rarity="legendary"),
+        ]
+        try:
+            for item_data in ALL_AVATAR_ITEMS:
+                if not AvatarItem.query.filter_by(svg_filename=item_data['svg_filename']).first():
+                    db.session.add(AvatarItem(**item_data))
+            db.session.commit()
+            # Grant starters to all existing non-demo users
+            starters = AvatarItem.query.filter_by(is_starter=True).all()
+            for u in User.query.filter(User.email != DEMO_EMAIL).all():
+                for item in starters:
+                    if item not in u.avatar_items:
+                        u.avatar_items.append(item)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+
+def _grant_starter_items(user):
+    """Grant all is_starter AvatarItems to a user (idempotent)."""
+    starters = AvatarItem.query.filter_by(is_starter=True).all()
+    for item in starters:
+        if item not in user.avatar_items:
+            user.avatar_items.append(item)
+    # Equip defaults if nothing equipped yet
+    if not user.avatar_head_id:
+        helm = AvatarItem.query.filter_by(svg_filename='head_iron_helm.svg').first()
+        if helm:
+            user.avatar_head_id = helm.id
+    if not user.avatar_chest_id:
+        tunic = AvatarItem.query.filter_by(svg_filename='chest_tunic.svg').first()
+        if tunic:
+            user.avatar_chest_id = tunic.id
+    if not user.avatar_weapon_id:
+        sword = AvatarItem.query.filter_by(svg_filename='weapon_sword.svg').first()
+        if sword:
+            user.avatar_weapon_id = sword.id
+    if not user.avatar_offhand_id:
+        shield = AvatarItem.query.filter_by(svg_filename='offhand_wooden_shield.svg').first()
+        if shield:
+            user.avatar_offhand_id = shield.id
 
 # Call initialization
 initialize_database()
@@ -664,6 +816,8 @@ def register():
         if app.config['ADMIN_EMAIL'] and email == app.config['ADMIN_EMAIL']: new_user.is_admin = True
         db.session.add(new_user)
         db.session.commit()
+        _grant_starter_items(new_user)
+        db.session.commit()
         login_user(new_user)
         return redirect(url_for('index'))
     return render_template('register.html')
@@ -685,6 +839,8 @@ def authorize():
         if not user:
             user = User(email=email, name=user_info['name'], picture=user_info['picture'], is_admin=should_be_admin)
             db.session.add(user)
+            db.session.commit()
+            _grant_starter_items(user)
             db.session.commit()
         elif should_be_admin and not user.is_admin:
             user.is_admin = True
@@ -905,13 +1061,15 @@ def admin_panel():
     ).all()
     
     notification_icon_url = get_setting('notification_icon_url', '')
+    avatar_items = AvatarItem.query.order_by(AvatarItem.item_type, AvatarItem.coin_cost).all()
     return render_template('admin.html',
                          pending=pending,
                          users=users,
                          habits=habits,
                          pending_rewards=pending_rewards,
                          active_rewards=active_rewards,
-                         notification_icon_url=notification_icon_url)
+                         notification_icon_url=notification_icon_url,
+                         avatar_items=avatar_items)
 
 @app.route('/admin/reward/create', methods=['POST'])
 @login_required
@@ -993,6 +1151,8 @@ def create_user_admin():
         new_user = User(email=email, name=name, password_hash=generate_password_hash(password, method='scrypt'))
         db.session.add(new_user)
         db.session.commit()
+        _grant_starter_items(new_user)
+        db.session.commit()
         flash('Adventurer recruited!', 'success')
     return redirect(url_for('admin_panel'))
 
@@ -1072,12 +1232,15 @@ def create_habit():
     streak_enabled = 'streak_enabled' in request.form
     streak_milestone = int(request.form.get('streak_milestone') or 5)
     streak_multiplier = float(request.form.get('streak_multiplier') or 2.0)
+    coins_reward = int(request.form.get('coins_reward') or 1)
+    coins_streak_bonus = int(request.form.get('coins_streak_bonus') or 0)
 
     new_habit = Habit(
         name=name, description=description, points_reward=points,
         schedule_type=schedule_type, schedule_days=schedule_days,
         interval_days=interval_days, penalty_enabled=penalty_enabled, penalty_amount=penalty_amount,
         streak_enabled=streak_enabled, streak_milestone=streak_milestone, streak_multiplier=streak_multiplier,
+        coins_reward=coins_reward, coins_streak_bonus=coins_streak_bonus,
         assigned_users=assigned_users
     )
     db.session.add(new_habit)
@@ -1108,6 +1271,8 @@ def edit_habit(habit_id):
         habit.interval_days = int(request.form.get('interval_days')) if schedule_type == 'interval' else None
         habit.penalty_enabled = 'penalty_enabled' in request.form
         habit.penalty_amount = int(request.form.get('penalty_amount') or 0)
+        habit.coins_reward = int(request.form.get('coins_reward') or 1)
+        habit.coins_streak_bonus = int(request.form.get('coins_streak_bonus') or 0)
         db.session.commit()
         flash('Quest updated!', 'success')
         return redirect(url_for('admin_panel'))
@@ -1128,14 +1293,17 @@ def approve_completion(completion_id):
         habit = db.session.get(Habit, completion.habit_id)
         if habit:
             points = habit.points_reward
+            coins_earned = habit.coins_reward if habit.coins_reward else 1
             bonus_msg = ""
             if habit.streak_enabled and habit.streak_milestone:
                 prev_streak = get_habit_streak(user.id, habit.id, exclude_id=completion.id)
                 new_streak = prev_streak + 1
                 if new_streak % habit.streak_milestone == 0:
                     points = int(points * habit.streak_multiplier)
+                    coins_earned += habit.coins_streak_bonus if habit.coins_streak_bonus else 0
                     bonus_msg = f" 🔥 **{new_streak}-quest streak! {habit.streak_multiplier}x gem bonus!**"
             user.points += points
+            user.coins += coins_earned
         db.session.commit()
         send_notification(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved){bonus_msg}", completion.image_filename)
     return redirect(url_for('admin_panel'))
@@ -1169,13 +1337,16 @@ def quick_approve(completion_id, token):
     bonus_msg = ""
     if habit:
         points = habit.points_reward
+        coins_earned = habit.coins_reward if habit.coins_reward else 1
         if habit.streak_enabled and habit.streak_milestone:
             prev_streak = get_habit_streak(user.id, habit.id, exclude_id=completion.id)
             new_streak = prev_streak + 1
             if new_streak % habit.streak_milestone == 0:
                 points = int(points * habit.streak_multiplier)
+                coins_earned += habit.coins_streak_bonus if habit.coins_streak_bonus else 0
                 bonus_msg = f" 🔥 {new_streak}-quest streak! {habit.streak_multiplier}x gem bonus!"
         user.points += points
+        user.coins += coins_earned
     completion.action_token = None  # invalidate token
     db.session.commit()
     send_notification(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved via link){bonus_msg}", completion.image_filename)
@@ -1225,6 +1396,150 @@ def cleanup_rejected_images():
     Completion.query.filter_by(status='rejected').delete(synchronize_session=False)
     db.session.commit()
     flash(f'Removed {entry_count} rejected log entr{"y" if entry_count == 1 else "ies"} and {file_count} image file(s).', 'success')
+    return redirect(url_for('admin_panel'))
+
+AVATAR_ROLES = {
+    'knight': 'Knight',
+    'prince': 'Prince',
+    'princess': 'Princess',
+    'king': 'King',
+    'queen': 'Queen',
+    'ranger': 'Ranger',
+    'wizard': 'Wizard',
+}
+
+RARITY_COLORS = {
+    'common': 'text-gray-400',
+    'rare': 'text-blue-400',
+    'epic': 'text-purple-400',
+    'legendary': 'text-yellow-400',
+}
+
+@app.route('/avatar')
+@login_required
+def avatar():
+    owned_ids = {item.id for item in current_user.avatar_items}
+    items_by_type = {}
+    for slot in ['head', 'chest', 'weapon', 'offhand', 'spell']:
+        items_by_type[slot] = AvatarItem.query.filter_by(item_type=slot).order_by(AvatarItem.coin_cost).all()
+    equipped = {
+        'head': db.session.get(AvatarItem, current_user.avatar_head_id),
+        'chest': db.session.get(AvatarItem, current_user.avatar_chest_id),
+        'weapon': db.session.get(AvatarItem, current_user.avatar_weapon_id),
+        'offhand': db.session.get(AvatarItem, current_user.avatar_offhand_id),
+        'spell': db.session.get(AvatarItem, current_user.avatar_spell_id),
+    }
+    return render_template('avatar.html', items_by_type=items_by_type, owned_ids=owned_ids,
+                           equipped=equipped, roles=AVATAR_ROLES, rarity_colors=RARITY_COLORS)
+
+@app.route('/avatar/save', methods=['POST'])
+@login_required
+def avatar_save():
+    if current_user.email == DEMO_EMAIL:
+        flash("The Demo account cannot save an avatar.", "warning")
+        return redirect(url_for('avatar'))
+    current_user.avatar_body = request.form.get('avatar_body', 'male')
+    role = request.form.get('avatar_role', 'knight')
+    if role in AVATAR_ROLES:
+        current_user.avatar_role = role
+    owned_ids = {item.id for item in current_user.avatar_items}
+    for slot in ['head', 'chest', 'weapon', 'offhand', 'spell']:
+        raw = request.form.get(f'avatar_{slot}_id', '')
+        if raw.isdigit():
+            item_id = int(raw)
+            if item_id in owned_ids:
+                setattr(current_user, f'avatar_{slot}_id', item_id)
+            else:
+                setattr(current_user, f'avatar_{slot}_id', None)
+        else:
+            setattr(current_user, f'avatar_{slot}_id', None)
+    db.session.commit()
+    flash("Avatar saved!", "success")
+    return redirect(url_for('avatar'))
+
+@app.route('/avatar/shop')
+@login_required
+def avatar_shop():
+    owned_ids = {item.id for item in current_user.avatar_items}
+    all_items = AvatarItem.query.order_by(AvatarItem.item_type, AvatarItem.coin_cost).all()
+    return render_template('avatar_shop.html', items=all_items, owned_ids=owned_ids,
+                           rarity_colors=RARITY_COLORS)
+
+@app.route('/avatar/shop/buy/<int:item_id>', methods=['POST'])
+@login_required
+def avatar_shop_buy(item_id):
+    if current_user.email == DEMO_EMAIL:
+        flash("The Demo account cannot purchase items.", "warning")
+        return redirect(url_for('avatar_shop'))
+    item = AvatarItem.query.get_or_404(item_id)
+    if item in current_user.avatar_items:
+        flash(f"You already own {item.name}.", "info")
+    elif current_user.coins < item.coin_cost:
+        flash(f"Not enough coins. You need {item.coin_cost - current_user.coins} more.", "warning")
+    else:
+        current_user.coins -= item.coin_cost
+        current_user.avatar_items.append(item)
+        db.session.commit()
+        flash(f"Purchased {item.name}! Head to your Avatar to equip it.", "success")
+    return redirect(url_for('avatar_shop'))
+
+@app.route('/admin/avatar/item/create', methods=['POST'])
+@login_required
+def admin_avatar_item_create():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    name = request.form.get('name', '').strip()
+    description = request.form.get('description', '').strip()
+    item_type = request.form.get('item_type', '')
+    svg_filename = request.form.get('svg_filename', '').strip()
+    coin_cost = int(request.form.get('coin_cost') or 0)
+    rarity = request.form.get('rarity', 'common')
+    is_starter = 'is_starter' in request.form
+    if not name or item_type not in ['head', 'chest', 'weapon', 'offhand', 'spell'] or not svg_filename:
+        flash('Name, type, and SVG filename are required.', 'error')
+        return redirect(url_for('admin_panel'))
+    db.session.add(AvatarItem(name=name, description=description, item_type=item_type,
+                              svg_filename=svg_filename, coin_cost=coin_cost,
+                              rarity=rarity, is_starter=is_starter))
+    db.session.commit()
+    flash(f'Avatar item "{name}" created.', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/avatar/item/delete/<int:item_id>', methods=['POST'])
+@login_required
+def admin_avatar_item_delete(item_id):
+    if not current_user.is_admin: return redirect(url_for('index'))
+    item = AvatarItem.query.get_or_404(item_id)
+    if item.is_starter:
+        flash('Cannot delete a starter item.', 'error')
+        return redirect(url_for('admin_panel'))
+    db.session.delete(item)
+    db.session.commit()
+    flash(f'Avatar item "{item.name}" deleted.', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/user/adjust-coins', methods=['POST'])
+@login_required
+def adjust_coins():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    user_id = request.form.get('user_id')
+    try:
+        amount = int(request.form.get('amount', 0))
+    except (TypeError, ValueError):
+        flash('Invalid coin amount.', 'error')
+        return redirect(url_for('admin_panel'))
+    if amount == 0:
+        flash('Amount cannot be zero.', 'error')
+        return redirect(url_for('admin_panel'))
+    user = db.session.get(User, int(user_id))
+    if not user or user.email == DEMO_EMAIL:
+        flash('User not found.', 'error')
+        return redirect(url_for('admin_panel'))
+    user.coins += amount
+    if user.coins < 0:
+        user.coins = 0
+    db.session.commit()
+    action = f"+{amount}" if amount > 0 else str(amount)
+    flash(f'{action} coins applied to {user.name}. New total: {user.coins} coins.', 'success')
     return redirect(url_for('admin_panel'))
 
 # UPDATED: Add header for inline image display and guess MIME type

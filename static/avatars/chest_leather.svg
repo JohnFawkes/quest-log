@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Leather Armor Jerkin -->
+  <!-- Main body -->
+  <rect x="72" y="67" width="56" height="76" fill="#6B4226" rx="4"/>
+  <!-- Left arm -->
+  <rect x="54" y="69" width="19" height="58" fill="#6B4226" rx="4"/>
+  <!-- Right arm -->
+  <rect x="127" y="69" width="19" height="58" fill="#6B4226" rx="4"/>
+  <!-- Leather panel lines -->
+  <line x1="72" y1="90" x2="128" y2="90" stroke="#5A3318" stroke-width="2"/>
+  <line x1="72" y1="110" x2="128" y2="110" stroke="#5A3318" stroke-width="2"/>
+  <line x1="72" y1="130" x2="128" y2="130" stroke="#5A3318" stroke-width="2"/>
+  <!-- Vertical seams -->
+  <line x1="88" y1="67" x2="88" y2="143" stroke="#5A3318" stroke-width="1.5"/>
+  <line x1="112" y1="67" x2="112" y2="143" stroke="#5A3318" stroke-width="1.5"/>
+  <!-- Shoulder reinforcement -->
+  <rect x="58" y="67" width="15" height="18" fill="#5A3318" rx="2"/>
+  <rect x="127" y="67" width="15" height="18" fill="#5A3318" rx="2"/>
+  <!-- Buckle straps across chest -->
+  <rect x="72" y="82" width="56" height="5" fill="#3B2A1A" rx="1"/>
+  <rect x="95" y="80" width="10" height="9" fill="#C8A020" rx="1"/>
+  <rect x="72" y="112" width="56" height="5" fill="#3B2A1A" rx="1"/>
+  <rect x="95" y="110" width="10" height="9" fill="#C8A020" rx="1"/>
+  <!-- Collar -->
+  <path d="M88 67 L100 76 L112 67" fill="#5A3318" stroke="#3B2A1A" stroke-width="1"/>
+  <!-- Belt -->
+  <rect x="70" y="136" width="60" height="9" fill="#3B2A1A" rx="3"/>
+  <rect x="97" y="134" width="6" height="13" fill="#8B6914" rx="1"/>
+  <!-- Arm buckles -->
+  <rect x="54" y="100" width="19" height="4" fill="#3B2A1A" rx="1"/>
+  <rect x="127" y="100" width="19" height="4" fill="#3B2A1A" rx="1"/>
+  <!-- Leather sheen -->
+  <path d="M75 70 Q88 67 96 70" stroke="#8B5A34" stroke-width="1.5" fill="none" opacity="0.6"/>
+</svg>

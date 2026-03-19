@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Open Spellbook -->
+  <!-- Book spine -->
+  <rect x="44" y="148" width="10" height="70" fill="#3B1F8C" rx="2"/>
+  <!-- Left page -->
+  <path d="M44 148 L10 152 L10 218 L44 218 Z" fill="#F5F0E8"/>
+  <!-- Right page -->
+  <path d="M54 148 L88 152 L88 218 L54 218 Z" fill="#F0EBE0"/>
+  <!-- Page edge shadows -->
+  <path d="M44 148 L10 152" stroke="#CCC5B5" stroke-width="1"/>
+  <path d="M44 218 L10 218" stroke="#CCC5B5" stroke-width="1"/>
+  <path d="M54 148 L88 152" stroke="#CCC5B5" stroke-width="1"/>
+  <!-- Book cover (top) -->
+  <rect x="10" y="148" width="78" height="6" fill="#2C1670" rx="1"/>
+  <rect x="10" y="218" width="78" height="6" fill="#2C1670" rx="1"/>
+  <!-- Magic text/runes on left page -->
+  <line x1="14" y1="162" x2="42" y2="162" stroke="#2C1670" stroke-width="1.5" opacity="0.7"/>
+  <line x1="14" y1="170" x2="40" y2="170" stroke="#2C1670" stroke-width="1.5" opacity="0.7"/>
+  <line x1="14" y1="178" x2="42" y2="178" stroke="#2C1670" stroke-width="1.5" opacity="0.7"/>
+  <line x1="14" y1="186" x2="38" y2="186" stroke="#2C1670" stroke-width="1.5" opacity="0.7"/>
+  <line x1="14" y1="194" x2="42" y2="194" stroke="#2C1670" stroke-width="1.5" opacity="0.7"/>
+  <line x1="14" y1="202" x2="36" y2="202" stroke="#2C1670" stroke-width="1.5" opacity="0.7"/>
+  <!-- Magic diagram on right page (pentagram) -->
+  <circle cx="71" cy="184" r="22" fill="none" stroke="#9B59B6" stroke-width="1"/>
+  <path d="M71 162 L63 184 L82 170 L60 170 L79 184 Z" fill="none" stroke="#9B59B6" stroke-width="1.5"/>
+  <!-- Glowing runes -->
+  <text x="58" y="180" font-size="8" fill="#6B2D8B" opacity="0.8">✦</text>
+  <text x="74" y="200" font-size="7" fill="#9B59B6" opacity="0.7">✦</text>
+  <!-- Gold clasp/bookmark -->
+  <rect x="48" y="210" width="12" height="14" fill="#C49A28" rx="1"/>
+  <circle cx="54" cy="217" r="3" fill="#8B6914"/>
+  <!-- Page glow -->
+  <circle cx="71" cy="184" r="10" fill="#9B59B6" opacity="0.08"/>
+</svg>

@@ -84,6 +84,10 @@
                     <label for="habit-points" class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Gem Reward</label>
                     <input type="number" name="points" id="habit-points" placeholder="10" min="1" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
                 </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1"><i class="fas fa-coins text-yellow-500 mr-1"></i>Coin Reward</label>
+                    <input type="number" name="coins_reward" placeholder="1" min="0" value="1" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
+                </div>
             </div>
             <div>
                 <label for="habit-description" class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Description</label>
@@ -148,8 +152,12 @@
                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Gem multiplier</label>
                             <input type="number" name="streak_multiplier" placeholder="e.g. 3" min="1.1" step="0.1" value="2" class="w-full p-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-900 rounded dark:text-white text-sm">
                         </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1"><i class="fas fa-coins text-yellow-500 mr-1"></i>Coin streak bonus</label>
+                            <input type="number" name="coins_streak_bonus" placeholder="0" min="0" value="0" class="w-full p-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-900 rounded dark:text-white text-sm">
+                        </div>
                     </div>
-                    <p class="text-xs text-slate-400 dark:text-slate-500 italic">Example: every 5 completions in a row earns 2x gems.</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 italic">Example: every 5 completions in a row earns 2x gems + bonus coins.</p>
                 </div>
             </div>
             <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-bold shadow-md transition">Post Quest</button>
@@ -232,6 +240,21 @@
                         <button type="submit" class="bg-purple-600 text-white px-3 rounded hover:bg-purple-700 text-sm font-bold transition whitespace-nowrap">Apply</button>
                     </div>
                     <p class="text-xs text-slate-400 dark:text-slate-500">Use negative numbers to deduct gems.</p>
+                </form>
+            </div>
+            <div class="border-t dark:border-slate-700 pt-4">
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-1"><i class="fas fa-coins text-yellow-500"></i> Adjust Coins</p>
+                <form action="{{ url_for('adjust_coins') }}" method="POST" class="space-y-2">
+                    <select name="user_id" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
+                        {% for u in users %}
+                        <option value="{{ u.id }}">{{ u.name }} ({{ u.coins }} coins)</option>
+                        {% endfor %}
+                    </select>
+                    <div class="flex gap-2">
+                        <input type="number" name="amount" placeholder="e.g. 50 or -20" required class="flex-1 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
+                        <button type="submit" class="bg-yellow-600 text-white px-3 rounded hover:bg-yellow-700 text-sm font-bold transition whitespace-nowrap">Apply</button>
+                    </div>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">Avatar shop currency. Use negative numbers to deduct.</p>
                 </form>
             </div>
             <div class="border-t dark:border-slate-700 pt-4">
@@ -397,6 +420,88 @@
                     </div>
                     {% else %}
                     <p class="text-slate-400 dark:text-slate-600 text-sm text-center">Shop is empty.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Avatar Armory -->
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 border border-slate-200 dark:border-slate-700">
+        <h2 class="text-xl font-bold mb-6 text-slate-800 dark:text-slate-100 border-b dark:border-slate-700 pb-3 flex items-center gap-2">
+            <i class="fas fa-helmet-battle text-indigo-500"></i> Avatar Armory
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Create Item Form -->
+            <div class="h-fit">
+                <h3 class="font-bold text-base mb-4 text-slate-700 dark:text-slate-300">Add New Item</h3>
+                <form action="{{ url_for('admin_avatar_item_create') }}" method="POST" class="space-y-3">
+                    <input type="text" name="name" placeholder="Item Name" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm">
+                    <textarea name="description" placeholder="Description" rows="2" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm"></textarea>
+                    <select name="item_type" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm">
+                        <option value="">-- Item Type --</option>
+                        <option value="head">Head</option>
+                        <option value="chest">Chest</option>
+                        <option value="weapon">Weapon</option>
+                        <option value="offhand">Offhand</option>
+                        <option value="spell">Spell / Aura</option>
+                    </select>
+                    <input type="text" name="svg_filename" placeholder="SVG filename (e.g. head_crown.svg)" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm">
+                    <div class="flex gap-2">
+                        <div class="flex-1">
+                            <label class="block text-xs text-slate-500 mb-1">Coin Cost</label>
+                            <input type="number" name="coin_cost" value="0" min="0" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs text-slate-500 mb-1">Rarity</label>
+                            <select name="rarity" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm">
+                                <option value="common">Common</option>
+                                <option value="rare">Rare</option>
+                                <option value="epic">Epic</option>
+                                <option value="legendary">Legendary</option>
+                            </select>
+                        </div>
+                    </div>
+                    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                        <input type="checkbox" name="is_starter" class="rounded">
+                        Free starter item (granted to all users)
+                    </label>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 font-bold transition text-sm">
+                        <i class="fas fa-plus mr-1"></i>Add Item
+                    </button>
+                </form>
+            </div>
+
+            <!-- Item List -->
+            <div>
+                <h3 class="font-bold text-base mb-4 text-slate-700 dark:text-slate-300">All Avatar Items ({{ avatar_items|length }})</h3>
+                <div class="space-y-2 max-h-[480px] overflow-y-auto pr-1">
+                    {% for item in avatar_items %}
+                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded border border-slate-100 dark:border-slate-700">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div style="width:40px;height:40px;background:var(--nav-bg);border-radius:0.375rem;overflow:hidden;flex-shrink:0">
+                                <img src="/static/avatars/{{ item.svg_filename }}" style="width:100%;height:100%;object-fit:contain" alt="">
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">{{ item.name }}</p>
+                                <p class="text-xs text-slate-400">
+                                    {{ item.item_type }} ·
+                                    <span class="{{ 'text-yellow-400' if item.rarity == 'legendary' else 'text-purple-400' if item.rarity == 'epic' else 'text-blue-400' if item.rarity == 'rare' else 'text-slate-400' }}">{{ item.rarity }}</span>
+                                    · <i class="fas fa-coins text-yellow-500"></i> {{ item.coin_cost }}
+                                    {% if item.is_starter %}<span class="ml-1 text-green-400">★ Starter</span>{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        {% if not item.is_starter %}
+                        <form action="{{ url_for('admin_avatar_item_delete', item_id=item.id) }}" method="POST" onsubmit="return confirm('Delete {{ item.name }}?')" class="ml-2 flex-shrink-0">
+                            <button type="submit" class="text-red-400 hover:text-red-600 p-1" title="Delete item">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-slate-400 text-center">No avatar items found.</p>
                     {% endfor %}
                 </div>
             </div>

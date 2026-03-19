@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Dwarven Plate Armor (bronze/copper) -->
+  <!-- Main breastplate -->
+  <rect x="72" y="67" width="56" height="76" fill="#8B6914" rx="4"/>
+  <!-- Large arm guards -->
+  <rect x="52" y="67" width="22" height="66" fill="#8B6914" rx="4"/>
+  <rect x="126" y="67" width="22" height="66" fill="#8B6914" rx="4"/>
+  <!-- Breastplate riveted border -->
+  <rect x="72" y="67" width="56" height="76" fill="none" stroke="#C49A28" stroke-width="3" rx="4"/>
+  <!-- Center boss emblem -->
+  <circle cx="100" cy="100" r="16" fill="#7A5C10"/>
+  <circle cx="100" cy="100" r="12" fill="#C49A28"/>
+  <circle cx="100" cy="100" r="7" fill="#8B6914"/>
+  <!-- Dwarven rune on center -->
+  <path d="M97 94 L97 106 M103 94 L103 106 M95 100 L105 100" stroke="#FFD700" stroke-width="2"/>
+  <!-- Segmented arm plates -->
+  <line x1="52" y1="85" x2="74" y2="85" stroke="#C49A28" stroke-width="2"/>
+  <line x1="52" y1="103" x2="74" y2="103" stroke="#C49A28" stroke-width="2"/>
+  <line x1="52" y1="118" x2="74" y2="118" stroke="#C49A28" stroke-width="2"/>
+  <line x1="126" y1="85" x2="148" y2="85" stroke="#C49A28" stroke-width="2"/>
+  <line x1="126" y1="103" x2="148" y2="103" stroke="#C49A28" stroke-width="2"/>
+  <line x1="126" y1="118" x2="148" y2="118" stroke="#C49A28" stroke-width="2"/>
+  <!-- Shoulder spikes/plates -->
+  <polygon points="52,67 48,58 60,67" fill="#C49A28"/>
+  <polygon points="148,67 152,58 140,67" fill="#C49A28"/>
+  <polygon points="56,67 54,56 64,67" fill="#A07820"/>
+  <polygon points="144,67 146,56 136,67" fill="#A07820"/>
+  <!-- Tassets -->
+  <rect x="74" y="138" width="22" height="22" fill="#8B6914" rx="2"/>
+  <rect x="104" y="138" width="22" height="22" fill="#8B6914" rx="2"/>
+  <rect x="74" y="138" width="22" height="22" fill="none" stroke="#C49A28" stroke-width="2" rx="2"/>
+  <rect x="104" y="138" width="22" height="22" fill="none" stroke="#C49A28" stroke-width="2" rx="2"/>
+  <!-- Belly plate rivets -->
+  <circle cx="80" cy="128" r="2.5" fill="#C49A28"/>
+  <circle cx="90" cy="128" r="2.5" fill="#C49A28"/>
+  <circle cx="100" cy="128" r="2.5" fill="#C49A28"/>
+  <circle cx="110" cy="128" r="2.5" fill="#C49A28"/>
+  <circle cx="120" cy="128" r="2.5" fill="#C49A28"/>
+  <!-- Metal shine -->
+  <path d="M76 70 Q90 66 104 70" stroke="#FFD700" stroke-width="1.5" fill="none" opacity="0.5"/>
+</svg>

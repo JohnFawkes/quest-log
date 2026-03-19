@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Dwarven Horned Helmet -->
+  <!-- Helmet dome -->
+  <ellipse cx="100" cy="22" rx="30" ry="22" fill="#8B6914"/>
+  <!-- Helmet face box -->
+  <rect x="70" y="22" width="60" height="32" fill="#8B6914" rx="2"/>
+  <!-- Left horn -->
+  <path d="M72 22 Q58 10 55 -2 Q62 8 74 18" fill="#A07820" stroke="#7A5C10" stroke-width="1"/>
+  <!-- Right horn -->
+  <path d="M128 22 Q142 10 145 -2 Q138 8 126 18" fill="#A07820" stroke="#7A5C10" stroke-width="1"/>
+  <!-- Horn rings -->
+  <ellipse cx="62" cy="9" rx="4" ry="2.5" fill="#C49A28" transform="rotate(-25 62 9)"/>
+  <ellipse cx="138" cy="9" rx="4" ry="2.5" fill="#C49A28" transform="rotate(25 138 9)"/>
+  <!-- Eye openings -->
+  <ellipse cx="89" cy="32" rx="9" ry="7" fill="#2C3E50"/>
+  <ellipse cx="111" cy="32" rx="9" ry="7" fill="#2C3E50"/>
+  <!-- Eye glints -->
+  <circle cx="91" cy="30" r="2" fill="#E74C3C" opacity="0.7"/>
+  <circle cx="113" cy="30" r="2" fill="#E74C3C" opacity="0.7"/>
+  <!-- Nose guard -->
+  <rect x="97" y="26" width="6" height="18" fill="#7A5C10" rx="1"/>
+  <!-- Chin guard -->
+  <rect x="76" y="48" width="48" height="10" fill="#7A5C10" rx="2"/>
+  <!-- Engravings -->
+  <path d="M76 28 Q100 24 124 28" stroke="#C49A28" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <circle cx="100" cy="16" r="4" fill="#C49A28"/>
+  <path d="M97 16 L100 12 L103 16" fill="#FFD700" opacity="0.8"/>
+</svg>

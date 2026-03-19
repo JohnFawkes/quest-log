@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Shining Plate Armor -->
+  <!-- Breastplate -->
+  <rect x="74" y="67" width="52" height="76" fill="#A8B8C4" rx="4"/>
+  <!-- Breastplate center ridge -->
+  <path d="M100 67 L100 143" stroke="#C8D8E4" stroke-width="4" opacity="0.6"/>
+  <!-- Breastplate lower curve -->
+  <path d="M74 115 Q100 130 126 115" stroke="#8898A8" stroke-width="2" fill="none"/>
+  <!-- Pauldrons (shoulder plates) -->
+  <ellipse cx="71" cy="74" rx="16" ry="12" fill="#A8B8C4"/>
+  <ellipse cx="129" cy="74" rx="16" ry="12" fill="#A8B8C4"/>
+  <!-- Pauldron detail segments -->
+  <path d="M56 76 Q58 72 70 70 Q72 76 68 82 Q60 84 56 76" fill="#96A8B4"/>
+  <path d="M144 76 Q142 72 130 70 Q128 76 132 82 Q140 84 144 76" fill="#96A8B4"/>
+  <!-- Arm guards upper -->
+  <rect x="55" y="84" width="18" height="44" fill="#A8B8C4" rx="3"/>
+  <rect x="127" y="84" width="18" height="44" fill="#A8B8C4" rx="3"/>
+  <!-- Arm guard segments -->
+  <line x1="55" y1="100" x2="73" y2="100" stroke="#8898A8" stroke-width="1.5"/>
+  <line x1="55" y1="116" x2="73" y2="116" stroke="#8898A8" stroke-width="1.5"/>
+  <line x1="127" y1="100" x2="145" y2="100" stroke="#8898A8" stroke-width="1.5"/>
+  <line x1="127" y1="116" x2="145" y2="116" stroke="#8898A8" stroke-width="1.5"/>
+  <!-- Tassets (hip plates) -->
+  <rect x="74" y="138" width="22" height="20" fill="#9AABB8" rx="2"/>
+  <rect x="104" y="138" width="22" height="20" fill="#9AABB8" rx="2"/>
+  <!-- Belt -->
+  <rect x="70" y="136" width="60" height="9" fill="#3B2A1A" rx="3"/>
+  <rect x="97" y="136" width="6" height="9" fill="#C8A020"/>
+  <!-- Armor shine highlights -->
+  <path d="M80 72 Q88 68 100 70" stroke="#DCE8F0" stroke-width="2.5" fill="none" opacity="0.7"/>
+  <path d="M58 78 Q64 72 72 74" stroke="#DCE8F0" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M128 74 Q136 72 142 78" stroke="#DCE8F0" stroke-width="2" fill="none" opacity="0.6"/>
+  <!-- Emblem on chest -->
+  <path d="M96 88 L100 80 L104 88 L112 88 L106 94 L108 102 L100 96 L92 102 L94 94 L88 88 Z" fill="#FFD700" opacity="0.8" transform="scale(0.5) translate(100,90)"/>
+  <path d="M97 92 L100 86 L103 92 L108 92 L104 95 L106 101 L100 97 L94 101 L96 95 L92 92 Z" fill="#FFD700" opacity="0.9"/>
+</svg>

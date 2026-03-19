@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Ice Aura -->
+  <!-- Ice crystal shards floating around figure -->
+  <!-- Large crystal left -->
+  <polygon points="58,180 54,155 60,145 66,155 62,180" fill="#87CEEB" opacity="0.7"/>
+  <polygon points="58,180 54,155 60,145 66,155 62,180" fill="none" stroke="#B0E8FF" stroke-width="1" opacity="0.8"/>
+  <!-- Crystal shine -->
+  <line x1="58" y1="155" x2="60" y2="145" stroke="white" stroke-width="1.5" opacity="0.6"/>
+  <!-- Large crystal right -->
+  <polygon points="142,175 138,150 144,140 150,150 146,175" fill="#87CEEB" opacity="0.7"/>
+  <line x1="142" y1="150" x2="144" y2="140" stroke="white" stroke-width="1.5" opacity="0.6"/>
+  <!-- Small floating shards -->
+  <polygon points="76,120 72,108 78,102 84,108 80,120" fill="#B0E8FF" opacity="0.6"/>
+  <polygon points="128,118 124,106 130,100 136,106 132,118" fill="#B0E8FF" opacity="0.6"/>
+  <polygon points="68,230 65,218 70,213 75,218 72,230" fill="#87CEEB" opacity="0.65"/>
+  <polygon points="134,228 131,216 136,211 141,216 138,228" fill="#87CEEB" opacity="0.65"/>
+  <!-- Ground frost ring -->
+  <ellipse cx="100" cy="270" rx="48" ry="10" fill="#87CEEB" opacity="0.2"/>
+  <!-- Snowflake crystals at feet -->
+  <line x1="80" y1="268" x2="80" y2="276" stroke="#87CEEB" stroke-width="1.5" opacity="0.6"/>
+  <line x1="76" y1="270" x2="84" y2="274" stroke="#87CEEB" stroke-width="1.5" opacity="0.6"/>
+  <line x1="76" y1="274" x2="84" y2="270" stroke="#87CEEB" stroke-width="1.5" opacity="0.6"/>
+  <line x1="118" y1="268" x2="118" y2="276" stroke="#87CEEB" stroke-width="1.5" opacity="0.6"/>
+  <line x1="114" y1="270" x2="122" y2="274" stroke="#87CEEB" stroke-width="1.5" opacity="0.6"/>
+  <line x1="114" y1="274" x2="122" y2="270" stroke="#87CEEB" stroke-width="1.5" opacity="0.6"/>
+  <!-- Body glow (cold blue) -->
+  <ellipse cx="100" cy="165" rx="52" ry="100" fill="#87CEEB" opacity="0.05"/>
+  <!-- Ice mist at ground -->
+  <ellipse cx="100" cy="274" rx="40" ry="6" fill="#E0F4FF" opacity="0.3"/>
+  <!-- Tiny floating ice dots -->
+  <circle cx="90" cy="140" r="2.5" fill="#B0E8FF" opacity="0.7"/>
+  <circle cx="114" cy="148" r="2" fill="#87CEEB" opacity="0.6"/>
+  <circle cx="72" cy="165" r="2" fill="#B0E8FF" opacity="0.5"/>
+  <circle cx="130" cy="160" r="2.5" fill="#B0E8FF" opacity="0.6"/>
+</svg>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Lightning Aura -->
+  <!-- Main lightning bolt left -->
+  <path d="M62 80 L54 120 L66 120 L56 165 L74 110 L62 110 L72 80 Z" fill="#FFD700" opacity="0.85"/>
+  <!-- Main lightning bolt right -->
+  <path d="M138 80 L146 120 L134 120 L144 165 L126 110 L138 110 L128 80 Z" fill="#FFD700" opacity="0.85"/>
+  <!-- Lightning arc across top -->
+  <path d="M68 78 Q100 62 132 78" stroke="#FFD700" stroke-width="2.5" fill="none" opacity="0.7"/>
+  <!-- Electric arcs around body -->
+  <path d="M60 130 Q50 125 54 115" stroke="#FFF380" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <path d="M140 130 Q150 125 146 115" stroke="#FFF380" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <path d="M58 180 Q46 175 50 162" stroke="#FFD700" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M142 180 Q154 175 150 162" stroke="#FFD700" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <!-- Ground strike sparks -->
+  <path d="M85 270 L78 282 L92 278 L82 295" stroke="#FFD700" stroke-width="2.5" fill="none" opacity="0.8"/>
+  <path d="M118 268 L124 280 L112 278 L120 295" stroke="#FFD700" stroke-width="2.5" fill="none" opacity="0.8"/>
+  <!-- Ground glow -->
+  <ellipse cx="100" cy="275" rx="44" ry="8" fill="#FFD700" opacity="0.2"/>
+  <!-- Electric sparks -->
+  <circle cx="66" cy="120" r="4" fill="#FFD700" opacity="0.8"/>
+  <circle cx="134" cy="120" r="4" fill="#FFD700" opacity="0.8"/>
+  <circle cx="56" cy="165" r="3" fill="#FFF380" opacity="0.6"/>
+  <circle cx="144" cy="165" r="3" fill="#FFF380" opacity="0.6"/>
+  <!-- Body electric glow -->
+  <ellipse cx="100" cy="165" rx="50" ry="95" fill="#FFD700" opacity="0.04"/>
+  <!-- Small crackles -->
+  <path d="M72 100 L68 92 L74 88" stroke="#FFF380" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M128 100 L132 92 L126 88" stroke="#FFF380" stroke-width="1" fill="none" opacity="0.6"/>
+</svg>

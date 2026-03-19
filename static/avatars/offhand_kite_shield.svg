@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Kite Shield (heraldic) -->
+  <!-- Shield shape -->
+  <path d="M20 135 L84 135 L84 195 Q84 230 52 248 Q20 230 20 195 Z" fill="#1A3A6B"/>
+  <!-- Heraldic division (quarterly) -->
+  <path d="M52 135 L52 248 M20 192 L84 192" stroke="#FFD700" stroke-width="3"/>
+  <!-- Top-left quarter (red) -->
+  <path d="M20 135 L52 135 L52 192 L20 192 Z" fill="#C0392B"/>
+  <!-- Bottom-right quarter (red) -->
+  <path d="M52 192 L84 192 L84 195 Q84 230 52 248 L52 192 Z" fill="#C0392B"/>
+  <!-- Lion/emblem (simplified) in top-right -->
+  <text x="56" y="172" font-size="20" fill="#FFD700">♞</text>
+  <!-- Fleur in bottom-left -->
+  <text x="24" y="228" font-size="16" fill="#FFD700" opacity="0.9">⚜</text>
+  <!-- Gold border -->
+  <path d="M20 135 L84 135 L84 195 Q84 230 52 248 Q20 230 20 195 Z" fill="none" stroke="#FFD700" stroke-width="4"/>
+  <!-- Center boss -->
+  <circle cx="52" cy="192" r="6" fill="#FFD700"/>
+  <circle cx="52" cy="192" r="3" fill="#C49A28"/>
+  <!-- Arm strap -->
+  <path d="M38 155 Q28 185 38 215" stroke="#3B2A1A" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Shield shine -->
+  <path d="M24 142 Q40 136 56 140" stroke="#4A6ABA" stroke-width="1.5" fill="none" opacity="0.5"/>
+</svg>

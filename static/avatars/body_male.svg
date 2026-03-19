@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Head -->
+  <circle cx="100" cy="32" r="24" fill="#F5CBA7"/>
+  <!-- Hair -->
+  <ellipse cx="100" cy="13" rx="24" ry="13" fill="#5C3317"/>
+  <rect x="76" y="13" width="48" height="12" fill="#5C3317"/>
+  <!-- Eyes -->
+  <ellipse cx="93" cy="30" rx="3" ry="2.5" fill="#2C1810"/>
+  <ellipse cx="107" cy="30" rx="3" ry="2.5" fill="#2C1810"/>
+  <circle cx="94" cy="29" r="1" fill="#fff" opacity="0.6"/>
+  <circle cx="108" cy="29" r="1" fill="#fff" opacity="0.6"/>
+  <!-- Nose -->
+  <path d="M100 34 L97 38 L103 38" stroke="#C17A5A" stroke-width="1" fill="none"/>
+  <!-- Mouth -->
+  <path d="M96 41 Q100 44 104 41" stroke="#C17A5A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Jaw shadow -->
+  <path d="M78 38 Q78 56 100 58 Q122 56 122 38" fill="#E8B48C" opacity="0.4"/>
+  <!-- Neck -->
+  <rect x="92" y="55" width="16" height="14" fill="#F5CBA7"/>
+  <!-- Torso base (plain cloth - overridden by chest items) -->
+  <rect x="72" y="67" width="56" height="74" fill="#8B7355" rx="4"/>
+  <!-- Tunic collar -->
+  <path d="M92 67 L100 78 L108 67" fill="#7A6347" stroke="#6A5337" stroke-width="1"/>
+  <!-- Left upper arm -->
+  <rect x="54" y="69" width="19" height="56" fill="#8B7355" rx="4"/>
+  <!-- Right upper arm -->
+  <rect x="127" y="69" width="19" height="56" fill="#8B7355" rx="4"/>
+  <!-- Left forearm skin -->
+  <rect x="56" y="123" width="16" height="38" fill="#F5CBA7" rx="3"/>
+  <!-- Right forearm skin -->
+  <rect x="128" y="123" width="16" height="38" fill="#F5CBA7" rx="3"/>
+  <!-- Left hand -->
+  <ellipse cx="64" cy="164" rx="10" ry="9" fill="#F5CBA7"/>
+  <!-- Right hand -->
+  <ellipse cx="136" cy="164" rx="10" ry="9" fill="#F5CBA7"/>
+  <!-- Hips -->
+  <rect x="72" y="139" width="56" height="28" fill="#5C3317" rx="2"/>
+  <!-- Belt -->
+  <rect x="70" y="136" width="60" height="9" fill="#3B2A1A" rx="3"/>
+  <rect x="97" y="136" width="6" height="9" fill="#C8A020"/>
+  <!-- Left leg -->
+  <rect x="75" y="165" width="24" height="90" fill="#5C3317" rx="3"/>
+  <!-- Right leg -->
+  <rect x="101" y="165" width="24" height="90" fill="#5C3317" rx="3"/>
+  <!-- Leg seam -->
+  <line x1="99" y1="165" x2="99" y2="248" stroke="#4A2910" stroke-width="1.5"/>
+  <!-- Left boot -->
+  <rect x="72" y="250" width="30" height="24" fill="#3B2A1A" rx="3"/>
+  <rect x="72" y="248" width="30" height="8" fill="#4E3318" rx="2"/>
+  <!-- Right boot -->
+  <rect x="98" y="250" width="30" height="24" fill="#3B2A1A" rx="3"/>
+  <rect x="98" y="248" width="30" height="8" fill="#4E3318" rx="2"/>
+</svg>
