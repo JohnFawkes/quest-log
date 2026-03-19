@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Open Spellbook -->
   <!-- Book spine -->
   <rect x="44" y="148" width="10" height="70" fill="#3B1F8C" rx="2"/>
@@ -31,4 +32,5 @@
   <circle cx="54" cy="217" r="3" fill="#8B6914"/>
   <!-- Page glow -->
   <circle cx="71" cy="184" r="10" fill="#9B59B6" opacity="0.08"/>
+  </g>
 </svg>

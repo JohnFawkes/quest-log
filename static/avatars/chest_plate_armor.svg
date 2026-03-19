@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Shining Plate Armor -->
   <!-- Breastplate -->
   <rect x="74" y="67" width="52" height="76" fill="#A8B8C4" rx="4"/>
@@ -33,4 +34,5 @@
   <!-- Emblem on chest -->
   <path d="M96 88 L100 80 L104 88 L112 88 L106 94 L108 102 L100 96 L92 102 L94 94 L88 88 Z" fill="#FFD700" opacity="0.8" transform="scale(0.5) translate(100,90)"/>
   <path d="M97 92 L100 86 L103 92 L108 92 L104 95 L106 101 L100 97 L94 101 L96 95 L92 92 Z" fill="#FFD700" opacity="0.9"/>
+  </g>
 </svg>

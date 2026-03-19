@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Curved Dagger - grip at right hand (cy≈164) -->
   <!-- Blade (curved) -->
   <path d="M152 175 Q158 115 148 55" stroke="#C0CDD3" stroke-width="6" fill="none" stroke-linecap="round"/>
@@ -20,4 +21,5 @@
   <circle cx="151" cy="187" r="3" fill="#E74C3C"/>
   <!-- Blade etch/pattern -->
   <path d="M150 85 L153 95 M150 100 L153 110 M150 120 L153 130" stroke="#8898A8" stroke-width="1" opacity="0.5"/>
+  </g>
 </svg>

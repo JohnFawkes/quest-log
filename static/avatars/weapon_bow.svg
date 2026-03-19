@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Recurve Bow - grip at right hand (cy≈164) -->
   <!-- Bow limbs -->
   <path d="M155 102 Q170 167 155 227" stroke="#8B6914" stroke-width="9" fill="none" stroke-linecap="round"/>
@@ -20,4 +21,5 @@
   <rect x="153" y="192" width="6" height="5" fill="#C49A28" rx="1"/>
   <!-- Wood grain on bow -->
   <path d="M158 127 Q164 157 160 189" stroke="#7A5C10" stroke-width="1.5" fill="none" opacity="0.4"/>
+  </g>
 </svg>

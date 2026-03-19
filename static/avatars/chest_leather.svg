@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Leather Armor Jerkin -->
   <!-- Main body -->
   <rect x="72" y="67" width="56" height="76" fill="#6B4226" rx="4"/>
@@ -31,4 +32,5 @@
   <rect x="127" y="100" width="19" height="4" fill="#3B2A1A" rx="1"/>
   <!-- Leather sheen -->
   <path d="M75 70 Q88 67 96 70" stroke="#8B5A34" stroke-width="1.5" fill="none" opacity="0.6"/>
+  </g>
 </svg>

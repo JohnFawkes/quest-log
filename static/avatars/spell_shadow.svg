@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Shadow Aura -->
   <!-- Dark wisps rising from ground around feet -->
   <path d="M72 280 Q64 265 70 252 Q62 268 68 274 Q60 258 72 248 Q65 262 78 270 Q70 255 82 248 Q74 265 80 278" fill="#6B2D8B" opacity="0.7"/>
@@ -23,4 +24,5 @@
   <circle cx="112" cy="175" r="2.5" fill="#4A1870" opacity="0.4"/>
   <!-- Subtle body dark haze -->
   <ellipse cx="100" cy="165" rx="52" ry="100" fill="#2C0A3E" opacity="0.06"/>
+  </g>
 </svg>

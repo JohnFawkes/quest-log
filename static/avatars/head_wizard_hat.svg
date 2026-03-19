@@ -1,18 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <!-- Wizard Hat - brim sits at top of head/forehead -->
-  <!-- Hat cone (tip clips above canvas) -->
-  <polygon points="100,-30 72,14 128,14" fill="#3B1F8C"/>
+  <!-- Wizard Hat - brim at y=44 = top of head after body shift; full hat visible -->
+  <!-- Hat cone -->
+  <polygon points="100,0 72,44 128,44" fill="#3B1F8C"/>
   <!-- Hat band -->
-  <rect x="72" y="8" width="56" height="8" fill="#6B2D8B" rx="1"/>
+  <rect x="72" y="38" width="56" height="8" fill="#6B2D8B" rx="1"/>
   <!-- Brim -->
-  <ellipse cx="100" cy="14" rx="36" ry="10" fill="#2C1670"/>
-  <!-- Stars on hat (upper ones clip naturally) -->
-  <text x="86" y="-8" font-size="10" fill="#FFD700" opacity="0.9">★</text>
-  <text x="104" y="-16" font-size="8" fill="#FFD700" opacity="0.8">★</text>
-  <text x="94" y="4" font-size="7" fill="#C0C0C0" opacity="0.7">✦</text>
-  <text x="112" y="-2" font-size="6" fill="#C0C0C0" opacity="0.7">✦</text>
+  <ellipse cx="100" cy="44" rx="36" ry="10" fill="#2C1670"/>
+  <!-- Stars on hat (all visible now) -->
+  <text x="86" y="22" font-size="10" fill="#FFD700" opacity="0.9">★</text>
+  <text x="104" y="14" font-size="8" fill="#FFD700" opacity="0.8">★</text>
+  <text x="94" y="34" font-size="7" fill="#C0C0C0" opacity="0.7">✦</text>
+  <text x="112" y="28" font-size="6" fill="#C0C0C0" opacity="0.7">✦</text>
   <!-- Moon symbol -->
-  <path d="M88 0 Q84 -5 88 -10 Q83 -8 83 -2 Q83 4 88 0" fill="#FFD700" opacity="0.8"/>
+  <path d="M88 30 Q84 25 88 20 Q83 22 83 28 Q83 34 88 30" fill="#FFD700" opacity="0.8"/>
+  <!-- Hat tip glow -->
+  <circle cx="100" cy="2" r="3" fill="#9B59B6" opacity="0.6"/>
   <!-- Brim shine -->
-  <path d="M70 12 Q100 5 130 12" stroke="#5A3AAB" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M70 42 Q100 35 130 42" stroke="#5A3AAB" stroke-width="1.5" fill="none" opacity="0.6"/>
 </svg>

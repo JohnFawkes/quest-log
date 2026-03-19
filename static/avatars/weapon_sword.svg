@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Short Sword - straight vertical, grip at right hand (cy≈164) -->
   <!-- Blade -->
   <rect x="143" y="28" width="7" height="108" fill="#C0CDD3" rx="2"/>
@@ -21,4 +22,5 @@
   <!-- Pommel -->
   <circle cx="146" cy="192" r="8" fill="#C49A28"/>
   <circle cx="146" cy="192" r="4" fill="#8B6914"/>
+  </g>
 </svg>

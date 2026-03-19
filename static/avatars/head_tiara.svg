@@ -1,23 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <!-- Tiara - sits on top of head -->
+  <!-- Tiara - band sits at top of head (y≈44 after body shift) -->
   <!-- Tiara band arc -->
-  <path d="M76 24 Q100 10 124 24" stroke="#C0C0C0" stroke-width="5" fill="none"/>
+  <path d="M76 42 Q100 28 124 42" stroke="#C0C0C0" stroke-width="5" fill="none"/>
   <!-- Center tall piece -->
-  <path d="M97 22 L100 2 L103 22" fill="#C0C0C0"/>
+  <path d="M97 40 L100 20 L103 40" fill="#C0C0C0"/>
   <!-- Center gem -->
-  <ellipse cx="100" cy="2" rx="5" ry="6" fill="#9B59B6"/>
-  <ellipse cx="100" cy="1" rx="2.5" ry="3" fill="#D7BDE2" opacity="0.8"/>
+  <ellipse cx="100" cy="20" rx="5" ry="6" fill="#9B59B6"/>
+  <ellipse cx="100" cy="19" rx="2.5" ry="3" fill="#D7BDE2" opacity="0.8"/>
   <!-- Left medium piece -->
-  <path d="M85 21 L87 8 L89 21" fill="#C0C0C0"/>
-  <ellipse cx="87" cy="8" rx="3.5" ry="4" fill="#E74C3C"/>
+  <path d="M85 39 L87 26 L89 39" fill="#C0C0C0"/>
+  <ellipse cx="87" cy="26" rx="3.5" ry="4" fill="#E74C3C"/>
   <!-- Right medium piece -->
-  <path d="M111 21 L113 8 L115 21" fill="#C0C0C0"/>
-  <ellipse cx="113" cy="8" rx="3.5" ry="4" fill="#E74C3C"/>
+  <path d="M111 39 L113 26 L115 39" fill="#C0C0C0"/>
+  <ellipse cx="113" cy="26" rx="3.5" ry="4" fill="#E74C3C"/>
   <!-- Small gems along band -->
-  <circle cx="79" cy="24" r="2" fill="#3498DB"/>
-  <circle cx="93" cy="17" r="2" fill="#F39C12"/>
-  <circle cx="107" cy="17" r="2" fill="#F39C12"/>
-  <circle cx="121" cy="24" r="2" fill="#3498DB"/>
+  <circle cx="79" cy="42" r="2" fill="#3498DB"/>
+  <circle cx="93" cy="35" r="2" fill="#F39C12"/>
+  <circle cx="107" cy="35" r="2" fill="#F39C12"/>
+  <circle cx="121" cy="42" r="2" fill="#3498DB"/>
   <!-- Silver sheen -->
-  <path d="M76 24 Q100 10 124 24" stroke="#E8E8E8" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M76 42 Q100 28 124 42" stroke="#E8E8E8" stroke-width="1.5" fill="none" opacity="0.6"/>
 </svg>

@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Lit Torch - handle grip at left hand (cy≈164) -->
   <!-- Handle -->
   <rect x="46" y="115" width="12" height="110" fill="#5C3317" rx="4"/>
@@ -30,4 +31,5 @@
   <!-- Smoke wisps -->
   <path d="M52 63 Q48 54 52 46 Q56 52 52 60" stroke="#888" stroke-width="1.5" fill="none" opacity="0.3"/>
   <path d="M52 63 Q55 50 58 45" stroke="#888" stroke-width="1" fill="none" opacity="0.2"/>
+  </g>
 </svg>

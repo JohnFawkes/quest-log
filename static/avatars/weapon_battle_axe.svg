@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Battle Axe - grip at right hand (cy≈164) -->
   <!-- Handle -->
   <rect x="145" y="55" width="12" height="200" fill="#5C3317" rx="4"/>
@@ -24,4 +25,5 @@
   <path d="M166 55 L166 65 M163 60 L169 60" stroke="#FFD700" stroke-width="1.5" opacity="0.7"/>
   <!-- Pommel -->
   <ellipse cx="151" cy="257" rx="8" ry="6" fill="#3B2A1A"/>
+  </g>
 </svg>
