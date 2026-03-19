@@ -32,6 +32,18 @@ Quest Log is a gamified habit tracker that transforms your daily tasks into an R
 
 ---
 
+## Screenshots
+
+| Quests | Rewards |
+|---|---|
+| ![Quests](screenshots/screenshot-quests.png) | ![Rewards](screenshots/screenshot-rewards.png) |
+
+| Avatar | Settings |
+|---|---|
+| ![Avatar](screenshots/screenshot-avatar.png) | ![Settings](screenshots/screenshot-settings.png) |
+
+---
+
 ## Forged With
 
 - **Backend:** Python, Flask, SQLAlchemy (SQLite)
