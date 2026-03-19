@@ -1,10 +1,14 @@
+import glob as _glob
 import logging
 import mimetypes
 import os
 import re
 import secrets
 import sqlite3
+import threading
+import time
 import types
+import zipfile
 from datetime import datetime, timedelta, timezone
 
 import apprise
@@ -45,6 +49,7 @@ GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', "")
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', "")
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', "")
 PUBLIC_DOMAIN = os.environ.get('PUBLIC_DOMAIN', "http://localhost:5000")
+BACKUP_DIR = os.environ.get('BACKUP_DIR', '/backups')
 DEMO_EMAIL = "demo@questlog.app"
 
 app = Flask(__name__)
@@ -215,18 +220,21 @@ def _build_apprise():
     """Build an Apprise instance from configured URLs, injecting icon URL where supported."""
     ap = apprise.Apprise()
     icon_url = get_setting('notification_icon_url', '')
-    if APPRISE_URLS:
-        for url in APPRISE_URLS.split(','):
+    # DB setting overrides env var if set
+    apprise_urls = get_setting('apprise_urls', '') or APPRISE_URLS
+    discord_url = get_setting('discord_webhook_url', '') or DISCORD_WEBHOOK_URL
+    if apprise_urls:
+        for url in apprise_urls.split(','):
             url = url.strip()
             if url:
                 ap.add(url)
-    if DISCORD_WEBHOOK_URL:
+    if discord_url:
         # Convert to Apprise Discord URL format so we can inject avatar_url
-        m = re.match(r'https://discord(?:app)?\.com/api/webhooks/(\d+)/([^?]+)', DISCORD_WEBHOOK_URL)
+        m = re.match(r'https://discord(?:app)?\.com/api/webhooks/(\d+)/([^?]+)', discord_url)
         if m and icon_url:
             ap.add(f"discord://{m.group(1)}/{m.group(2)}?avatar_url={icon_url}")
         else:
-            ap.add(DISCORD_WEBHOOK_URL)
+            ap.add(discord_url)
     return ap
 
 def send_notification(content, image_filename=None, completion_id=None, action_token=None):
@@ -252,6 +260,41 @@ def send_notification(content, image_filename=None, completion_id=None, action_t
             logger.warning("Apprise notification failed (check your URLs and service config)")
     except Exception as e:
         logger.warning("Notification error: %s", e)
+
+# --- Backup ---
+_backup_lock = threading.Lock()
+_last_backup_date = [None]  # per-worker mutable cell
+
+def _perform_backup():
+    """Create a timestamped zip of questlog.db; keep only the last 7 daily backups."""
+    try:
+        os.makedirs(BACKUP_DIR, exist_ok=True)
+        today_str = datetime.now(_get_localtz()).strftime('%Y-%m-%d')
+        # Skip if a backup already exists for today (prevents duplicate runs across workers)
+        if _glob.glob(os.path.join(BACKUP_DIR, f'{today_str}*.zip')):
+            return
+        ts = datetime.now(_get_localtz()).strftime('%Y-%m-%d_%H-%M-%S')
+        zip_path = os.path.join(BACKUP_DIR, f'{ts}.zip')
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+            zf.write(db_path, 'questlog.db')
+        # Prune: keep newest 7
+        all_backups = sorted(_glob.glob(os.path.join(BACKUP_DIR, '*.zip')))
+        while len(all_backups) > 7:
+            os.remove(all_backups.pop(0))
+        logger.info("Daily backup written: %s", zip_path)
+    except Exception as exc:
+        logger.error("Backup failed: %s", exc)
+
+@app.before_request
+def _maybe_backup():
+    """Trigger a daily backup on the first request of each calendar day (per worker)."""
+    today = datetime.now(_get_localtz()).date()
+    if _last_backup_date[0] != today:
+        with _backup_lock:
+            if _last_backup_date[0] != today:
+                _last_backup_date[0] = today
+                threading.Thread(target=_perform_backup, daemon=True,
+                                 name='backup').start()
 
 def is_habit_due_on_date(habit, check_date):
     local_tz = _get_localtz()
@@ -953,6 +996,52 @@ def complete_habit(habit_id):
     flash('Quest submitted for review!', 'success')
     return redirect(url_for('dashboard'))
 
+@app.route('/calendar')
+@login_required
+def calendar():
+    local_tz = _get_localtz()
+    week_start = int(get_setting('week_start_day', '0'))  # 0=Monday, 6=Sunday
+    today = datetime.now(local_tz).date()
+
+    # Align calendar start to the configured week start day
+    days_since_start = (today.weekday() - week_start) % 7
+    grid_start = today - timedelta(days=days_since_start)
+
+    # 5 weeks so today is always visible and there's plenty of look-ahead
+    grid_days = [grid_start + timedelta(days=i) for i in range(35)]
+
+    # Habits to show: admin sees all non-demo; others see their own
+    demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
+    if current_user.is_admin:
+        all_habits = Habit.query.all()
+        if demo_user:
+            all_habits = [h for h in all_habits
+                          if not any(u.id == demo_user.id for u in h.assigned_users)]
+    else:
+        all_habits = Habit.query.filter(
+            Habit.assigned_users.any(User.id == current_user.id)
+        ).all()
+
+    # Build {date: [habit, ...]} mapping
+    calendar_data = {}
+    for day in grid_days:
+        day_dt = datetime.combine(day, datetime.min.time()).replace(tzinfo=local_tz)
+        calendar_data[day] = [h for h in all_habits if is_habit_due_on_date(h, day_dt)]
+
+    # Group into weeks for the template
+    weeks = [grid_days[i:i + 7] for i in range(0, 35, 7)]
+
+    # Day-of-week header labels starting from the configured week start
+    day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    # week_start=0 → Mon first; week_start=6 → Sun first
+    ordered = day_names[week_start:] + day_names[:week_start]
+
+    return render_template('calendar.html',
+                           weeks=weeks,
+                           calendar_data=calendar_data,
+                           today=today,
+                           day_names=ordered)
+
 @app.route('/rewards')
 @login_required
 def rewards():
@@ -1066,6 +1155,9 @@ def admin_panel():
     ).all()
     
     notification_icon_url = get_setting('notification_icon_url', '')
+    apprise_urls_setting = get_setting('apprise_urls', '')
+    discord_webhook_setting = get_setting('discord_webhook_url', '')
+    week_start_day = get_setting('week_start_day', '0')
     avatar_items = AvatarItem.query.order_by(AvatarItem.item_type, AvatarItem.coin_cost).all()
     return render_template('admin.html',
                          pending=pending,
@@ -1074,6 +1166,9 @@ def admin_panel():
                          pending_rewards=pending_rewards,
                          active_rewards=active_rewards,
                          notification_icon_url=notification_icon_url,
+                         apprise_urls_setting=apprise_urls_setting,
+                         discord_webhook_setting=discord_webhook_setting,
+                         week_start_day=week_start_day,
                          avatar_items=avatar_items)
 
 @app.route('/admin/reward/create', methods=['POST'])
@@ -1380,6 +1475,19 @@ def admin_notification_settings():
     icon_url = request.form.get('notification_icon_url', '').strip()
     set_setting('notification_icon_url', icon_url)
     flash('Notification settings saved.', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/settings/general', methods=['POST'])
+@login_required
+def admin_general_settings():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    set_setting('apprise_urls', request.form.get('apprise_urls', '').strip())
+    set_setting('discord_webhook_url', request.form.get('discord_webhook_url', '').strip())
+    week_start = request.form.get('week_start_day', '0')
+    if week_start not in ('0', '6'):
+        week_start = '0'
+    set_setting('week_start_day', week_start)
+    flash('General settings saved.', 'success')
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/cleanup-rejected-images', methods=['POST'])

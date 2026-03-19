@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto">
+
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold flex items-center gap-2" style="color:var(--text-heading)">
+      <i class="fas fa-calendar-alt text-indigo-400"></i> Quest Calendar
+    </h1>
+    <a href="{{ url_for('dashboard') }}"
+       class="text-sm px-4 py-2 rounded-lg font-medium transition"
+       style="background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-body)">
+      <i class="fas fa-arrow-left mr-1"></i> Dashboard
+    </a>
+  </div>
+
+  <!-- Calendar grid -->
+  <div class="rounded-2xl overflow-hidden shadow-lg" style="background:var(--bg-card);border:1px solid var(--border-color)">
+
+    <!-- Day-of-week header -->
+    <div class="grid grid-cols-7">
+      {% for name in day_names %}
+      <div class="text-center text-xs font-bold uppercase tracking-wide py-3"
+           style="background:var(--btn-bg);color:var(--btn-text)">
+        {{ name }}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Week rows -->
+    {% for week in weeks %}
+    <div class="grid grid-cols-7 {% if not loop.last %}border-b{% endif %}"
+         style="border-color:var(--border-color)">
+      {% for day in week %}
+      {% set is_today = (day == today) %}
+      {% set habits_due = calendar_data[day] %}
+      <div class="min-h-24 p-2 {% if not loop.last %}border-r{% endif %} {% if is_today %}ring-2 ring-inset ring-indigo-400{% endif %}"
+           style="border-color:var(--border-color);{% if is_today %}background:var(--bg-body){% endif %}">
+
+        <!-- Day number -->
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-sm font-bold {% if is_today %}text-indigo-400{% else %}opacity-60{% endif %}">
+            {{ day.day }}
+          </span>
+          {% if day.day == 1 %}
+          <span class="text-xs opacity-50">{{ day.strftime('%b') }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Quest chips -->
+        {% if habits_due %}
+          {% for habit in habits_due %}
+          <div class="text-xs rounded px-1.5 py-0.5 mb-1 truncate font-medium leading-snug"
+               style="background:var(--btn-bg);color:var(--btn-text);opacity:0.85"
+               title="{{ habit.name }}{% if current_user.is_admin %} — {{ habit.assigned_users | map(attribute='name') | join(', ') }}{% endif %}">
+            <i class="fas fa-scroll text-xs mr-0.5 opacity-70"></i>{{ habit.name }}
+          </div>
+          {% endfor %}
+        {% endif %}
+
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- Legend -->
+  <div class="mt-4 flex flex-wrap gap-4 text-xs opacity-70">
+    <div class="flex items-center gap-1.5">
+      <div class="w-3 h-3 rounded" style="background:var(--btn-bg)"></div>
+      Quest due on this day
+    </div>
+    <div class="flex items-center gap-1.5">
+      <div class="w-3 h-3 rounded ring-2 ring-indigo-400"></div>
+      Today
+    </div>
+  </div>
+
+</div>
+{% endblock %}
