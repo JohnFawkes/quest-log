@@ -145,7 +145,7 @@
                             {% endif %}
                         </div>
                         
-                        <p class="text-xs text-gray-400 dark:text-slate-500 mb-2">{{ c.timestamp.strftime('%m/%d %H:%M') }}</p>
+                        <p class="text-xs text-gray-400 dark:text-slate-500 mb-2">{{ (c.timestamp | localtime).strftime('%m/%d %H:%M') }}</p>
 
                         {% if c.image_filename %}
                         <a href="{{ url_for('uploaded_file', filename=c.image_filename) }}" target="_blank" rel="noopener noreferrer" class="block group relative">

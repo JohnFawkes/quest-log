@@ -25,6 +25,16 @@ from werkzeug.utils import secure_filename
 
 logger = logging.getLogger(__name__)
 
+# Timezone helper — used by the `localtime` Jinja2 filter
+def _get_localtz():
+    from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+    tz_name = os.environ.get('TZ', 'UTC')
+    try:
+        return ZoneInfo(tz_name)
+    except (ZoneInfoNotFoundError, KeyError):
+        logger.warning("Unknown TZ value %r, falling back to UTC", tz_name)
+        return ZoneInfo('UTC')
+
 # Allow OAuth over HTTP
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
@@ -67,6 +77,15 @@ os.makedirs(data_dir, exist_ok=True)
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
+
+@app.template_filter('localtime')
+def localtime_filter(dt):
+    """Convert a UTC datetime to the server's local timezone for display."""
+    if dt is None:
+        return dt
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(_get_localtz())
 login_manager.login_view = 'login'
 
 oauth = OAuth(app)
