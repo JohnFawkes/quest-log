@@ -1,29 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <!-- Great Two-Handed Longsword - grip at right hand (cy≈164) -->
-  <!-- Blade (wide, tip clips above canvas) -->
-  <path d="M155 208 L120 -22" stroke="#C0CDD3" stroke-width="10" stroke-linecap="round"/>
-  <!-- Blade fuller groove -->
-  <path d="M154 206 L120 -18" stroke="#8898A8" stroke-width="2" opacity="0.5"/>
+  <!-- Great Two-Handed Longsword - straight vertical, grip at right hand (cy≈164) -->
+  <!-- Blade (wide, long - top clips above canvas) -->
+  <rect x="141" y="8" width="10" height="132" fill="#C0CDD3" rx="3"/>
+  <!-- Blade fuller groove (centre channel) -->
+  <rect x="145" y="12" width="3" height="124" fill="#8898A8" rx="1" opacity="0.5"/>
   <!-- Blade edge highlight -->
-  <path d="M158 206 L124 -22" stroke="#E8F0F5" stroke-width="2" opacity="0.6"/>
+  <rect x="150" y="10" width="2" height="128" fill="#E8F0F5" rx="1" opacity="0.6"/>
   <!-- Blade tip -->
-  <polygon points="120,-22 114,-8 126,-8" fill="#A8B8C4"/>
-  <!-- Crossguard (large) -->
-  <rect x="106" y="138" width="44" height="10" fill="#C49A28" rx="3"/>
-  <!-- Crossguard points -->
-  <polygon points="106,143 98,143 100,136 108,138" fill="#A07820"/>
-  <polygon points="150,143 158,143 156,136 148,138" fill="#A07820"/>
-  <!-- Grip (long, two-handed) -->
-  <rect x="122" y="148" width="14" height="54" fill="#3B2A1A" rx="3"/>
-  <!-- Grip wrap leather -->
-  <rect x="122" y="148" width="14" height="4" fill="#6B4226"/>
-  <rect x="122" y="156" width="14" height="4" fill="#6B4226"/>
-  <rect x="122" y="164" width="14" height="4" fill="#6B4226"/>
-  <rect x="122" y="172" width="14" height="4" fill="#6B4226"/>
-  <rect x="122" y="180" width="14" height="4" fill="#6B4226"/>
-  <rect x="122" y="188" width="14" height="4" fill="#6B4226"/>
+  <polygon points="141,8 151,8 146,-6" fill="#A8B8C4"/>
+  <!-- Crossguard (large, wide) -->
+  <rect x="106" y="140" width="80" height="10" fill="#C49A28" rx="3"/>
+  <!-- Crossguard end ornaments -->
+  <ellipse cx="106" cy="145" rx="7" ry="6" fill="#A07820"/>
+  <ellipse cx="186" cy="145" rx="7" ry="6" fill="#A07820"/>
+  <!-- Grip (long, two-handed) - centred on blade -->
+  <rect x="140" y="150" width="12" height="56" fill="#3B2A1A" rx="3"/>
+  <!-- Grip leather wrap bands -->
+  <rect x="140" y="154" width="12" height="4" fill="#6B4226"/>
+  <rect x="140" y="162" width="12" height="4" fill="#6B4226"/>
+  <rect x="140" y="170" width="12" height="4" fill="#6B4226"/>
+  <rect x="140" y="178" width="12" height="4" fill="#6B4226"/>
+  <rect x="140" y="186" width="12" height="4" fill="#6B4226"/>
+  <rect x="140" y="194" width="12" height="4" fill="#6B4226"/>
   <!-- Pommel (ornate) -->
-  <ellipse cx="129" cy="205" rx="11" ry="8" fill="#C49A28"/>
-  <circle cx="129" cy="205" r="5" fill="#8B6914"/>
-  <circle cx="129" cy="205" r="2.5" fill="#FFD700"/>
+  <ellipse cx="146" cy="212" rx="12" ry="9" fill="#C49A28"/>
+  <circle cx="146" cy="212" r="5" fill="#8B6914"/>
+  <circle cx="146" cy="212" r="2.5" fill="#FFD700"/>
 </svg>
