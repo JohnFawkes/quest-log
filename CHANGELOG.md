@@ -9,6 +9,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 > Changes on the current branch, not yet merged to `main`.
 
+### Added
+- Quest Calendar — new `/calendar` page (linked in nav) shows 5 weeks of upcoming quests in a grid, respecting the configured week start day.
+- Auto-backup — app writes a daily zip of `questlog.db` to `/backups/` (configurable via `BACKUP_DIR` env var), keeping the 7 most recent backups; backup is triggered on the first request of each day.
+- Admin General Settings panel — Guild Masters can now configure Apprise notification URLs, Discord webhook URL, and week start day directly from the Guild Hall UI (DB values override env vars).
+- README Backups section — documents `docker cp` extraction, volume mounting, and the `BACKUP_DIR` env var.
+
 ### Fixed
 - Avatar UI — spell slot no longer shows a redundant "None" unequip card; use the owned "No Aura" item instead.
 - Avatar SVG — iron helm raised 10 px so the brow ridge clears the character's eyes.

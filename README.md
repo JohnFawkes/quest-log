@@ -129,6 +129,51 @@ The **Maintenance** section of the Guild Hall lets you permanently delete all re
 
 ---
 
+## Backups
+
+Quest Log automatically backs up the database once per day, keeping the last **7 daily backups**. Backup files are stored as timestamped zip archives inside the container at `/backups/YYYY-MM-DD_HH-MM-SS.zip`.
+
+### Extracting backups with `docker cp`
+
+```bash
+# List available backups
+docker exec <container_name> ls /backups/
+
+# Copy a specific backup to your host
+docker cp <container_name>:/backups/2024-01-15_03-00-00.zip ./questlog-backup.zip
+
+# Copy all backups to a local directory
+docker cp <container_name>:/backups/. ./quest-log-backups/
+```
+
+Replace `<container_name>` with the name or ID of your running container (find it with `docker ps`).
+
+### Persisting backups with a volume (recommended)
+
+Mount `/backups` as a host volume so backups survive container restarts and can be accessed directly from the host:
+
+```yaml
+# compose.yaml
+services:
+  quest-log:
+    volumes:
+      - ./data:/data
+      - ./backups:/backups   # <-- add this line
+```
+
+Backups will then appear in the `./backups/` folder on your host machine.
+
+### Custom backup directory
+
+Set the `BACKUP_DIR` environment variable to change the backup location inside the container:
+
+```yaml
+environment:
+  - BACKUP_DIR=/data/backups
+```
+
+---
+
 ## Scrolls of Configuration
 
 | Variable | Required | Description |
@@ -141,6 +186,7 @@ The **Maintenance** section of the Guild Hall lets you permanently delete all re
 | `APPRISE_URLS` | No | Comma-separated [Apprise URLs](https://github.com/caronc/apprise/wiki) (Discord, Telegram, Slack, etc.) |
 | `DISCORD_WEBHOOK_URL` | No | Discord webhook URL (automatically converted to Apprise format) |
 | `DATA_DIR` | No | Directory for the SQLite database |
+| `BACKUP_DIR` | No | Directory for daily backup zip files (default: `/backups`) |
 | `PORT` | No | Application port (default: `5000`) |
 | `TZ` | No | Timezone in IANA format (default: `UTC`) |
 
