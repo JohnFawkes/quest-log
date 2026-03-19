@@ -104,7 +104,8 @@
         <div id="slot-{{ slot }}" class="slot-panel {% if not loop.first %}hidden{% endif %}">
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
 
-            <!-- Unequip / None card -->
+            <!-- Unequip / None card (hidden for spell slot — use the No Aura item instead) -->
+            {% if slot != 'spell' %}
             <div class="rounded-xl p-3 cursor-pointer transition-all item-card {{ 'ring-2 ring-yellow-400' if not equipped[slot] else '' }}"
                  style="background:var(--bg-card);border:1px solid var(--border-color)"
                  data-is-none="true"
@@ -122,6 +123,7 @@
               <p class="text-xs mt-1 opacity-40">—</p>
               {% endif %}
             </div>
+            {% endif %}
 
             {% for item in items_by_type[slot] %}
             {% set is_owned = item.id in owned_ids %}

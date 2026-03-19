@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <g transform="translate(0,36)">
+  <g transform="translate(12,36)">
   <!-- Kite Shield - shifted x+20, y-30 so arm strap aligns with left arm (x=54) -->
   <!-- Shield shape -->
   <path d="M40 105 L104 105 L104 165 Q104 200 72 218 Q40 200 40 165 Z" fill="#1A3A6B"/>

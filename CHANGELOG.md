@@ -10,6 +10,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 > Changes on the current branch, not yet merged to `main`.
 
 ### Fixed
+- Avatar UI — spell slot no longer shows a redundant "None" unequip card; use the owned "No Aura" item instead.
+- Avatar SVG — iron helm raised 10 px so the brow ridge clears the character's eyes.
+- Avatar SVG — ranger hood redesigned as a split-panel cowl (left/right panels + crown + chin wrap) leaving the face fully visible.
+- Avatar SVG — princess dress arm paths widened at the lower section (left inner edge x 56→53, right outer edge x 144→147) to cover body-arm pixels.
+- Avatar SVG — plate armor arm guards widened by 2 px on each side (left x 55→53, right width 18→20) to cover body-arm skin pixels.
+- Avatar SVG — all weapon sprites shifted left via translate so grips align with the right hand (sword −6, longsword −10, dagger −14, staff −20, bow −18, axe −20, wand −10).
+- Avatar SVG — all offhand sprites shifted right via translate so straps/grips align with the left arm (wooden shield +20, kite shield +12, spellbook +18, torch +18, buckler +22).
 - Avatar SVG — ranger hood redesigned as a transparent-face cowl so the character's face is no longer covered.
 - Avatar SVG — robe sleeves now angle outward at ~50° so arms appear extended rather than hanging straight down.
 - Avatar SVG — dress arms replaced with a single continuous puff-to-wrist path, eliminating the segmented "crossed arms" illusion.
