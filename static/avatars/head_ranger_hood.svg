@@ -1,20 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
   <g transform="translate(0,36)">
-  <!-- Ranger Hood: side panels + top dome only; face center is transparent -->
-  <!-- Top dome (covers crown/hair) -->
-  <path d="M84 26 Q82 4 100 2 Q118 4 116 26 Q108 18 100 16 Q92 18 84 26" fill="#5A7A50"/>
-  <!-- Left side drape -->
-  <path d="M84 26 Q74 36 72 52 Q72 66 78 76 Q84 70 84 52 Q82 38 84 26 Z" fill="#4A6741"/>
-  <!-- Right side drape -->
-  <path d="M116 26 Q126 36 128 52 Q128 66 122 76 Q116 70 116 52 Q118 38 116 26 Z" fill="#4A6741"/>
-  <!-- Chin/neck drape -->
-  <path d="M78 76 Q88 86 100 88 Q112 86 122 76 Q116 72 100 74 Q84 72 78 76 Z" fill="#4A6741"/>
-  <!-- Hood fold texture -->
-  <path d="M74 34 Q72 52 74 68" stroke="#3A5535" stroke-width="1" fill="none" opacity="0.5"/>
-  <path d="M126 34 Q128 52 126 68" stroke="#3A5535" stroke-width="1" fill="none" opacity="0.5"/>
+  <!-- Ranger Hood: side panels + top crown, face area left transparent -->
+  <!-- Left side panel (covers left side of head, x≈66–84) -->
+  <path d="M68 64 Q66 6 84 2 Q86 14 84 30 Q82 50 82 62 Z" fill="#4A6741"/>
+  <!-- Right side panel (mirror, x≈116–134) -->
+  <path d="M132 64 Q134 6 116 2 Q114 14 116 30 Q118 50 118 62 Z" fill="#4A6741"/>
+  <!-- Top crown (bridges both panels over the hair) -->
+  <path d="M84 2 Q100 -4 116 2 Q106 14 100 12 Q94 14 84 2 Z" fill="#4A6741"/>
+  <!-- Chin / neck wrap (below face) -->
+  <path d="M82 62 Q100 70 118 62 Q110 76 100 78 Q90 76 82 62 Z" fill="#4A6741"/>
+  <!-- Left shoulder drape -->
+  <path d="M68 64 Q60 78 56 94 L66 94 Q70 80 74 66 Z" fill="#5A7A50"/>
+  <!-- Right shoulder drape -->
+  <path d="M132 64 Q140 78 144 94 L134 94 Q130 80 126 66 Z" fill="#5A7A50"/>
+  <!-- Vertical fold lines -->
+  <path d="M70 12 Q68 38 70 62" stroke="#3A5535" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M130 12 Q132 38 130 62" stroke="#3A5535" stroke-width="1.5" fill="none" opacity="0.5"/>
   <!-- Drawstring at chin -->
-  <path d="M84 76 Q100 80 116 76" stroke="#3A5535" stroke-width="1.5" fill="none"/>
+  <path d="M82 62 Q100 68 118 62" stroke="#3A5535" stroke-width="2" fill="none"/>
   <!-- Leaf pin -->
-  <path d="M100 78 Q103 74 106 77 Q103 80 100 78" fill="#7AB34A"/>
+  <path d="M98 6 Q101 1 104 5 Q101 9 98 6" fill="#7AB34A"/>
   </g>
 </svg>

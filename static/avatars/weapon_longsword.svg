@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <g transform="translate(0,36)">
+  <g transform="translate(-10,36)">
   <!-- Great Two-Handed Longsword - straight vertical, grip at right hand (cy≈164) -->
   <!-- Blade (wide, long - top clips above canvas) -->
   <rect x="141" y="8" width="10" height="132" fill="#C0CDD3" rx="3"/>

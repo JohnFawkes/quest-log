@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <g transform="translate(0,36)">
+  <g transform="translate(18,36)">
   <!-- Lit Torch - shifted 6px left to clear left arm (arm starts at x=54) -->
   <!-- Handle -->
   <rect x="40" y="115" width="12" height="110" fill="#5C3317" rx="4"/>

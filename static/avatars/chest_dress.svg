@@ -4,10 +4,10 @@
   <!-- Bodice -->
   <rect x="74" y="67" width="52" height="72" fill="#9B2D7A" rx="4"/>
   <!-- Arms: single continuous path — puffs out at shoulder, tapers to wrist -->
-  <!-- Left arm -->
-  <path d="M56 68 Q44 68 44 82 Q44 96 56 98 L56 134 L74 134 L74 98 Q86 96 86 82 Q86 68 74 68 Z" fill="#C97BB2"/>
-  <!-- Right arm -->
-  <path d="M126 68 Q114 68 114 82 Q114 96 126 98 L126 134 L144 134 L144 98 Q156 96 156 82 Q156 68 144 68 Z" fill="#C97BB2"/>
+  <!-- Left arm (inner edge at x=53 to cover body arm left edge at x=54) -->
+  <path d="M54 68 Q44 68 44 82 Q44 96 53 98 L53 134 L75 134 L75 98 Q86 96 86 82 Q86 68 74 68 Z" fill="#C97BB2"/>
+  <!-- Right arm (outer edge at x=147 to cover body arm right edge at x=146) -->
+  <path d="M126 68 Q114 68 114 82 Q114 96 126 98 L126 134 L147 134 L147 98 Q156 96 156 82 Q156 68 144 68 Z" fill="#C97BB2"/>
   <!-- Skirt flare -->
   <path d="M68 130 L50 280 L150 280 L132 130 Z" fill="#C97BB2"/>
   <!-- Skirt layers / petticoat -->

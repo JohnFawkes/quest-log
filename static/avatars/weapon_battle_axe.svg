@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <g transform="translate(0,36)">
+  <g transform="translate(-20,36)">
   <!-- Battle Axe - shifted 5px right to clear body arm (right arm edge x=146) -->
   <!-- Handle -->
   <rect x="150" y="55" width="12" height="200" fill="#5C3317" rx="4"/>

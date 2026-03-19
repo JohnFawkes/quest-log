@@ -1,22 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
   <g transform="translate(0,36)">
-  <!-- Iron Helm - starter -->
+  <!-- Iron Helm - raised so brow clears eyes (eyes at cy=30) -->
   <!-- Dome -->
-  <ellipse cx="100" cy="20" rx="27" ry="20" fill="#8B9DA8"/>
-  <!-- Helm sides -->
-  <rect x="73" y="20" width="54" height="22" fill="#8B9DA8" rx="2"/>
-  <!-- Nasal guard -->
-  <rect x="97" y="26" width="6" height="22" fill="#6E7F88" rx="1"/>
-  <!-- Cheek guards -->
-  <rect x="73" y="32" width="10" height="18" fill="#7A8D96" rx="2"/>
-  <rect x="117" y="32" width="10" height="18" fill="#7A8D96" rx="2"/>
-  <!-- Brow ridge -->
-  <rect x="73" y="26" width="54" height="6" fill="#7A8D96" rx="1"/>
+  <ellipse cx="100" cy="10" rx="27" ry="20" fill="#8B9DA8"/>
+  <!-- Helm face band (shortened so bottom stays above eyes) -->
+  <rect x="73" y="10" width="54" height="14" fill="#8B9DA8" rx="2"/>
+  <!-- Brow ridge (y=16–22, well above eyes at cy=30) -->
+  <rect x="73" y="16" width="54" height="6" fill="#7A8D96" rx="1"/>
+  <!-- Nasal guard (from brow down to nose level) -->
+  <rect x="97" y="16" width="6" height="22" fill="#6E7F88" rx="1"/>
+  <!-- Cheek guards (below eyes, on cheeks/jaw) -->
+  <rect x="73" y="26" width="10" height="20" fill="#7A8D96" rx="2"/>
+  <rect x="117" y="26" width="10" height="20" fill="#7A8D96" rx="2"/>
   <!-- Metal highlight -->
-  <path d="M80 14 Q100 8 120 14" stroke="#C0CDD3" stroke-width="2.5" fill="none" opacity="0.7"/>
+  <path d="M80 4 Q100 -2 120 4" stroke="#C0CDD3" stroke-width="2.5" fill="none" opacity="0.7"/>
   <!-- Rivets -->
-  <circle cx="81" cy="22" r="2" fill="#6E7F88"/>
-  <circle cx="119" cy="22" r="2" fill="#6E7F88"/>
-  <circle cx="100" cy="18" r="2" fill="#6E7F88"/>
+  <circle cx="81" cy="12" r="2" fill="#6E7F88"/>
+  <circle cx="119" cy="12" r="2" fill="#6E7F88"/>
+  <circle cx="100" cy="8" r="2" fill="#6E7F88"/>
   </g>
 </svg>

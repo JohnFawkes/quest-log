@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <g transform="translate(0,36)">
+  <g transform="translate(18,36)">
   <!-- Open Spellbook - shifted 20px up so hand grips book centre -->
   <!-- Book spine -->
   <rect x="44" y="128" width="10" height="70" fill="#3B1F8C" rx="2"/>
