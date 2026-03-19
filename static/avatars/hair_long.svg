@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
+  <!-- Long flowing side panels (extends well below shoulders) -->
+  <rect x="74" y="12" width="16" height="90" fill="#5C3317" rx="5"/>
+  <rect x="110" y="12" width="16" height="90" fill="#5C3317" rx="5"/>
+  <!-- Hair top -->
+  <ellipse cx="100" cy="11" rx="26" ry="15" fill="#5C3317"/>
+  <rect x="74" y="11" width="52" height="14" fill="#5C3317"/>
+  <!-- Loose wave hints at bottom of side panels -->
+  <path d="M74 98 Q78 108 74 118 Q78 128 76 140" stroke="#5C3317" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path d="M126 98 Q122 108 126 118 Q122 128 124 140" stroke="#5C3317" stroke-width="14" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

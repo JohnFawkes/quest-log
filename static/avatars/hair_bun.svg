@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
+  <!-- Cover existing side hair and top with skin colour -->
+  <rect x="74" y="14" width="17" height="44" fill="#F5CBA7"/>
+  <rect x="109" y="14" width="17" height="44" fill="#F5CBA7"/>
+  <!-- Cover male short hair top -->
+  <ellipse cx="100" cy="16" rx="26" ry="14" fill="#F5CBA7"/>
+  <!-- Tight hair base on head -->
+  <ellipse cx="100" cy="14" rx="25" ry="12" fill="#5C3317"/>
+  <rect x="80" y="14" width="40" height="10" fill="#5C3317" rx="3"/>
+  <!-- Bun on top -->
+  <ellipse cx="100" cy="4" rx="14" ry="10" fill="#5C3317"/>
+  <!-- Hair tie detail -->
+  <ellipse cx="100" cy="13" rx="12" ry="3" fill="#3A1F0D"/>
+  </g>
+</svg>

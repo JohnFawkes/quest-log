@@ -118,6 +118,10 @@ class User(UserMixin, db.Model):
     # Avatar
     avatar_body = db.Column(db.String(10), default='male')
     avatar_role = db.Column(db.String(20), default='knight')
+    avatar_skin_tone = db.Column(db.String(7), default='#F5CBA7')
+    avatar_hair_color = db.Column(db.String(7), default='#5C3317')
+    avatar_eye_color = db.Column(db.String(7), default='#2C1810')
+    avatar_hair_style = db.Column(db.String(20), default='none')
     avatar_head_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
     avatar_chest_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
     avatar_weapon_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
@@ -215,6 +219,47 @@ def set_setting(key, value):
     else:
         db.session.add(AppSetting(key=key, value=value))
     db.session.commit()
+
+_HEX_RE = re.compile(r'^[0-9A-Fa-f]{6}$')
+
+def _clean_hex(value, default):
+    """Strip '#', validate 6 hex chars, fall back to default (without #)."""
+    v = (value or '').strip().lstrip('#').upper()
+    return v if _HEX_RE.match(v) else default.lstrip('#').upper()
+
+def _darken_hex(hex6, factor=0.13):
+    """Return a darkened 6-char hex string (no '#') by the given factor 0-1."""
+    h = hex6.lstrip('#').upper()
+    r = max(0, int(int(h[0:2], 16) * (1 - factor)))
+    g = max(0, int(int(h[2:4], 16) * (1 - factor)))
+    b = max(0, int(int(h[4:6], 16) * (1 - factor)))
+    return f'{r:02X}{g:02X}{b:02X}'
+
+def _warm_tint(hex6):
+    """Compute a warm rosy nose/lip colour from a skin base hex string (no '#')."""
+    h = hex6.lstrip('#').upper()
+    r = min(255, int(int(h[0:2], 16) * 0.92 + 16))
+    g = max(0,   int(int(h[2:4], 16) * 0.68))
+    b = max(0,   int(int(h[4:6], 16) * 0.54))
+    return f'{r:02X}{g:02X}{b:02X}'
+
+def _recolor_svg(text, skin, hair, eye):
+    """
+    Replace the reference palette in a body/hair SVG with user-chosen colours.
+    skin / hair / eye are 6-char hex strings WITHOUT '#'.
+    """
+    shadow = _darken_hex(skin, 0.13)
+    nose   = _warm_tint(skin)
+    # skin
+    text = text.replace('#F5CBA7', f'#{skin}').replace('#f5cba7', f'#{skin}')
+    text = text.replace('#E8B48C', f'#{shadow}').replace('#e8b48c', f'#{shadow}')
+    text = text.replace('#C17A5A', f'#{nose}').replace('#c17a5a', f'#{nose}')
+    # hair — replace BOTH male (#5C3317) and female (#8B4513) base tones
+    text = text.replace('#5C3317', f'#{hair}').replace('#5c3317', f'#{hair}')
+    text = text.replace('#8B4513', f'#{hair}').replace('#8b4513', f'#{hair}')
+    # eyes
+    text = text.replace('#2C1810', f'#{eye}').replace('#2c1810', f'#{eye}')
+    return text
 
 def _build_apprise():
     """Build an Apprise instance from configured URLs, injecting icon URL where supported."""
@@ -447,6 +492,10 @@ def perform_db_migration():
         ('avatar_weapon_id', 'INTEGER'),
         ('avatar_offhand_id', 'INTEGER'),
         ('avatar_spell_id', 'INTEGER'),
+        ('avatar_skin_tone', "VARCHAR(7) DEFAULT '#F5CBA7'"),
+        ('avatar_hair_color', "VARCHAR(7) DEFAULT '#5C3317'"),
+        ('avatar_eye_color', "VARCHAR(7) DEFAULT '#2C1810'"),
+        ('avatar_hair_style', "VARCHAR(20) DEFAULT 'none'"),
     ]:
         if col_name not in user_cols:
             cursor.execute(f"ALTER TABLE user ADD COLUMN {col_name} {col_def}")
@@ -1528,6 +1577,39 @@ RARITY_COLORS = {
     'legendary': 'text-yellow-400',
 }
 
+@app.route('/avatar/body.svg')
+def avatar_body_svg():
+    """Return a body SVG with the user's chosen skin / hair / eye colours substituted."""
+    gender = request.args.get('gender', 'male')
+    if gender not in ('male', 'female'):
+        gender = 'male'
+    skin = _clean_hex(request.args.get('skin'), 'F5CBA7')
+    hair = _clean_hex(request.args.get('hair'), '5C3317')
+    eye  = _clean_hex(request.args.get('eye'),  '2C1810')
+    svg_path = os.path.join(basedir, 'static', 'avatars', f'body_{gender}.svg')
+    with open(svg_path, 'r') as f:
+        content = _recolor_svg(f.read(), skin, hair, eye)
+    resp = make_response(content)
+    resp.headers['Content-Type'] = 'image/svg+xml'
+    resp.headers['Cache-Control'] = 'no-store'
+    return resp
+
+@app.route('/avatar/hair.svg')
+def avatar_hair_svg():
+    """Return a hair-style overlay SVG with user hair + skin colours substituted."""
+    style = request.args.get('style', 'none')
+    if style not in ('none', 'short', 'long', 'bun'):
+        style = 'none'
+    skin = _clean_hex(request.args.get('skin'), 'F5CBA7')
+    hair = _clean_hex(request.args.get('hair'), '5C3317')
+    svg_path = os.path.join(basedir, 'static', 'avatars', f'hair_{style}.svg')
+    with open(svg_path, 'r') as f:
+        content = _recolor_svg(f.read(), skin, hair, '2C1810')
+    resp = make_response(content)
+    resp.headers['Content-Type'] = 'image/svg+xml'
+    resp.headers['Cache-Control'] = 'no-store'
+    return resp
+
 @app.route('/avatar')
 @login_required
 def avatar():
@@ -1555,6 +1637,15 @@ def avatar_save():
     role = request.form.get('avatar_role', 'knight')
     if role in AVATAR_ROLES:
         current_user.avatar_role = role
+    # Appearance customisation
+    skin = request.form.get('avatar_skin_tone', '#F5CBA7')
+    hair = request.form.get('avatar_hair_color', '#5C3317')
+    eye  = request.form.get('avatar_eye_color',  '#2C1810')
+    style = request.form.get('avatar_hair_style', 'none')
+    if re.match(r'^#[0-9A-Fa-f]{6}$', skin): current_user.avatar_skin_tone = skin
+    if re.match(r'^#[0-9A-Fa-f]{6}$', hair): current_user.avatar_hair_color = hair
+    if re.match(r'^#[0-9A-Fa-f]{6}$', eye):  current_user.avatar_eye_color  = eye
+    if style in ('none', 'short', 'long', 'bun'): current_user.avatar_hair_style = style
     owned_ids = {item.id for item in current_user.avatar_items}
     for slot in ['head', 'chest', 'weapon', 'offhand', 'spell']:
         raw = request.form.get(f'avatar_{slot}_id', '')

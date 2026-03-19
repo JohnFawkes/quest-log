@@ -4,8 +4,8 @@
   <circle cx="100" cy="32" r="24" fill="#F5CBA7"/>
   <!-- Long hair back -->
   <ellipse cx="100" cy="12" rx="25" ry="14" fill="#8B4513"/>
-  <rect x="75" y="12" width="15" height="50" fill="#8B4513" rx="4"/>
-  <rect x="110" y="12" width="15" height="50" fill="#8B4513" rx="4"/>
+  <rect x="75" y="12" width="15" height="43" fill="#8B4513" rx="4"/>
+  <rect x="110" y="12" width="15" height="43" fill="#8B4513" rx="4"/>
   <!-- Hair top -->
   <ellipse cx="100" cy="12" rx="24" ry="13" fill="#8B4513"/>
   <!-- Eyes -->
@@ -20,8 +20,8 @@
   <path d="M100 34 L98 38 L102 38" stroke="#C17A5A" stroke-width="1" fill="none"/>
   <!-- Mouth (smile) -->
   <path d="M96 41 Q100 45 104 41" stroke="#C17A5A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-  <!-- Jaw shadow -->
-  <path d="M78 38 Q78 56 100 58 Q122 56 122 38" fill="#E8B48C" opacity="0.35"/>
+  <!-- Jaw shadow (very subtle on female) -->
+  <path d="M78 38 Q78 56 100 58 Q122 56 122 38" fill="#E8B48C" opacity="0.1"/>
   <!-- Neck -->
   <rect x="93" y="55" width="14" height="14" fill="#F5CBA7"/>
   <!-- Torso base (plain dress - overridden by chest items) -->
