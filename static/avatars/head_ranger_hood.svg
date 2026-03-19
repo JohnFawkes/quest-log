@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
   <g transform="translate(0,36)">
-  <!-- Ranger Hood -->
-  <!-- Hood drape (back) -->
-  <path d="M74 28 Q70 55 72 70 Q82 78 100 78 Q118 78 128 70 Q130 55 126 28" fill="#4A6741"/>
-  <!-- Hood dome (front) -->
-  <path d="M74 28 Q74 8 100 5 Q126 8 126 28 Q120 38 100 40 Q80 38 74 28" fill="#5A7A50"/>
-  <!-- Shadow at face opening -->
-  <path d="M80 30 Q80 55 100 57 Q120 55 120 30" fill="#3A5535"/>
-  <!-- Face opening - skin peek through -->
-  <path d="M83 30 Q83 52 100 54 Q117 52 117 30 Q110 22 100 21 Q90 22 83 30" fill="#F5CBA7"/>
-  <!-- Hood texture lines -->
-  <path d="M76 32 Q74 50 76 62" stroke="#3A5535" stroke-width="1" fill="none" opacity="0.5"/>
-  <path d="M124 32 Q126 50 124 62" stroke="#3A5535" stroke-width="1" fill="none" opacity="0.5"/>
-  <!-- Drawstring -->
-  <path d="M83 54 Q100 58 117 54" stroke="#3A5535" stroke-width="1.5" fill="none"/>
+  <!-- Ranger Hood: side panels + top dome only; face center is transparent -->
+  <!-- Top dome (covers crown/hair) -->
+  <path d="M84 26 Q82 4 100 2 Q118 4 116 26 Q108 18 100 16 Q92 18 84 26" fill="#5A7A50"/>
+  <!-- Left side drape -->
+  <path d="M84 26 Q74 36 72 52 Q72 66 78 76 Q84 70 84 52 Q82 38 84 26 Z" fill="#4A6741"/>
+  <!-- Right side drape -->
+  <path d="M116 26 Q126 36 128 52 Q128 66 122 76 Q116 70 116 52 Q118 38 116 26 Z" fill="#4A6741"/>
+  <!-- Chin/neck drape -->
+  <path d="M78 76 Q88 86 100 88 Q112 86 122 76 Q116 72 100 74 Q84 72 78 76 Z" fill="#4A6741"/>
+  <!-- Hood fold texture -->
+  <path d="M74 34 Q72 52 74 68" stroke="#3A5535" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M126 34 Q128 52 126 68" stroke="#3A5535" stroke-width="1" fill="none" opacity="0.5"/>
+  <!-- Drawstring at chin -->
+  <path d="M84 76 Q100 80 116 76" stroke="#3A5535" stroke-width="1.5" fill="none"/>
   <!-- Leaf pin -->
-  <path d="M100 56 Q103 52 106 55 Q103 58 100 56" fill="#7AB34A"/>
+  <path d="M100 78 Q103 74 106 77 Q103 80 100 78" fill="#7AB34A"/>
   </g>
 </svg>

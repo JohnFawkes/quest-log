@@ -1,29 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
   <g transform="translate(0,36)">
-  <!-- Battle Axe - grip at right hand (cy≈164) -->
+  <!-- Battle Axe - shifted 5px right to clear body arm (right arm edge x=146) -->
   <!-- Handle -->
-  <rect x="145" y="55" width="12" height="200" fill="#5C3317" rx="4"/>
-  <!-- Handle grip -->
-  <rect x="145" y="145" width="12" height="8" fill="#3B2A1A"/>
-  <rect x="145" y="161" width="12" height="8" fill="#3B2A1A"/>
-  <rect x="145" y="177" width="12" height="8" fill="#3B2A1A"/>
+  <rect x="150" y="55" width="12" height="200" fill="#5C3317" rx="4"/>
+  <!-- Handle grip bands -->
+  <rect x="150" y="145" width="12" height="8" fill="#3B2A1A"/>
+  <rect x="150" y="161" width="12" height="8" fill="#3B2A1A"/>
+  <rect x="150" y="177" width="12" height="8" fill="#3B2A1A"/>
   <!-- Axe head top -->
-  <path d="M151 55 Q162 30 175 25 Q180 40 170 53 Q162 59 151 59" fill="#8B9DA8"/>
+  <path d="M156 55 Q167 30 180 25 Q185 40 175 53 Q167 59 156 59" fill="#8B9DA8"/>
   <!-- Axe head bottom -->
-  <path d="M151 59 Q162 70 175 75 Q170 90 162 83 Q154 77 151 63" fill="#8B9DA8"/>
+  <path d="M156 59 Q167 70 180 75 Q175 90 167 83 Q159 77 156 63" fill="#8B9DA8"/>
   <!-- Axe blade edge -->
-  <path d="M175 25 Q185 50 175 75" stroke="#C0CDD3" stroke-width="3" fill="none"/>
+  <path d="M180 25 Q190 50 180 75" stroke="#C0CDD3" stroke-width="3" fill="none"/>
   <!-- Axe head highlight -->
-  <path d="M162 35 Q174 50 162 65" stroke="#E0EAEE" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M167 35 Q179 50 167 65" stroke="#E0EAEE" stroke-width="2" fill="none" opacity="0.6"/>
   <!-- Axe socket straps -->
-  <rect x="142" y="57" width="18" height="5" fill="#C49A28" rx="1"/>
-  <rect x="142" y="65" width="18" height="5" fill="#C49A28" rx="1"/>
+  <rect x="147" y="57" width="18" height="5" fill="#C49A28" rx="1"/>
+  <rect x="147" y="65" width="18" height="5" fill="#C49A28" rx="1"/>
   <!-- Spike on top of handle -->
-  <polygon points="145,55 157,55 151,41" fill="#A8B8C4"/>
+  <polygon points="150,55 162,55 156,41" fill="#A8B8C4"/>
   <!-- Runes on blade -->
-  <path d="M166 40 L166 50 M163 45 L169 45" stroke="#FFD700" stroke-width="1.5" opacity="0.7"/>
-  <path d="M166 55 L166 65 M163 60 L169 60" stroke="#FFD700" stroke-width="1.5" opacity="0.7"/>
+  <path d="M171 40 L171 50 M168 45 L174 45" stroke="#FFD700" stroke-width="1.5" opacity="0.7"/>
+  <path d="M171 55 L171 65 M168 60 L174 60" stroke="#FFD700" stroke-width="1.5" opacity="0.7"/>
   <!-- Pommel -->
-  <ellipse cx="151" cy="257" rx="8" ry="6" fill="#3B2A1A"/>
+  <ellipse cx="156" cy="257" rx="8" ry="6" fill="#3B2A1A"/>
   </g>
 </svg>

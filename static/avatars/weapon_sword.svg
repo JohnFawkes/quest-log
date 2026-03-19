@@ -1,26 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
   <g transform="translate(0,36)">
-  <!-- Short Sword - straight vertical, grip at right hand (cy≈164) -->
-  <!-- Blade -->
-  <rect x="143" y="28" width="7" height="108" fill="#C0CDD3" rx="2"/>
+  <!-- Short Sword - blade tip at shoulder level, grip centred on right hand (cy≈164) -->
+  <!-- Blade (tip clears head, blade runs from shoulder to crossguard) -->
+  <rect x="140" y="60" width="7" height="76" fill="#C0CDD3" rx="2"/>
   <!-- Blade edge highlight -->
-  <rect x="148" y="30" width="2" height="104" fill="#E8F0F5" rx="1" opacity="0.7"/>
-  <!-- Blade tip (pointed top) -->
-  <polygon points="143,28 150,28 146,14" fill="#A8B8C4"/>
+  <rect x="145" y="62" width="2" height="72" fill="#E8F0F5" rx="1" opacity="0.7"/>
+  <!-- Blade tip (pointed) -->
+  <polygon points="140,60 147,60 143,46" fill="#A8B8C4"/>
   <!-- Crossguard -->
-  <rect x="126" y="136" width="38" height="8" fill="#C49A28" rx="2"/>
+  <rect x="124" y="136" width="38" height="8" fill="#C49A28" rx="2"/>
   <!-- Crossguard end balls -->
-  <circle cx="126" cy="140" r="5" fill="#A07820"/>
-  <circle cx="164" cy="140" r="5" fill="#A07820"/>
-  <!-- Grip -->
-  <rect x="141" y="144" width="11" height="44" fill="#5C3317" rx="3"/>
+  <circle cx="124" cy="140" r="5" fill="#A07820"/>
+  <circle cx="162" cy="140" r="5" fill="#A07820"/>
+  <!-- Grip (centred on right hand cx=136) -->
+  <rect x="137" y="144" width="11" height="44" fill="#5C3317" rx="3"/>
   <!-- Grip wrap -->
-  <line x1="141" y1="154" x2="152" y2="154" stroke="#3B2A1A" stroke-width="2"/>
-  <line x1="141" y1="162" x2="152" y2="162" stroke="#3B2A1A" stroke-width="2"/>
-  <line x1="141" y1="170" x2="152" y2="170" stroke="#3B2A1A" stroke-width="2"/>
-  <line x1="141" y1="178" x2="152" y2="178" stroke="#3B2A1A" stroke-width="2"/>
+  <line x1="137" y1="154" x2="148" y2="154" stroke="#3B2A1A" stroke-width="2"/>
+  <line x1="137" y1="162" x2="148" y2="162" stroke="#3B2A1A" stroke-width="2"/>
+  <line x1="137" y1="170" x2="148" y2="170" stroke="#3B2A1A" stroke-width="2"/>
+  <line x1="137" y1="178" x2="148" y2="178" stroke="#3B2A1A" stroke-width="2"/>
   <!-- Pommel -->
-  <circle cx="146" cy="192" r="8" fill="#C49A28"/>
-  <circle cx="146" cy="192" r="4" fill="#8B6914"/>
+  <circle cx="142" cy="192" r="8" fill="#C49A28"/>
+  <circle cx="142" cy="192" r="4" fill="#8B6914"/>
   </g>
 </svg>

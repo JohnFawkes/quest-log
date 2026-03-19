@@ -13,13 +13,15 @@
   <!-- Pauldron detail segments -->
   <path d="M56 76 Q58 72 70 70 Q72 76 68 82 Q60 84 56 76" fill="#96A8B4"/>
   <path d="M144 76 Q142 72 130 70 Q128 76 132 82 Q140 84 144 76" fill="#96A8B4"/>
-  <!-- Arm guards upper -->
-  <rect x="55" y="84" width="18" height="44" fill="#A8B8C4" rx="3"/>
-  <rect x="127" y="84" width="18" height="44" fill="#A8B8C4" rx="3"/>
+  <!-- Arm guards (extended up to overlap pauldron base, no skin gap) -->
+  <rect x="55" y="74" width="18" height="54" fill="#A8B8C4" rx="3"/>
+  <rect x="127" y="74" width="18" height="54" fill="#A8B8C4" rx="3"/>
   <!-- Arm guard segments -->
-  <line x1="55" y1="100" x2="73" y2="100" stroke="#8898A8" stroke-width="1.5"/>
+  <line x1="55" y1="92" x2="73" y2="92" stroke="#8898A8" stroke-width="1.5"/>
+  <line x1="55" y1="108" x2="73" y2="108" stroke="#8898A8" stroke-width="1.5"/>
   <line x1="55" y1="116" x2="73" y2="116" stroke="#8898A8" stroke-width="1.5"/>
-  <line x1="127" y1="100" x2="145" y2="100" stroke="#8898A8" stroke-width="1.5"/>
+  <line x1="127" y1="92" x2="145" y2="92" stroke="#8898A8" stroke-width="1.5"/>
+  <line x1="127" y1="108" x2="145" y2="108" stroke="#8898A8" stroke-width="1.5"/>
   <line x1="127" y1="116" x2="145" y2="116" stroke="#8898A8" stroke-width="1.5"/>
   <!-- Tassets (hip plates) -->
   <rect x="74" y="138" width="22" height="20" fill="#9AABB8" rx="2"/>
