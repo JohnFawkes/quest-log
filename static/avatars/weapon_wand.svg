@@ -1,27 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <!-- Magic Wand -->
+  <!-- Magic Wand - grip at right hand (cy≈164), star tip near top of canvas -->
   <!-- Wand shaft (elegant, tapered) -->
-  <path d="M155 300 L140 120" stroke="#3B2A1A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M155 210 L140 30" stroke="#3B2A1A" stroke-width="7" stroke-linecap="round"/>
   <!-- Wand shaft highlight -->
-  <path d="M153 298 L139 122" stroke="#6B4226" stroke-width="2" opacity="0.6"/>
+  <path d="M153 208 L139 32" stroke="#6B4226" stroke-width="2" opacity="0.6"/>
   <!-- Wand star tip -->
-  <path d="M140,120 L135,108 L140,120 L128,115 L140,120 L134,130 L140,120 L152,115 L140,120 L146,130 L140,120 L145,108 Z" fill="#FFD700"/>
+  <path d="M140,30 L135,18 L140,30 L128,25 L140,30 L134,40 L140,30 L152,25 L140,30 L146,40 L140,30 L145,18 Z" fill="#FFD700"/>
   <!-- Star glow -->
-  <circle cx="140" cy="118" r="12" fill="#FFD700" opacity="0.25"/>
-  <circle cx="140" cy="118" r="8" fill="#FFD700" opacity="0.3"/>
+  <circle cx="140" cy="28" r="12" fill="#FFD700" opacity="0.25"/>
+  <circle cx="140" cy="28" r="8" fill="#FFD700" opacity="0.3"/>
   <!-- Sparkles emanating -->
-  <circle cx="124" cy="104" r="3" fill="#FFD700" opacity="0.7"/>
-  <circle cx="118" cy="118" r="2" fill="#C39FE8" opacity="0.8"/>
-  <circle cx="128" cy="96" r="2" fill="#E8D44D" opacity="0.7"/>
-  <circle cx="155" cy="108" r="2.5" fill="#FFD700" opacity="0.6"/>
-  <circle cx="162" cy="120" r="2" fill="#C39FE8" opacity="0.7"/>
-  <path d="M125 100 L120 94" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
-  <path d="M157 106 L162 100" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
+  <circle cx="124" cy="14" r="3" fill="#FFD700" opacity="0.7"/>
+  <circle cx="118" cy="28" r="2" fill="#C39FE8" opacity="0.8"/>
+  <circle cx="128" cy="6" r="2" fill="#E8D44D" opacity="0.7"/>
+  <circle cx="155" cy="18" r="2.5" fill="#FFD700" opacity="0.6"/>
+  <circle cx="162" cy="30" r="2" fill="#C39FE8" opacity="0.7"/>
+  <path d="M125 10 L120 4" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
+  <path d="M157 16 L162 10" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
   <!-- Wand decorative band -->
-  <rect x="136" y="180" width="12" height="8" fill="#9B59B6" rx="2"/>
+  <rect x="136" y="90" width="12" height="8" fill="#9B59B6" rx="2"/>
   <!-- Wand grip -->
-  <rect x="137" y="240" width="10" height="44" fill="#5C3317" rx="3"/>
+  <rect x="137" y="150" width="10" height="44" fill="#5C3317" rx="3"/>
   <!-- Pommel -->
-  <ellipse cx="142" cy="288" rx="8" ry="6" fill="#9B59B6"/>
-  <circle cx="142" cy="288" r="3" fill="#C39FE8"/>
+  <ellipse cx="142" cy="198" rx="8" ry="6" fill="#9B59B6"/>
+  <circle cx="142" cy="198" r="3" fill="#C39FE8"/>
 </svg>
