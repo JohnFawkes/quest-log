@@ -5,15 +5,15 @@
   <rect x="70" y="67" width="60" height="80" fill="#2C1670" rx="4"/>
   <!-- Robe flare at bottom -->
   <path d="M70 140 L60 270 L140 270 L130 140 Z" fill="#2C1670"/>
-  <!-- Wide sleeves (inner edge covers full shoulder width) -->
-  <path d="M72 69 L54 69 L36 100 L50 150 L72 125 L72 69 Z" fill="#2C1670"/>
-  <path d="M128 69 L146 69 L164 100 L150 150 L128 125 L128 69 Z" fill="#2C1670"/>
+  <!-- Wide sleeves angled outward (~50°) so arms appear extended, not hanging down -->
+  <path d="M72 69 L54 69 L24 90 L30 116 L54 120 L72 106 L72 69 Z" fill="#2C1670"/>
+  <path d="M128 69 L146 69 L176 90 L170 116 L146 120 L128 106 L128 69 Z" fill="#2C1670"/>
   <!-- Robe trim (gold) -->
   <path d="M70 67 Q100 62 130 67" stroke="#FFD700" stroke-width="3" fill="none"/>
   <line x1="70" y1="140" x2="130" y2="140" stroke="#FFD700" stroke-width="2"/>
-  <!-- Sleeve trim -->
-  <path d="M36 100 L50 150" stroke="#FFD700" stroke-width="2" fill="none"/>
-  <path d="M164 100 L150 150" stroke="#FFD700" stroke-width="2" fill="none"/>
+  <!-- Sleeve trim (outer edge of each sleeve) -->
+  <path d="M24 90 L30 116" stroke="#FFD700" stroke-width="2" fill="none"/>
+  <path d="M176 90 L170 116" stroke="#FFD700" stroke-width="2" fill="none"/>
   <!-- Hem trim -->
   <path d="M60 270 L140 270" stroke="#FFD700" stroke-width="2.5"/>
   <!-- Star pattern on robe -->

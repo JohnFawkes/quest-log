@@ -1,35 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
   <g transform="translate(0,36)">
-  <!-- Lit Torch - handle grip at left hand (cy≈164) -->
+  <!-- Lit Torch - shifted 6px left to clear left arm (arm starts at x=54) -->
   <!-- Handle -->
-  <rect x="46" y="115" width="12" height="110" fill="#5C3317" rx="4"/>
+  <rect x="40" y="115" width="12" height="110" fill="#5C3317" rx="4"/>
   <!-- Handle grip wrapping -->
-  <rect x="46" y="125" width="12" height="5" fill="#3B2A1A"/>
-  <rect x="46" y="140" width="12" height="5" fill="#3B2A1A"/>
-  <rect x="46" y="155" width="12" height="5" fill="#3B2A1A"/>
-  <rect x="46" y="170" width="12" height="5" fill="#3B2A1A"/>
+  <rect x="40" y="125" width="12" height="5" fill="#3B2A1A"/>
+  <rect x="40" y="140" width="12" height="5" fill="#3B2A1A"/>
+  <rect x="40" y="155" width="12" height="5" fill="#3B2A1A"/>
+  <rect x="40" y="170" width="12" height="5" fill="#3B2A1A"/>
   <!-- Torch head -->
-  <rect x="42" y="90" width="20" height="30" fill="#6B4226" rx="3"/>
+  <rect x="36" y="90" width="20" height="30" fill="#6B4226" rx="3"/>
   <!-- Wrapping/binding -->
-  <line x1="42" y1="98" x2="62" y2="98" stroke="#3B2A1A" stroke-width="2"/>
-  <line x1="42" y1="106" x2="62" y2="106" stroke="#3B2A1A" stroke-width="2"/>
-  <!-- Flame (animated glow using layers) -->
+  <line x1="36" y1="98" x2="56" y2="98" stroke="#3B2A1A" stroke-width="2"/>
+  <line x1="36" y1="106" x2="56" y2="106" stroke="#3B2A1A" stroke-width="2"/>
+  <!-- Flame -->
   <!-- Outer flame glow -->
-  <ellipse cx="52" cy="78" rx="18" ry="22" fill="#FF6B35" opacity="0.3"/>
+  <ellipse cx="46" cy="78" rx="18" ry="22" fill="#FF6B35" opacity="0.3"/>
   <!-- Main flame shape -->
-  <path d="M40 95 Q42 78 52 65 Q62 78 64 95" fill="#FF8C00"/>
+  <path d="M34 95 Q36 78 46 65 Q56 78 58 95" fill="#FF8C00"/>
   <!-- Inner flame -->
-  <path d="M44 95 Q46 82 52 72 Q58 82 60 95" fill="#FFA500"/>
+  <path d="M38 95 Q40 82 46 72 Q52 82 54 95" fill="#FFA500"/>
   <!-- Hot core -->
-  <path d="M47 95 Q49 85 52 78 Q55 85 57 95" fill="#FFD700"/>
+  <path d="M41 95 Q43 85 46 78 Q49 85 51 95" fill="#FFD700"/>
   <!-- White hot tip -->
-  <ellipse cx="52" cy="78" rx="4" ry="6" fill="#FFFACD" opacity="0.8"/>
+  <ellipse cx="46" cy="78" rx="4" ry="6" fill="#FFFACD" opacity="0.8"/>
   <!-- Flame sparkles -->
-  <circle cx="44" cy="74" r="2" fill="#FF6B35" opacity="0.6"/>
-  <circle cx="60" cy="70" r="2" fill="#FF6B35" opacity="0.5"/>
-  <circle cx="48" cy="65" r="1.5" fill="#FFA500" opacity="0.5"/>
+  <circle cx="38" cy="74" r="2" fill="#FF6B35" opacity="0.6"/>
+  <circle cx="54" cy="70" r="2" fill="#FF6B35" opacity="0.5"/>
+  <circle cx="42" cy="65" r="1.5" fill="#FFA500" opacity="0.5"/>
   <!-- Smoke wisps -->
-  <path d="M52 63 Q48 54 52 46 Q56 52 52 60" stroke="#888" stroke-width="1.5" fill="none" opacity="0.3"/>
-  <path d="M52 63 Q55 50 58 45" stroke="#888" stroke-width="1" fill="none" opacity="0.2"/>
+  <path d="M46 63 Q42 54 46 46 Q50 52 46 60" stroke="#888" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <path d="M46 63 Q49 50 52 45" stroke="#888" stroke-width="1" fill="none" opacity="0.2"/>
   </g>
 </svg>

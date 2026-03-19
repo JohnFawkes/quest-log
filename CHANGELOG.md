@@ -9,6 +9,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 > Changes on the current branch, not yet merged to `main`.
 
+### Fixed
+- Avatar SVG — ranger hood redesigned as a transparent-face cowl so the character's face is no longer covered.
+- Avatar SVG — robe sleeves now angle outward at ~50° so arms appear extended rather than hanging straight down.
+- Avatar SVG — dress arms replaced with a single continuous puff-to-wrist path, eliminating the segmented "crossed arms" illusion.
+- Avatar SVG — plate armor arm guards extended upward to overlap the pauldron base, closing the skin gap.
+- Avatar SVG — sword blade shortened and grip centred on the right hand.
+- Avatar SVG — dagger blade now starts at the crossguard instead of below it.
+- Avatar SVG — bow arrow redirected to point right (away from body) instead of into the character's torso.
+- Avatar SVG — battle axe, staff, and wand shifted right to clear the body arm.
+- Avatar SVG — longsword crossguard narrowed from 80 px to 50 px.
+- Avatar SVG — torch shifted left to clear the left arm.
+- Avatar SVG — spellbook shifted up 20 px so the hand grips the centre of the book.
+- Avatar SVG — kite shield shifted up and right so the arm strap aligns with the left arm and the shield covers the arm area.
+- Avatar SVG — wand sparkles moved to x > 150 so none overlap the body.
+
 ---
 
 ## [v0.2.0]

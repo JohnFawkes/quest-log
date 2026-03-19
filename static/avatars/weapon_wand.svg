@@ -10,14 +10,14 @@
   <!-- Star glow -->
   <circle cx="146" cy="43" r="12" fill="#FFD700" opacity="0.22"/>
   <circle cx="146" cy="43" r="7" fill="#FFD700" opacity="0.28"/>
-  <!-- Sparkles -->
-  <circle cx="130" cy="30" r="2.5" fill="#FFD700" opacity="0.7"/>
-  <circle cx="125" cy="46" r="2" fill="#C39FE8" opacity="0.8"/>
-  <circle cx="136" cy="22" r="2" fill="#E8D44D" opacity="0.7"/>
-  <circle cx="160" cy="32" r="2.5" fill="#FFD700" opacity="0.6"/>
-  <circle cx="165" cy="48" r="2" fill="#C39FE8" opacity="0.7"/>
-  <path d="M131 27 L126 21" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
-  <path d="M159 28 L164 22" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
+  <!-- Sparkles (all to the right of the body, x>150) -->
+  <circle cx="158" cy="25" r="2.5" fill="#FFD700" opacity="0.7"/>
+  <circle cx="162" cy="48" r="2" fill="#C39FE8" opacity="0.8"/>
+  <circle cx="168" cy="18" r="2" fill="#E8D44D" opacity="0.7"/>
+  <circle cx="172" cy="34" r="2.5" fill="#FFD700" opacity="0.6"/>
+  <circle cx="170" cy="52" r="2" fill="#C39FE8" opacity="0.7"/>
+  <path d="M155 22 L162 16" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
+  <path d="M170 30 L175 24" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
   <!-- Decorative gem band (midpoint of shaft) -->
   <rect x="139" y="110" width="14" height="8" fill="#9B59B6" rx="2"/>
   <circle cx="146" cy="114" r="3" fill="#C39FE8" opacity="0.8"/>
