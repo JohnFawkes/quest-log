@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to Quest Log are documented here.
-Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
@@ -9,83 +9,151 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 > Changes on the current branch, not yet merged to `main`.
 
+---
+
+## [v0.2.0]
+
 ### Added
-- **Apprise notifications** — replaced the Discord-only webhook with [Apprise](https://github.com/caronc/apprise), supporting Discord, Telegram, Slack, Ntfy, Gotify, and [100+ other services](https://github.com/caronc/apprise/wiki) via `APPRISE_URLS`. `DISCORD_WEBHOOK_URL` continues to work alongside it.
-- **Notification icon / avatar URL** — admins can set a custom icon URL in *Notification Settings* (Guild Hall) used as the bot avatar in Discord and other supported services.
-- **Approve / Reject quest via link** — submission notifications include one-click approve and reject links usable directly from Discord, Telegram, email, etc. without logging in. Links are single-use.
-- **Delete user** — admins can permanently remove an adventurer and all their quest history from the Guild Hall.
-- **Google → local account migration** — users signed in via Google OAuth can set a local password under *Adventurer Settings*, enabling email/password login without Google.
-- **Maintenance: clean up rejected entries** — button in the *Maintenance* section of the Guild Hall to permanently delete all rejected quest log entries and their attached image files.
+- User deletion — admins can permanently remove an adventurer and all their quest history from the Guild Hall.
 
 ### Fixed
-- Timestamps in the UI now respect the server's `TZ` environment variable via a `localtime` Jinja2 filter (previously UTC was displayed raw, causing off-by-one date issues for non-UTC timezones).
-- Rejected log entry cleanup now performs a bulk SQL `DELETE` rather than per-object ORM deletes, which previously left rows in the database.
-
-### Changed
-- Test notification button now reflects all configured Apprise services (not just Discord).
-- Notification helper renamed from `send_discord_webhook` to `send_notification`.
+- Timestamps in the UI now respect the `TZ` environment variable via a `localtime` Jinja2 filter. Previously UTC was displayed raw, causing off-by-one date issues for non-UTC timezones.
 
 ---
 
-## [0.6.0] — Quest Editing & Streak Bonuses
+## [v0.1.0]
 
 ### Added
-- **Quest editing** — admins can edit existing quests (name, description, assigned adventurers, schedule, penalty, gem reward) from the Guild Hall.
-- **Streak bonuses** — quests can award a gem multiplier every N consecutive approved completions (configurable per quest at creation time).
-- **Multi-user quest assignment** — a single quest can now be assigned to multiple adventurers via a many-to-many relationship.
+- Google → local account migration — users signed in via Google OAuth can set a local password under *Adventurer Settings*, enabling email/password login without needing Google.
 
 ---
 
-## [0.5.0] — User & Password Management
-
-### Added
-- **Admin password reset** — Guild Masters can reset any user's password; the user is forced to set a new one on next login.
-- **Separate password-change flow** — admin setup (first login) and post-reset password changes now use separate routes and pages.
-- **Manual gem adjustment** — admins can add or deduct gems from any user directly from the Guild Hall.
+## [v0.0.27]
 
 ### Fixed
-- Debug mode was enabled in production; now controlled by `FLASK_DEBUG` environment variable.
+- Rejected log entry cleanup now performs a bulk SQL `DELETE` instead of per-object ORM deletes, which previously failed to remove rows from the database.
 
 ---
 
-## [0.4.0] — Notifications & Discord Webhook
+## [v0.0.26]
+
+### Fixed
+- Maintenance cleanup now deletes entire rejected `Completion` rows (including the database entry), not just the attached image file.
+
+---
+
+## [v0.0.25]
+
+### Added
+- Apprise notifications — replaced the Discord-only webhook with [Apprise](https://github.com/caronc/apprise), supporting Discord, Telegram, Slack, Ntfy, Gotify, and [100+ other services](https://github.com/caronc/apprise/wiki) via `APPRISE_URLS`. `DISCORD_WEBHOOK_URL` continues to work alongside it.
+- Notification icon / avatar URL — admins can set a custom icon URL in *Notification Settings* used as the bot avatar in Discord and other supported services.
+- Approve / Reject quest via link — submission notifications include one-click approve and reject links usable directly from Discord, Telegram, email, etc. without logging in. Links are single-use.
+- Maintenance section — new section in the Guild Hall admin panel with a button to permanently delete all rejected quest log entries and their attached image files.
+
+---
+
+## [v0.0.24]
 
 ### Added
 - Discord webhook notifications for quest submissions, approvals, reward requests, and redemptions.
 - Test webhook button in the Guild Hall admin panel.
-- Improved webhook logging.
-
----
-
-## [0.3.0] — Quest Descriptions & Schedule Improvements
-
-### Added
-- Quest description field displayed on the dashboard.
-- Active quests list on the admin dashboard (excluding demo account).
-
----
-
-## [0.2.0] — Security & Quality
 
 ### Changed
-- Improved codebase security, quality, and consistency (input validation, session config, proxy fix).
-- CI pipeline hardened; Docker image signed with Cosign.
-- Trivy vulnerability scanning added to CI.
-- Renovate configured for automated dependency updates.
+- Improved webhook error logging.
 
 ---
 
-## [0.1.0] — Initial Release
+## [v0.0.23]
+
+### Changed
+- Admin setup (first login with default `admin` account) and post-password-reset flows now use separate routes and pages.
+
+---
+
+## [v0.0.22]
 
 ### Added
-- Core habit tracking with RPG theming (quests, gems, adventurers, Guild Masters).
-- Photo proof upload for quest completions.
-- Admin approval / rejection workflow.
-- Gem-based reward shop with user reward requests.
-- Daily, weekly, bi-weekly, and interval quest schedules.
-- Penalty system for missed quests.
-- Google OAuth and local email/password authentication.
-- Demo user with pre-seeded content.
-- Multiple UI themes (Dungeon, Royal Court, Ranger's Lodge, Dragon's Lair, Sorcerer's Tower, Dwarven Forge).
-- Docker + Docker Compose deployment with Gunicorn.
-- GitHub Actions CI/CD pipeline (build, test, version, publish to GHCR).
+- Admins can reset any user's password from the Guild Hall. The user is forced to set a new one on next login.
+
+---
+
+## [v0.0.21]
+
+### Added
+- Multi-user quest assignment — a single quest can be assigned to multiple adventurers via a many-to-many relationship.
+- Manual gem adjustment — admins can add or deduct gems from any user directly from the Guild Hall.
+
+### Fixed
+- Debug mode was enabled in production; now controlled by the `FLASK_DEBUG` environment variable.
+
+---
+
+## [v0.0.20]
+
+### Added
+- Quest editing — admins can edit existing quests (name, description, assigned adventurers, schedule, penalty, gem reward) from the Guild Hall.
+- Streak bonuses — quests can award a gem multiplier every N consecutive approved completions, configurable per quest at creation time.
+
+---
+
+## [v0.0.19]
+
+### Security
+- Upgraded pip to v26.0 to address CVE-2026-1703.
+
+---
+
+## [v0.0.18]
+
+### Added
+- Trivy vulnerability scanning added to the CI pipeline.
+- Active quests list on admin dashboard now shows all users (excluding the demo account).
+
+---
+
+## [v0.0.12] – [v0.0.17]
+
+### Changed
+- Renovate automated dependency updates (Docker actions, Python base image).
+
+---
+
+## [v0.0.11]
+
+### Added
+- Medieval-themed UI overhaul: multiple themes (Dungeon, Royal Court, Ranger's Lodge, Dragon's Lair, Sorcerer's Tower, Dwarven Forge) with live preview in settings.
+- RPG-themed README rewrite.
+
+---
+
+## [v0.0.12]
+
+### Added
+- Quest description field added to quest creation form and displayed on the dashboard.
+
+---
+
+## [v0.0.10]
+
+### Added
+- CLAUDE.md with comprehensive codebase documentation.
+
+### Fixed
+- Demo user's quests now correctly filtered from the admin panel.
+- Bind-mounted volume read-only database error resolved.
+- Naive vs. aware datetime comparison crash in `check_missed_habits`.
+
+---
+
+## [v0.0.5] – [v0.0.9]
+
+### Changed
+- CI/CD: PR build workflow refined (comment triggers → label triggers → permission fixes → caching improvements).
+
+---
+
+## [v0.0.1] – [v0.0.4]
+
+### Added
+- Initial release: core habit tracking with RPG theming (quests, gems, adventurers, Guild Masters), photo proof upload, admin approval/rejection workflow, gem-based reward shop, daily/weekly/bi-weekly/interval quest schedules, penalty system, Google OAuth and local email/password authentication, demo user with pre-seeded content, Docker + Docker Compose deployment with Gunicorn, GitHub Actions CI/CD pipeline.
+- Renovate configured for automated dependency updates (FontAwesome, Python).
