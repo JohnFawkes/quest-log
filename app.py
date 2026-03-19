@@ -227,9 +227,12 @@ def send_notification(content, image_filename=None, completion_id=None, action_t
         logger.warning("Notification error: %s", e)
 
 def is_habit_due_on_date(habit, check_date):
-    check_date = check_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    local_tz = _get_localtz()
+    if check_date.tzinfo is None:
+        check_date = check_date.replace(tzinfo=timezone.utc)
+    check_date = check_date.astimezone(local_tz).replace(hour=0, minute=0, second=0, microsecond=0)
     created = habit.created_at if habit.created_at.tzinfo else habit.created_at.replace(tzinfo=timezone.utc)
-    habit_start = created.replace(hour=0, minute=0, second=0, microsecond=0)
+    habit_start = created.astimezone(local_tz).replace(hour=0, minute=0, second=0, microsecond=0)
     
     if habit.schedule_type == 'daily':
         return True
@@ -252,7 +255,7 @@ def is_habit_due_on_date(habit, check_date):
 
 def calculate_next_due_date(habit):
     """Finds the next due date for a habit starting from tomorrow."""
-    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today = datetime.now(_get_localtz()).replace(hour=0, minute=0, second=0, microsecond=0)
     check_date = today + timedelta(days=1)
     
     # Limit search to 30 days to prevent infinite loops on broken schedules
@@ -269,8 +272,8 @@ def check_missed_habits(user):
     last_check = user.last_penalty_check
     if last_check.tzinfo is None:
         last_check = last_check.replace(tzinfo=timezone.utc)
-    now = datetime.now(timezone.utc)
-    check_date = last_check.replace(hour=0, minute=0, second=0, microsecond=0)
+    now = datetime.now(_get_localtz())
+    check_date = last_check.astimezone(_get_localtz()).replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
     
     if check_date >= yesterday:
@@ -703,7 +706,7 @@ def logout():
 @login_required
 def dashboard():
     check_missed_habits(current_user)
-    today = datetime.now(timezone.utc)
+    today = datetime.now(_get_localtz())
     todays_habits = []
     upcoming_habits = []
 
