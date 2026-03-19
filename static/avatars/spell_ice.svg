@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Ice Aura -->
   <!-- Ice crystal shards floating around figure -->
   <!-- Large crystal left -->
@@ -32,4 +33,5 @@
   <circle cx="114" cy="148" r="2" fill="#87CEEB" opacity="0.6"/>
   <circle cx="72" cy="165" r="2" fill="#B0E8FF" opacity="0.5"/>
   <circle cx="130" cy="160" r="2.5" fill="#B0E8FF" opacity="0.6"/>
+  </g>
 </svg>

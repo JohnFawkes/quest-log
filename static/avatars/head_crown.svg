@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <!-- Royal Crown -->
+  <!-- Royal Crown - band sits at top of head (y≈44 after body shift) -->
   <!-- Crown band -->
   <rect x="76" y="26" width="48" height="16" fill="#FFD700" rx="2"/>
-  <!-- Crown points -->
+  <!-- Crown points (extend upward, fully visible with body shifted down) -->
   <polygon points="76,26 84,8 92,26" fill="#FFD700"/>
   <polygon points="92,26 100,6 108,26" fill="#FFD700"/>
   <polygon points="108,26 116,8 124,26" fill="#FFD700"/>

@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Iron Helm - starter -->
   <!-- Dome -->
   <ellipse cx="100" cy="20" rx="27" ry="20" fill="#8B9DA8"/>
@@ -17,4 +18,5 @@
   <circle cx="81" cy="22" r="2" fill="#6E7F88"/>
   <circle cx="119" cy="22" r="2" fill="#6E7F88"/>
   <circle cx="100" cy="18" r="2" fill="#6E7F88"/>
+  </g>
 </svg>

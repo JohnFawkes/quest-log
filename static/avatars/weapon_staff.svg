@@ -1,27 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <!-- Wizard Staff with Crystal -->
+  <g transform="translate(0,36)">
+  <!-- Wizard Staff with Crystal - grip rings at hand level (cy≈160) -->
   <!-- Staff shaft -->
-  <rect x="146" y="80" width="10" height="220" fill="#6B4226" rx="5"/>
+  <rect x="146" y="40" width="10" height="220" fill="#6B4226" rx="5"/>
   <!-- Wood grain -->
-  <line x1="149" y1="90" x2="153" y2="110" stroke="#5A3318" stroke-width="1" opacity="0.6"/>
-  <line x1="148" y1="130" x2="154" y2="155" stroke="#5A3318" stroke-width="1" opacity="0.6"/>
-  <line x1="149" y1="180" x2="152" y2="205" stroke="#5A3318" stroke-width="1" opacity="0.6"/>
+  <line x1="149" y1="50" x2="153" y2="70" stroke="#5A3318" stroke-width="1" opacity="0.6"/>
+  <line x1="148" y1="90" x2="154" y2="115" stroke="#5A3318" stroke-width="1" opacity="0.6"/>
+  <line x1="149" y1="140" x2="152" y2="165" stroke="#5A3318" stroke-width="1" opacity="0.6"/>
   <!-- Staff top mount -->
-  <rect x="143" y="72" width="16" height="12" fill="#C49A28" rx="2"/>
+  <rect x="143" y="32" width="16" height="12" fill="#C49A28" rx="2"/>
   <!-- Crystal orb -->
-  <circle cx="151" cy="55" r="22" fill="#9B59B6" opacity="0.8"/>
-  <circle cx="151" cy="55" r="18" fill="#8B2FBF" opacity="0.6"/>
+  <circle cx="151" cy="15" r="22" fill="#9B59B6" opacity="0.8"/>
+  <circle cx="151" cy="15" r="18" fill="#8B2FBF" opacity="0.6"/>
   <!-- Crystal facets -->
-  <polygon points="151,35 163,55 151,70 139,55" fill="#C39FE8" opacity="0.4"/>
+  <polygon points="151,-5 163,15 151,30 139,15" fill="#C39FE8" opacity="0.4"/>
   <!-- Crystal glow -->
-  <circle cx="145" cy="48" r="7" fill="#E0C8F8" opacity="0.6"/>
-  <circle cx="143" cy="46" r="4" fill="white" opacity="0.5"/>
+  <circle cx="145" cy="8" r="7" fill="#E0C8F8" opacity="0.6"/>
+  <circle cx="143" cy="6" r="4" fill="white" opacity="0.5"/>
   <!-- Orb magical glow -->
-  <circle cx="151" cy="55" r="26" fill="none" stroke="#C39FE8" stroke-width="2" opacity="0.3"/>
-  <circle cx="151" cy="55" r="30" fill="none" stroke="#9B59B6" stroke-width="1" opacity="0.2"/>
-  <!-- Staff tip (bottom) -->
-  <polygon points="146,300 156,300 151,316" fill="#C49A28"/>
-  <!-- Staff rings decorative -->
-  <rect x="144" y="150" width="14" height="6" fill="#C49A28" rx="1"/>
-  <rect x="144" y="200" width="14" height="6" fill="#C49A28" rx="1"/>
+  <circle cx="151" cy="15" r="26" fill="none" stroke="#C39FE8" stroke-width="2" opacity="0.3"/>
+  <circle cx="151" cy="15" r="30" fill="none" stroke="#9B59B6" stroke-width="1" opacity="0.2"/>
+  <!-- Staff tip (bottom, near feet) -->
+  <polygon points="146,260 156,260 151,276" fill="#C49A28"/>
+  <!-- Staff rings decorative (grip area) -->
+  <rect x="144" y="110" width="14" height="6" fill="#C49A28" rx="1"/>
+  <rect x="144" y="160" width="14" height="6" fill="#C49A28" rx="1"/>
+  </g>
 </svg>

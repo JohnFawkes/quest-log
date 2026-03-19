@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Plain Tunic - starter -->
   <!-- Torso -->
   <rect x="72" y="67" width="56" height="74" fill="#8B7355" rx="4"/>
@@ -21,4 +22,5 @@
   <rect x="127" y="116" width="19" height="6" fill="#7A6347" rx="2"/>
   <!-- Simple stitch line -->
   <path d="M72 95 L128 95" stroke="#7A6347" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+  </g>
 </svg>

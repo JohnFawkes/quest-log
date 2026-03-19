@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Round Wooden Shield - starter (left side) -->
   <!-- Shield body -->
   <circle cx="52" cy="170" r="36" fill="#8B6914"/>
@@ -27,4 +28,5 @@
   <path d="M42 152 Q30 170 42 188" stroke="#3B2A1A" stroke-width="5" fill="none" stroke-linecap="round"/>
   <!-- Rim shine -->
   <path d="M22 150 Q52 134 82 150" stroke="#C0CDD3" stroke-width="1.5" fill="none" opacity="0.5"/>
+  </g>
 </svg>

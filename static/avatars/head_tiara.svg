@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <!-- Tiara -->
+  <!-- Tiara - band sits at top of head (y≈44 after body shift) -->
   <!-- Tiara band arc -->
   <path d="M76 42 Q100 28 124 42" stroke="#C0C0C0" stroke-width="5" fill="none"/>
   <!-- Center tall piece -->

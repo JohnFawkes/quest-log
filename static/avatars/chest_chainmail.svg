@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Chainmail Hauberk -->
   <!-- Main body -->
   <rect x="72" y="67" width="56" height="80" fill="#8B9DA8" rx="4"/>
@@ -45,4 +46,5 @@
   <rect x="127" y="120" width="19" height="5" fill="#7A8D96" rx="2"/>
   <!-- Metal sheen -->
   <path d="M72 70 L128 70" stroke="#C0CDD3" stroke-width="1.5" opacity="0.4"/>
+  </g>
 </svg>

@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <!-- Wizard Hat -->
-  <!-- Brim -->
-  <ellipse cx="100" cy="44" rx="36" ry="10" fill="#2C1670"/>
+  <!-- Wizard Hat - brim at y=44 = top of head after body shift; full hat visible -->
   <!-- Hat cone -->
   <polygon points="100,0 72,44 128,44" fill="#3B1F8C"/>
   <!-- Hat band -->
   <rect x="72" y="38" width="56" height="8" fill="#6B2D8B" rx="1"/>
-  <!-- Stars on hat -->
+  <!-- Brim -->
+  <ellipse cx="100" cy="44" rx="36" ry="10" fill="#2C1670"/>
+  <!-- Stars on hat (all visible now) -->
   <text x="86" y="22" font-size="10" fill="#FFD700" opacity="0.9">★</text>
   <text x="104" y="14" font-size="8" fill="#FFD700" opacity="0.8">★</text>
   <text x="94" y="34" font-size="7" fill="#C0C0C0" opacity="0.7">✦</text>

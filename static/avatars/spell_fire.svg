@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Fire Aura -->
   <!-- Ground flames left -->
   <path d="M60 280 Q55 265 62 255 Q58 265 65 270 Q60 260 68 252 Q62 265 70 272 Q65 260 75 255 Q68 268 76 278" fill="#FF6B35" opacity="0.8"/>
@@ -23,4 +24,5 @@
   <!-- Flame cuff at wrists -->
   <path d="M55 160 Q50 152 58 146 Q54 155 60 158" fill="#FF6B35" opacity="0.6"/>
   <path d="M145 160 Q150 152 142 146 Q146 155 140 158" fill="#FF6B35" opacity="0.6"/>
+  </g>
 </svg>

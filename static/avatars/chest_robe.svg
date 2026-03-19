@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Wizard Robe -->
   <!-- Main robe body -->
   <rect x="70" y="67" width="60" height="80" fill="#2C1670" rx="4"/>
@@ -24,4 +25,5 @@
   <path d="M100 136 L96 154 L100 156 L104 154 L100 136" fill="#FFD700"/>
   <!-- Collar -->
   <path d="M84 67 L100 78 L116 67" fill="#3B1F8C" stroke="#FFD700" stroke-width="1"/>
+  </g>
 </svg>

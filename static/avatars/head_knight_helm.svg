@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Full Knight Great Helm -->
   <!-- Dome -->
   <ellipse cx="100" cy="18" rx="28" ry="19" fill="#7A8D96"/>
@@ -25,4 +26,5 @@
   <circle cx="124" cy="24" r="2" fill="#5A6E78"/>
   <circle cx="76" cy="46" r="2" fill="#5A6E78"/>
   <circle cx="124" cy="46" r="2" fill="#5A6E78"/>
+  </g>
 </svg>

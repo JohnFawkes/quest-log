@@ -1,27 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
-  <!-- Magic Wand -->
-  <!-- Wand shaft (elegant, tapered) -->
-  <path d="M155 300 L140 120" stroke="#3B2A1A" stroke-width="7" stroke-linecap="round"/>
-  <!-- Wand shaft highlight -->
-  <path d="M153 298 L139 122" stroke="#6B4226" stroke-width="2" opacity="0.6"/>
-  <!-- Wand star tip -->
-  <path d="M140,120 L135,108 L140,120 L128,115 L140,120 L134,130 L140,120 L152,115 L140,120 L146,130 L140,120 L145,108 Z" fill="#FFD700"/>
+  <g transform="translate(0,36)">
+  <!-- Magic Wand - straight vertical, grip at right hand (cy≈164) -->
+  <!-- Wand shaft (slim dark wood) -->
+  <rect x="143" y="46" width="6" height="154" fill="#3B2A1A" rx="3"/>
+  <!-- Shaft highlight -->
+  <rect x="147" y="48" width="2" height="150" fill="#6B4226" rx="1" opacity="0.6"/>
+  <!-- Wand star tip (6-pointed, centred at top of shaft) -->
+  <path d="M146,46 L143,35 L146,46 L135,41 L146,46 L141,56 L146,46 L157,41 L146,46 L151,56 L146,46 L149,35 Z" fill="#FFD700"/>
   <!-- Star glow -->
-  <circle cx="140" cy="118" r="12" fill="#FFD700" opacity="0.25"/>
-  <circle cx="140" cy="118" r="8" fill="#FFD700" opacity="0.3"/>
-  <!-- Sparkles emanating -->
-  <circle cx="124" cy="104" r="3" fill="#FFD700" opacity="0.7"/>
-  <circle cx="118" cy="118" r="2" fill="#C39FE8" opacity="0.8"/>
-  <circle cx="128" cy="96" r="2" fill="#E8D44D" opacity="0.7"/>
-  <circle cx="155" cy="108" r="2.5" fill="#FFD700" opacity="0.6"/>
-  <circle cx="162" cy="120" r="2" fill="#C39FE8" opacity="0.7"/>
-  <path d="M125 100 L120 94" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
-  <path d="M157 106 L162 100" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
-  <!-- Wand decorative band -->
-  <rect x="136" y="180" width="12" height="8" fill="#9B59B6" rx="2"/>
-  <!-- Wand grip -->
-  <rect x="137" y="240" width="10" height="44" fill="#5C3317" rx="3"/>
+  <circle cx="146" cy="43" r="12" fill="#FFD700" opacity="0.22"/>
+  <circle cx="146" cy="43" r="7" fill="#FFD700" opacity="0.28"/>
+  <!-- Sparkles -->
+  <circle cx="130" cy="30" r="2.5" fill="#FFD700" opacity="0.7"/>
+  <circle cx="125" cy="46" r="2" fill="#C39FE8" opacity="0.8"/>
+  <circle cx="136" cy="22" r="2" fill="#E8D44D" opacity="0.7"/>
+  <circle cx="160" cy="32" r="2.5" fill="#FFD700" opacity="0.6"/>
+  <circle cx="165" cy="48" r="2" fill="#C39FE8" opacity="0.7"/>
+  <path d="M131 27 L126 21" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
+  <path d="M159 28 L164 22" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
+  <!-- Decorative gem band (midpoint of shaft) -->
+  <rect x="139" y="110" width="14" height="8" fill="#9B59B6" rx="2"/>
+  <circle cx="146" cy="114" r="3" fill="#C39FE8" opacity="0.8"/>
+  <!-- Grip -->
+  <rect x="140" y="152" width="12" height="44" fill="#5C3317" rx="3"/>
   <!-- Pommel -->
-  <ellipse cx="142" cy="288" rx="8" ry="6" fill="#9B59B6"/>
-  <circle cx="142" cy="288" r="3" fill="#C39FE8"/>
+  <ellipse cx="146" cy="200" rx="9" ry="7" fill="#9B59B6"/>
+  <circle cx="146" cy="200" r="3.5" fill="#C39FE8"/>
+  </g>
 </svg>

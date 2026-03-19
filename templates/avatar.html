@@ -103,6 +103,26 @@
         {% for slot in ['head','chest','weapon','offhand','spell'] %}
         <div id="slot-{{ slot }}" class="slot-panel {% if not loop.first %}hidden{% endif %}">
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+
+            <!-- Unequip / None card -->
+            <div class="rounded-xl p-3 cursor-pointer transition-all item-card {{ 'ring-2 ring-yellow-400' if not equipped[slot] else '' }}"
+                 style="background:var(--bg-card);border:1px solid var(--border-color)"
+                 data-is-none="true"
+                 onclick="unequipItem('{{ slot }}', this)">
+              <div style="position:relative;width:100%;padding-bottom:100%;overflow:hidden;border-radius:0.5rem;background:var(--bg-body)">
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                  <i class="fas fa-ban text-4xl opacity-25"></i>
+                </div>
+              </div>
+              <p class="text-xs font-semibold mt-2 truncate" style="color:var(--text-heading)">None</p>
+              <p class="text-xs text-gray-400">unequip</p>
+              {% if not equipped[slot] %}
+              <p class="text-xs mt-1 text-yellow-400 font-semibold">Equipped</p>
+              {% else %}
+              <p class="text-xs mt-1 opacity-40">—</p>
+              {% endif %}
+            </div>
+
             {% for item in items_by_type[slot] %}
             {% set is_owned = item.id in owned_ids %}
             {% set is_equipped = equipped[slot] and equipped[slot].id == item.id %}
@@ -167,15 +187,36 @@ function showSlot(slot) {
 }
 
 function equipItem(slot, itemId, svgFilename, cardEl) {
-  // Update hidden input
   document.getElementById('input-' + slot).value = itemId;
-  // Update SVG layer
   document.getElementById('layer-' + slot).src = '/static/avatars/' + svgFilename;
-  // Update card styles in this slot
   document.querySelectorAll('#slot-' + slot + ' .item-card').forEach(c => {
     c.classList.remove('ring-2', 'ring-yellow-400');
     const badge = c.querySelector('p.text-xs.mt-1');
-    if (badge && badge.textContent.includes('Equipped')) {
+    if (badge && badge.textContent.trim() === 'Equipped') {
+      if (c.dataset.isNone === 'true') {
+        badge.className = 'text-xs mt-1 opacity-40';
+        badge.textContent = '—';
+      } else {
+        badge.className = 'text-xs mt-1 text-green-400';
+        badge.textContent = 'Owned';
+      }
+    }
+  });
+  cardEl.classList.add('ring-2', 'ring-yellow-400');
+  const badge = cardEl.querySelector('p.text-xs.mt-1');
+  if (badge) {
+    badge.className = 'text-xs mt-1 text-yellow-400 font-semibold';
+    badge.textContent = 'Equipped';
+  }
+}
+
+function unequipItem(slot, cardEl) {
+  document.getElementById('input-' + slot).value = '';
+  document.getElementById('layer-' + slot).src = '/static/avatars/' + slot + '_none.svg';
+  document.querySelectorAll('#slot-' + slot + ' .item-card').forEach(c => {
+    c.classList.remove('ring-2', 'ring-yellow-400');
+    const badge = c.querySelector('p.text-xs.mt-1');
+    if (badge && badge.textContent.trim() === 'Equipped') {
       badge.className = 'text-xs mt-1 text-green-400';
       badge.textContent = 'Owned';
     }

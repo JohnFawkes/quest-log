@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
   <!-- Lightning Aura -->
   <!-- Main lightning bolt left -->
   <path d="M62 80 L54 120 L66 120 L56 165 L74 110 L62 110 L72 80 Z" fill="#FFD700" opacity="0.85"/>
@@ -26,4 +27,5 @@
   <!-- Small crackles -->
   <path d="M72 100 L68 92 L74 88" stroke="#FFF380" stroke-width="1" fill="none" opacity="0.6"/>
   <path d="M128 100 L132 92 L126 88" stroke="#FFF380" stroke-width="1" fill="none" opacity="0.6"/>
+  </g>
 </svg>
