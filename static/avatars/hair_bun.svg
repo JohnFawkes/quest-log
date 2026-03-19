@@ -1,16 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
   <g transform="translate(0,36)">
-  <!-- Cover existing side hair and top with skin colour -->
-  <rect x="74" y="14" width="17" height="44" fill="#F5CBA7"/>
-  <rect x="109" y="14" width="17" height="44" fill="#F5CBA7"/>
-  <!-- Cover male short hair top -->
-  <ellipse cx="100" cy="16" rx="26" ry="14" fill="#F5CBA7"/>
-  <!-- Tight hair base on head -->
-  <ellipse cx="100" cy="14" rx="25" ry="12" fill="#5C3317"/>
-  <rect x="80" y="14" width="40" height="10" fill="#5C3317" rx="3"/>
-  <!-- Bun on top -->
-  <ellipse cx="100" cy="4" rx="14" ry="10" fill="#5C3317"/>
-  <!-- Hair tie detail -->
-  <ellipse cx="100" cy="13" rx="12" ry="3" fill="#3A1F0D"/>
+  <!-- Smooth hair base across top of head -->
+  <ellipse cx="100" cy="12" rx="26" ry="15" fill="#5C3317"/>
+  <rect x="74" y="12" width="52" height="20" fill="#5C3317"/>
+  <!-- Hair gathered upward to bun point -->
+  <ellipse cx="100" cy="7" rx="18" ry="11" fill="#5C3317"/>
+  <!-- Round bun -->
+  <ellipse cx="100" cy="-2" rx="13" ry="11" fill="#5C3317"/>
+  <!-- Bun depth shadow -->
+  <ellipse cx="100" cy="-3" rx="9" ry="7" fill="#4A2A10"/>
+  <!-- Bun highlight -->
+  <ellipse cx="96" cy="-6" rx="4" ry="3" fill="#7A4A20" opacity="0.5"/>
+  <!-- Hair tie at gather point -->
+  <ellipse cx="100" cy="11" rx="15" ry="3" fill="#2A1508"/>
   </g>
 </svg>

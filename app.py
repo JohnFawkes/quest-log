@@ -10,6 +10,7 @@ import time
 import types
 import zipfile
 from datetime import datetime, timedelta, timezone
+from urllib.parse import quote as _urlquote
 
 import apprise
 import requests as http_requests
@@ -274,10 +275,13 @@ def _build_apprise():
             if url:
                 ap.add(url)
     if discord_url:
-        # Convert to Apprise Discord URL format so we can inject avatar_url
-        m = re.match(r'https://discord(?:app)?\.com/api/webhooks/(\d+)/([^?]+)', discord_url)
+        # Convert to Apprise discord:// format so we can inject avatar_url.
+        # Token must exclude trailing slashes and '?' to avoid double-slash in
+        # the assembled URL.  The avatar_url value must be percent-encoded so
+        # that its own '://' and '/' don't confuse Apprise's URL parser.
+        m = re.match(r'https://discord(?:app)?\.com/api/webhooks/(\d+)/([^/?]+)', discord_url)
         if m and icon_url:
-            ap.add(f"discord://{m.group(1)}/{m.group(2)}?avatar_url={icon_url}")
+            ap.add(f"discord://{m.group(1)}/{m.group(2)}/?avatar_url={_urlquote(icon_url, safe='')}")
         else:
             ap.add(discord_url)
     return ap
