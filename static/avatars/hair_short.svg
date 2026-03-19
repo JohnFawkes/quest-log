@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <g transform="translate(0,36)">
+  <!-- Cover female side hair with skin colour (replaced by server-side route) -->
+  <rect x="74" y="25" width="17" height="33" fill="#F5CBA7"/>
+  <rect x="109" y="25" width="17" height="33" fill="#F5CBA7"/>
+  <!-- Short hair cap -->
+  <ellipse cx="100" cy="11" rx="26" ry="15" fill="#5C3317"/>
+  <rect x="74" y="11" width="52" height="18" fill="#5C3317"/>
+  <!-- Slight side tufts (ear-length) -->
+  <rect x="74" y="22" width="9" height="14" fill="#5C3317" rx="3"/>
+  <rect x="117" y="22" width="9" height="14" fill="#5C3317" rx="3"/>
+  </g>
+</svg>
