@@ -936,6 +936,29 @@ def delete_habit(habit_id):
     flash('Quest deleted.', 'info')
     return redirect(url_for('admin_panel'))
 
+@app.route('/admin/user/delete', methods=['POST'])
+@login_required
+def delete_user():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    user_id = request.form.get('user_id')
+    user = db.session.get(User, int(user_id))
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('admin_panel'))
+    if user.email == DEMO_EMAIL:
+        flash('Cannot delete the Demo user.', 'error')
+        return redirect(url_for('admin_panel'))
+    if user.id == current_user.id:
+        flash('You cannot delete your own account.', 'error')
+        return redirect(url_for('admin_panel'))
+    # Delete completions, remove from habit assignments, then delete user
+    Completion.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    user.assigned_habits.clear()
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'Adventurer "{user.name}" has been removed from the guild.', 'info')
+    return redirect(url_for('admin_panel'))
+
 @app.route('/admin/user/create', methods=['POST'])
 @login_required
 def create_user_admin():

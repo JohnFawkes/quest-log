@@ -25,6 +25,8 @@ Quest Log is a gamified habit tracker that transforms your daily tasks into an R
 | **Apprise Notifications** | Alerts via Discord, Telegram, Slack, Ntfy, Gotify, and [100+ more](https://github.com/caronc/apprise/wiki) through Apprise |
 | **One-Click Approvals** | Approve or reject quest submissions directly from Discord/Telegram via a link — no login needed |
 | **Notification Avatar** | Configure a custom icon URL shown as the bot avatar in Discord and other services |
+| **Google → Local Migration** | Convert a Google OAuth account to local email/password login from Settings |
+| **User Management** | Create, promote, reset passwords, adjust gems, and delete adventurers from the Guild Hall |
 | **Flexible Auth** | Local email/password or Google OAuth |
 | **Themes** | Multiple medieval-inspired themes — Dungeon, Royal Court, Ranger's Lodge, and more |
 
@@ -101,9 +103,17 @@ Set `APPRISE_URLS` to a comma-separated list of [Apprise-compatible URLs](https:
 
 Optionally set a **Notification Avatar URL** in the Guild Hall (*Notification Settings*) to display a custom icon alongside bot messages in Discord and other services.
 
+### User Management
+
+The **Recruit & Promote** section of the Guild Hall lets you create users, promote them to Guild Master, adjust gems, reset passwords, and **delete adventurers** (removing all their quest history).
+
+### Google → Local Account Migration
+
+Adventurers who signed up via Google can set a local password under *Adventurer Settings → Set a Local Password*. Once set, they can log in with email and password without needing Google.
+
 ### Maintenance
 
-The **Maintenance** section of the Guild Hall provides tools for routine upkeep, including a button to purge image files from rejected quest submissions and free up disk space.
+The **Maintenance** section of the Guild Hall lets you permanently delete all rejected quest log entries and their attached image files to reclaim disk space.
 
 ---
 

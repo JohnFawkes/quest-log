@@ -249,6 +249,21 @@
                     <p class="text-xs text-slate-400 dark:text-slate-500">User will be forced to change their password on next login.</p>
                 </form>
             </div>
+            <div class="border-t dark:border-slate-700 pt-4">
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-1"><i class="fas fa-user-times text-red-500"></i> Remove Adventurer</p>
+                <form action="{{ url_for('delete_user') }}" method="POST" class="space-y-2" onsubmit="return confirm('Permanently delete this adventurer and all their quest history? This cannot be undone.')">
+                    <select name="user_id" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
+                        {% for u in users %}
+                        {% if u.id != current_user.id %}
+                        <option value="{{ u.id }}">{{ u.name }} ({{ u.email }})</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 text-sm font-bold transition">
+                        <i class="fas fa-user-times mr-1"></i> Delete User
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
