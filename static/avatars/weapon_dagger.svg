@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Curved Dagger -->
+  <!-- Blade (curved) -->
+  <path d="M152 250 Q158 190 148 130" stroke="#C0CDD3" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <!-- Blade edge (sharp) -->
+  <path d="M150 248 Q155 188 146 130" stroke="#E8F0F5" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <!-- Blade tip -->
+  <polygon points="148,130 143,142 153,142" fill="#A8B8C4"/>
+  <!-- Crossguard (curved) -->
+  <path d="M138 220 Q152 214 166 220" stroke="#C49A28" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <!-- Guard gems -->
+  <circle cx="138" cy="220" r="4" fill="#E74C3C"/>
+  <circle cx="166" cy="220" r="4" fill="#E74C3C"/>
+  <!-- Grip -->
+  <rect x="144" y="224" width="14" height="36" fill="#3B2A1A" rx="3"/>
+  <!-- Grip wrapping (gold thread) -->
+  <path d="M144 228 Q151 226 158 228 M144 234 Q151 232 158 234 M144 240 Q151 238 158 240 M144 246 Q151 244 158 246 M144 252 Q151 250 158 252" stroke="#C49A28" stroke-width="1.5" fill="none"/>
+  <!-- Pommel -->
+  <circle cx="151" cy="262" r="7" fill="#C49A28"/>
+  <circle cx="151" cy="262" r="3" fill="#E74C3C"/>
+  <!-- Blade etch/pattern -->
+  <path d="M150 160 L153 170 M150 175 L153 185 M150 195 L153 205" stroke="#8898A8" stroke-width="1" opacity="0.5"/>
+</svg>

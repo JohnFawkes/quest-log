@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Full Knight Great Helm -->
+  <!-- Dome -->
+  <ellipse cx="100" cy="18" rx="28" ry="19" fill="#7A8D96"/>
+  <!-- Full face box -->
+  <rect x="72" y="18" width="56" height="36" fill="#7A8D96" rx="3"/>
+  <!-- Visor horizontal slots -->
+  <rect x="78" y="27" width="44" height="4" fill="#2C3E50" rx="1"/>
+  <rect x="78" y="34" width="44" height="4" fill="#2C3E50" rx="1"/>
+  <rect x="78" y="41" width="44" height="4" fill="#2C3E50" rx="1"/>
+  <!-- Breathing slots at bottom -->
+  <rect x="84" y="48" width="6" height="3" fill="#2C3E50" rx="1"/>
+  <rect x="95" y="48" width="6" height="3" fill="#2C3E50" rx="1"/>
+  <rect x="106" y="48" width="6" height="3" fill="#2C3E50" rx="1"/>
+  <!-- Neck guard -->
+  <rect x="78" y="52" width="44" height="10" fill="#6E7F88" rx="2"/>
+  <!-- Edge highlight -->
+  <path d="M72 18 Q100 6 128 18" stroke="#A0B4BE" stroke-width="2" fill="none" opacity="0.7"/>
+  <!-- Plume mount -->
+  <circle cx="100" cy="6" r="4" fill="#6E7F88"/>
+  <!-- Red plume -->
+  <path d="M100 6 Q90 -4 88 -8 M100 6 Q100 -6 100 -10 M100 6 Q110 -4 112 -8" stroke="#C0392B" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Rivets -->
+  <circle cx="76" cy="24" r="2" fill="#5A6E78"/>
+  <circle cx="124" cy="24" r="2" fill="#5A6E78"/>
+  <circle cx="76" cy="46" r="2" fill="#5A6E78"/>
+  <circle cx="124" cy="46" r="2" fill="#5A6E78"/>
+</svg>

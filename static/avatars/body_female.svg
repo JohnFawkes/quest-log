@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Head -->
+  <circle cx="100" cy="32" r="24" fill="#F5CBA7"/>
+  <!-- Long hair back -->
+  <ellipse cx="100" cy="12" rx="25" ry="14" fill="#8B4513"/>
+  <rect x="75" y="12" width="15" height="50" fill="#8B4513" rx="4"/>
+  <rect x="110" y="12" width="15" height="50" fill="#8B4513" rx="4"/>
+  <!-- Hair top -->
+  <ellipse cx="100" cy="12" rx="24" ry="13" fill="#8B4513"/>
+  <!-- Eyes -->
+  <ellipse cx="93" cy="30" rx="3" ry="2.5" fill="#2C1810"/>
+  <ellipse cx="107" cy="30" rx="3" ry="2.5" fill="#2C1810"/>
+  <circle cx="94" cy="29" r="1" fill="#fff" opacity="0.6"/>
+  <circle cx="108" cy="29" r="1" fill="#fff" opacity="0.6"/>
+  <!-- Lashes -->
+  <path d="M90 27 L91 25 M93 26 L93 24 M96 27 L97 25" stroke="#2C1810" stroke-width="1.2"/>
+  <path d="M104 27 L103 25 M107 26 L107 24 M110 27 L109 25" stroke="#2C1810" stroke-width="1.2"/>
+  <!-- Nose -->
+  <path d="M100 34 L98 38 L102 38" stroke="#C17A5A" stroke-width="1" fill="none"/>
+  <!-- Mouth (smile) -->
+  <path d="M96 41 Q100 45 104 41" stroke="#C17A5A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Jaw shadow -->
+  <path d="M78 38 Q78 56 100 58 Q122 56 122 38" fill="#E8B48C" opacity="0.35"/>
+  <!-- Neck -->
+  <rect x="93" y="55" width="14" height="14" fill="#F5CBA7"/>
+  <!-- Torso base (plain dress - overridden by chest items) -->
+  <rect x="74" y="67" width="52" height="74" fill="#C97BB2" rx="4"/>
+  <!-- Neckline -->
+  <path d="M93 67 Q100 75 107 67" fill="#B568A0" stroke="#A55090" stroke-width="1"/>
+  <!-- Waist cinch -->
+  <rect x="78" y="110" width="44" height="10" fill="#A55090" rx="3"/>
+  <!-- Left upper arm -->
+  <rect x="56" y="69" width="18" height="52" fill="#C97BB2" rx="4"/>
+  <!-- Right upper arm -->
+  <rect x="126" y="69" width="18" height="52" fill="#C97BB2" rx="4"/>
+  <!-- Left forearm skin -->
+  <rect x="57" y="119" width="15" height="40" fill="#F5CBA7" rx="3"/>
+  <!-- Right forearm skin -->
+  <rect x="128" y="119" width="15" height="40" fill="#F5CBA7" rx="3"/>
+  <!-- Left hand -->
+  <ellipse cx="64" cy="162" rx="9" ry="8" fill="#F5CBA7"/>
+  <!-- Right hand -->
+  <ellipse cx="136" cy="162" rx="9" ry="8" fill="#F5CBA7"/>
+  <!-- Skirt/hips -->
+  <path d="M70 139 L68 250 L132 250 L130 139 Z" fill="#C97BB2" rx="4"/>
+  <!-- Skirt detail lines -->
+  <line x1="82" y1="145" x2="78" y2="250" stroke="#B568A0" stroke-width="1" opacity="0.6"/>
+  <line x1="100" y1="145" x2="100" y2="250" stroke="#B568A0" stroke-width="1" opacity="0.6"/>
+  <line x1="118" y1="145" x2="122" y2="250" stroke="#B568A0" stroke-width="1" opacity="0.6"/>
+  <!-- Slipper left -->
+  <ellipse cx="83" cy="252" rx="16" ry="7" fill="#A55090"/>
+  <!-- Slipper right -->
+  <ellipse cx="117" cy="252" rx="16" ry="7" fill="#A55090"/>
+</svg>

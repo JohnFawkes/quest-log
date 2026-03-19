@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Recurve Bow -->
+  <!-- Bow limbs -->
+  <path d="M155 75 Q170 140 155 200" stroke="#8B6914" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <!-- Recurve tips -->
+  <path d="M155 75 Q158 62 148 60" stroke="#8B6914" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M155 200 Q158 213 148 215" stroke="#8B6914" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <!-- Bowstring -->
+  <line x1="148" y1="62" x2="148" y2="213" stroke="#F5F0E8" stroke-width="1.5"/>
+  <!-- Handle grip wrap -->
+  <rect x="146" y="130" width="18" height="14" fill="#5C3317" rx="2"/>
+  <!-- Arrow (nocked) -->
+  <line x1="148" y1="137" x2="120" y2="100" stroke="#8B6914" stroke-width="2"/>
+  <!-- Arrow fletching -->
+  <path d="M120 100 L115 93 L122 96 M120 100 L116 96 L119 103" fill="#C0392B"/>
+  <!-- Arrow tip -->
+  <polygon points="148,137 152,130 154,138" fill="#A8B8C4"/>
+  <!-- Bow decorative wrapping -->
+  <rect x="153" y="100" width="6" height="5" fill="#C49A28" rx="1"/>
+  <rect x="153" y="165" width="6" height="5" fill="#C49A28" rx="1"/>
+  <!-- Wood grain on bow -->
+  <path d="M158 100 Q164 130 160 162" stroke="#7A5C10" stroke-width="1.5" fill="none" opacity="0.4"/>
+</svg>

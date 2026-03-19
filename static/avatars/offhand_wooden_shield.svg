@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Round Wooden Shield - starter (left side) -->
+  <!-- Shield body -->
+  <circle cx="52" cy="170" r="36" fill="#8B6914"/>
+  <!-- Wood grain bands -->
+  <circle cx="52" cy="170" r="36" fill="none" stroke="#7A5C10" stroke-width="3" opacity="0.5"/>
+  <circle cx="52" cy="170" r="28" fill="none" stroke="#7A5C10" stroke-width="2" opacity="0.4"/>
+  <circle cx="52" cy="170" r="20" fill="none" stroke="#7A5C10" stroke-width="1.5" opacity="0.3"/>
+  <!-- Wood plank lines -->
+  <line x1="16" y1="158" x2="88" y2="158" stroke="#7A5C10" stroke-width="1.5" opacity="0.5"/>
+  <line x1="16" y1="170" x2="88" y2="170" stroke="#7A5C10" stroke-width="1.5" opacity="0.5"/>
+  <line x1="16" y1="182" x2="88" y2="182" stroke="#7A5C10" stroke-width="1.5" opacity="0.5"/>
+  <!-- Iron rim -->
+  <circle cx="52" cy="170" r="36" fill="none" stroke="#8B9DA8" stroke-width="4"/>
+  <!-- Boss (center metal piece) -->
+  <circle cx="52" cy="170" r="10" fill="#8B9DA8"/>
+  <circle cx="52" cy="170" r="6" fill="#A8B8C4"/>
+  <circle cx="52" cy="170" r="3" fill="#7A8D96"/>
+  <!-- Rivets on rim -->
+  <circle cx="52" cy="134" r="3" fill="#7A8D96"/>
+  <circle cx="86" cy="152" r="3" fill="#7A8D96"/>
+  <circle cx="86" cy="188" r="3" fill="#7A8D96"/>
+  <circle cx="52" cy="206" r="3" fill="#7A8D96"/>
+  <circle cx="18" cy="188" r="3" fill="#7A8D96"/>
+  <circle cx="18" cy="152" r="3" fill="#7A8D96"/>
+  <!-- Arm strap -->
+  <path d="M42 152 Q30 170 42 188" stroke="#3B2A1A" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Rim shine -->
+  <path d="M22 150 Q52 134 82 150" stroke="#C0CDD3" stroke-width="1.5" fill="none" opacity="0.5"/>
+</svg>

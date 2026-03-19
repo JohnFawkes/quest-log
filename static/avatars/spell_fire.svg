@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Fire Aura -->
+  <!-- Ground flames left -->
+  <path d="M60 280 Q55 265 62 255 Q58 265 65 270 Q60 260 68 252 Q62 265 70 272 Q65 260 75 255 Q68 268 76 278" fill="#FF6B35" opacity="0.8"/>
+  <!-- Ground flames right -->
+  <path d="M140 280 Q145 265 138 255 Q142 265 135 270 Q140 260 132 252 Q138 265 130 272 Q135 260 125 255 Q132 268 124 278" fill="#FF6B35" opacity="0.8"/>
+  <!-- Center ground flames -->
+  <path d="M90 278 Q85 262 92 250 Q88 262 96 268 Q90 255 100 248 Q110 255 104 268 Q112 262 108 250 Q115 262 110 278" fill="#FF8C00" opacity="0.9"/>
+  <!-- Rising sparks -->
+  <circle cx="72" cy="235" r="3" fill="#FFA500" opacity="0.7"/>
+  <circle cx="88" cy="220" r="2.5" fill="#FFD700" opacity="0.6"/>
+  <circle cx="115" cy="228" r="3" fill="#FFA500" opacity="0.7"/>
+  <circle cx="130" cy="215" r="2" fill="#FF6B35" opacity="0.6"/>
+  <circle cx="100" cy="210" r="2" fill="#FFD700" opacity="0.5"/>
+  <!-- Body glow (orange) -->
+  <ellipse cx="100" cy="160" rx="50" ry="100" fill="#FF6B35" opacity="0.06"/>
+  <!-- Foot ring glow -->
+  <ellipse cx="100" cy="270" rx="45" ry="10" fill="#FF6B35" opacity="0.25"/>
+  <!-- Embers floating up -->
+  <circle cx="78" cy="200" r="2" fill="#FF6B35" opacity="0.4"/>
+  <circle cx="120" cy="190" r="1.5" fill="#FFA500" opacity="0.4"/>
+  <circle cx="96" cy="185" r="2" fill="#FFD700" opacity="0.3"/>
+  <!-- Flame cuff at wrists -->
+  <path d="M55 160 Q50 152 58 146 Q54 155 60 158" fill="#FF6B35" opacity="0.6"/>
+  <path d="M145 160 Q150 152 142 146 Q146 155 140 158" fill="#FF6B35" opacity="0.6"/>
+</svg>

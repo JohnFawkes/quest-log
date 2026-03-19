@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Royal Tabard -->
+  <!-- Undergarment white/cream -->
+  <rect x="72" y="67" width="56" height="76" fill="#F5F0E8" rx="4"/>
+  <!-- Left sleeve white -->
+  <rect x="54" y="69" width="19" height="58" fill="#F5F0E8" rx="4"/>
+  <!-- Right sleeve white -->
+  <rect x="127" y="69" width="19" height="58" fill="#F5F0E8" rx="4"/>
+  <!-- Tabard front panel (royal blue) -->
+  <rect x="82" y="67" width="36" height="76" fill="#1A3A6B"/>
+  <!-- Tabard cross/heraldic -->
+  <rect x="95" y="72" width="10" height="66" fill="#FFD700"/>
+  <rect x="82" y="95" width="36" height="10" fill="#FFD700"/>
+  <!-- Royal insignia (fleur-de-lis ish) -->
+  <ellipse cx="100" cy="82" rx="4" ry="5" fill="#FFD700"/>
+  <path d="M97 78 Q100 72 103 78" fill="#FFD700"/>
+  <!-- Pauldron covers -->
+  <rect x="56" y="67" width="18" height="14" fill="#1A3A6B" rx="2"/>
+  <rect x="126" y="67" width="18" height="14" fill="#1A3A6B" rx="2"/>
+  <!-- Gold trim everywhere -->
+  <rect x="54" y="67" width="92" height="5" fill="#FFD700" rx="2"/>
+  <rect x="54" y="120" width="19" height="5" fill="#FFD700"/>
+  <rect x="127" y="120" width="19" height="5" fill="#FFD700"/>
+  <!-- Belt with ornate buckle -->
+  <rect x="70" y="136" width="60" height="9" fill="#1A3A6B" rx="3"/>
+  <rect x="92" y="134" width="16" height="13" fill="#FFD700" rx="2"/>
+  <rect x="94" y="136" width="12" height="9" fill="#1A3A6B" rx="1"/>
+  <!-- Cape suggestion at shoulders -->
+  <path d="M56 69 Q46 90 50 120 L56 118 Q54 92 56 72" fill="#C0392B" opacity="0.8"/>
+  <path d="M144 69 Q154 90 150 120 L144 118 Q146 92 144 72" fill="#C0392B" opacity="0.8"/>
+</svg>

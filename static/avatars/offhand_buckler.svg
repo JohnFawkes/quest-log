@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Small Steel Buckler -->
+  <!-- Shield body -->
+  <circle cx="48" cy="175" r="30" fill="#8B9DA8"/>
+  <!-- Concentric ring detail -->
+  <circle cx="48" cy="175" r="24" fill="#7A8D96"/>
+  <circle cx="48" cy="175" r="16" fill="#8B9DA8"/>
+  <!-- Center boss -->
+  <circle cx="48" cy="175" r="10" fill="#96A8B4"/>
+  <circle cx="48" cy="175" r="6" fill="#A8B8C4"/>
+  <circle cx="48" cy="175" r="3" fill="#8B9DA8"/>
+  <!-- Spike at center -->
+  <polygon points="48,168 44,175 48,164 52,175" fill="#C0CDD3"/>
+  <!-- Rim detail -->
+  <circle cx="48" cy="175" r="30" fill="none" stroke="#6E7F88" stroke-width="4"/>
+  <!-- Cross etching -->
+  <line x1="48" y1="146" x2="48" y2="204" stroke="#6E7F88" stroke-width="1.5" opacity="0.5"/>
+  <line x1="18" y1="175" x2="78" y2="175" stroke="#6E7F88" stroke-width="1.5" opacity="0.5"/>
+  <!-- Rim shine -->
+  <path d="M22 158 Q48 146 74 158" stroke="#C0CDD3" stroke-width="2" fill="none" opacity="0.5"/>
+  <!-- Arm strap -->
+  <rect x="38" y="163" width="10" height="24" fill="#3B2A1A" rx="3"/>
+  <!-- Rivets on outer ring -->
+  <circle cx="48" cy="145" r="2.5" fill="#6E7F88"/>
+  <circle cx="78" cy="175" r="2.5" fill="#6E7F88"/>
+  <circle cx="48" cy="205" r="2.5" fill="#6E7F88"/>
+  <circle cx="18" cy="175" r="2.5" fill="#6E7F88"/>
+</svg>

@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+{% block title %}Armory Shop{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-1">
+    <h1 class="text-2xl font-bold" style="color:var(--text-heading)">🛡️ Armory Shop</h1>
+    <div class="text-lg font-bold" style="color:#F59E0B">
+      <i class="fas fa-coins mr-1"></i>{{ current_user.coins }} coins
+    </div>
+  </div>
+  <p class="text-sm mb-6 opacity-60">Spend coins to unlock new gear, weapons, and magical auras for your avatar.</p>
+
+  <!-- Filter tabs -->
+  <div class="flex gap-2 mb-6 flex-wrap" id="filter-tabs">
+    {% for key, label, icon in [
+      ('all','All','fa-th'),
+      ('head','Head','fa-hard-hat'),
+      ('chest','Chest','fa-shield-alt'),
+      ('weapon','Weapon','fa-sword'),
+      ('offhand','Offhand','fa-shield'),
+      ('spell','Spell','fa-magic'),
+    ] %}
+    <button type="button" onclick="filterItems('{{ key }}')" id="ftab-{{ key }}"
+            class="filter-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ 'active-ftab' if key == 'all' else '' }}"
+            style="{{ 'background:var(--btn-bg);color:var(--btn-text)' if key == 'all' else 'background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-body)' }}">
+      <i class="fas {{ icon }} mr-1"></i>{{ label }}
+    </button>
+    {% endfor %}
+  </div>
+
+  <!-- Items grid -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="items-grid">
+    {% for item in items %}
+    {% set is_owned = item.id in owned_ids %}
+    <div class="shop-item rounded-xl overflow-hidden transition-all {{ 'opacity-60' if item.is_starter else '' }}"
+         data-type="{{ item.item_type }}"
+         style="background:var(--bg-card);border:1px solid var(--border-color)">
+
+      <!-- SVG preview area -->
+      <div style="position:relative;width:100%;padding-bottom:100%;background:var(--bg-body)">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden">
+          <img src="/static/avatars/{{ item.svg_filename }}" style="width:100%;height:100%;object-fit:contain" alt="{{ item.name }}">
+        </div>
+        <!-- Rarity badge -->
+        <span class="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full font-semibold capitalize
+          {% if item.rarity == 'legendary' %}bg-yellow-900 text-yellow-300
+          {% elif item.rarity == 'epic' %}bg-purple-900 text-purple-300
+          {% elif item.rarity == 'rare' %}bg-blue-900 text-blue-300
+          {% else %}bg-gray-700 text-gray-300{% endif %}">
+          {{ item.rarity }}
+        </span>
+        {% if is_owned %}
+        <span class="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-semibold bg-green-900 text-green-300">
+          Owned
+        </span>
+        {% endif %}
+      </div>
+
+      <div class="p-3">
+        <p class="font-semibold text-sm truncate" style="color:var(--text-heading)">{{ item.name }}</p>
+        <p class="text-xs opacity-60 mb-2 line-clamp-2" style="min-height:2rem">{{ item.description or '' }}</p>
+
+        {% if item.is_starter %}
+        <div class="text-xs text-green-400 font-semibold"><i class="fas fa-gift mr-1"></i>Free Starter</div>
+        {% elif is_owned %}
+        <div class="text-xs text-green-400 font-semibold"><i class="fas fa-check mr-1"></i>Owned</div>
+        {% else %}
+        <form method="POST" action="{{ url_for('avatar_shop_buy', item_id=item.id) }}">
+          {% set can_afford = current_user.coins >= item.coin_cost %}
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold {{ 'text-yellow-400' if can_afford else 'text-red-400' }}">
+              <i class="fas fa-coins mr-0.5"></i>{{ item.coin_cost }}
+            </span>
+            <button type="submit"
+                    class="px-3 py-1 rounded-lg text-xs font-semibold transition-colors
+                           {{ '' if can_afford else 'opacity-40 cursor-not-allowed' }}"
+                    style="{{ 'background:var(--btn-bg);color:var(--btn-text)' if can_afford else 'background:var(--bg-body);color:var(--text-body);border:1px solid var(--border-color)' }}"
+                    {{ 'disabled' if not can_afford }}>
+              {% if can_afford %}Buy{% else %}Need {{ item.coin_cost - current_user.coins }} more{% endif %}
+            </button>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-6">
+    <a href="{{ url_for('avatar') }}" class="text-sm font-medium" style="color:var(--btn-bg)">
+      <i class="fas fa-arrow-left mr-1"></i>Back to Avatar
+    </a>
+  </div>
+</div>
+
+<style>
+.active-ftab { background: var(--btn-bg) !important; color: var(--btn-text) !important; border-color: transparent !important; }
+.line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+</style>
+
+<script>
+function filterItems(type) {
+  document.querySelectorAll('.filter-tab').forEach(t => {
+    t.classList.remove('active-ftab');
+    t.style.background = 'var(--bg-card)';
+    t.style.color = 'var(--text-body)';
+    t.style.border = '1px solid var(--border-color)';
+  });
+  const tab = document.getElementById('ftab-' + type);
+  tab.classList.add('active-ftab');
+  tab.style.background = 'var(--btn-bg)';
+  tab.style.color = 'var(--btn-text)';
+  tab.style.border = 'none';
+
+  document.querySelectorAll('.shop-item').forEach(el => {
+    if (type === 'all' || el.dataset.type === type) {
+      el.style.display = '';
+    } else {
+      el.style.display = 'none';
+    }
+  });
+}
+</script>
+{% endblock %}

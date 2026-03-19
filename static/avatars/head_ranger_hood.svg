@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Ranger Hood -->
+  <!-- Hood drape (back) -->
+  <path d="M74 28 Q70 55 72 70 Q82 78 100 78 Q118 78 128 70 Q130 55 126 28" fill="#4A6741"/>
+  <!-- Hood dome (front) -->
+  <path d="M74 28 Q74 8 100 5 Q126 8 126 28 Q120 38 100 40 Q80 38 74 28" fill="#5A7A50"/>
+  <!-- Shadow at face opening -->
+  <path d="M80 30 Q80 55 100 57 Q120 55 120 30" fill="#3A5535"/>
+  <!-- Face opening - skin peek through -->
+  <path d="M83 30 Q83 52 100 54 Q117 52 117 30 Q110 22 100 21 Q90 22 83 30" fill="#F5CBA7"/>
+  <!-- Hood texture lines -->
+  <path d="M76 32 Q74 50 76 62" stroke="#3A5535" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M124 32 Q126 50 124 62" stroke="#3A5535" stroke-width="1" fill="none" opacity="0.5"/>
+  <!-- Drawstring -->
+  <path d="M83 54 Q100 58 117 54" stroke="#3A5535" stroke-width="1.5" fill="none"/>
+  <!-- Leaf pin -->
+  <path d="M100 56 Q103 52 106 55 Q103 58 100 56" fill="#7AB34A"/>
+</svg>

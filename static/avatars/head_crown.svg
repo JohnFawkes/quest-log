@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Royal Crown -->
+  <!-- Crown band -->
+  <rect x="76" y="26" width="48" height="16" fill="#FFD700" rx="2"/>
+  <!-- Crown points -->
+  <polygon points="76,26 84,8 92,26" fill="#FFD700"/>
+  <polygon points="92,26 100,6 108,26" fill="#FFD700"/>
+  <polygon points="108,26 116,8 124,26" fill="#FFD700"/>
+  <!-- Gem on center point -->
+  <ellipse cx="100" cy="10" rx="4" ry="5" fill="#E74C3C"/>
+  <ellipse cx="100" cy="9" rx="2" ry="2" fill="#FF8080" opacity="0.7"/>
+  <!-- Gems on side points -->
+  <ellipse cx="84" cy="13" rx="3" ry="3.5" fill="#2980B9"/>
+  <ellipse cx="116" cy="13" rx="3" ry="3.5" fill="#27AE60"/>
+  <!-- Band decoration -->
+  <line x1="76" y1="34" x2="124" y2="34" stroke="#B8860B" stroke-width="1.5"/>
+  <!-- Pearls on band -->
+  <circle cx="84" cy="34" r="2.5" fill="#F5F0E8"/>
+  <circle cx="92" cy="34" r="2.5" fill="#F5F0E8"/>
+  <circle cx="100" cy="34" r="2.5" fill="#F5F0E8"/>
+  <circle cx="108" cy="34" r="2.5" fill="#F5F0E8"/>
+  <circle cx="116" cy="34" r="2.5" fill="#F5F0E8"/>
+  <!-- Crown gold sheen -->
+  <path d="M78 28 L122 28" stroke="#FFF3AA" stroke-width="1.5" opacity="0.5"/>
+</svg>

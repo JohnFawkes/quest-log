@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Great Two-Handed Longsword (held diagonally) -->
+  <!-- Blade (wide) -->
+  <path d="M155 280 L120 50" stroke="#C0CDD3" stroke-width="10" stroke-linecap="round"/>
+  <!-- Blade fuller groove -->
+  <path d="M154 278 L120 54" stroke="#8898A8" stroke-width="2" opacity="0.5"/>
+  <!-- Blade edge highlight -->
+  <path d="M158 278 L124 50" stroke="#E8F0F5" stroke-width="2" opacity="0.6"/>
+  <!-- Blade tip -->
+  <polygon points="120,50 114,64 126,64" fill="#A8B8C4"/>
+  <!-- Crossguard (large) -->
+  <rect x="106" y="210" width="44" height="10" fill="#C49A28" rx="3"/>
+  <!-- Crossguard points -->
+  <polygon points="106,215 98,215 100,208 108,210" fill="#A07820"/>
+  <polygon points="150,215 158,215 156,208 148,210" fill="#A07820"/>
+  <!-- Grip (long, two-handed) -->
+  <rect x="122" y="220" width="14" height="54" fill="#3B2A1A" rx="3"/>
+  <!-- Grip wrap leather -->
+  <rect x="122" y="220" width="14" height="4" fill="#6B4226"/>
+  <rect x="122" y="228" width="14" height="4" fill="#6B4226"/>
+  <rect x="122" y="236" width="14" height="4" fill="#6B4226"/>
+  <rect x="122" y="244" width="14" height="4" fill="#6B4226"/>
+  <rect x="122" y="252" width="14" height="4" fill="#6B4226"/>
+  <rect x="122" y="260" width="14" height="4" fill="#6B4226"/>
+  <!-- Pommel (ornate) -->
+  <ellipse cx="129" cy="277" rx="11" ry="8" fill="#C49A28"/>
+  <circle cx="129" cy="277" r="5" fill="#8B6914"/>
+  <circle cx="129" cy="277" r="2.5" fill="#FFD700"/>
+</svg>

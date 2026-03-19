@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <!-- Lit Torch -->
+  <!-- Handle -->
+  <rect x="46" y="185" width="12" height="110" fill="#5C3317" rx="4"/>
+  <!-- Handle grip wrapping -->
+  <rect x="46" y="195" width="12" height="5" fill="#3B2A1A"/>
+  <rect x="46" y="210" width="12" height="5" fill="#3B2A1A"/>
+  <rect x="46" y="225" width="12" height="5" fill="#3B2A1A"/>
+  <rect x="46" y="240" width="12" height="5" fill="#3B2A1A"/>
+  <!-- Torch head -->
+  <rect x="42" y="160" width="20" height="30" fill="#6B4226" rx="3"/>
+  <!-- Wrapping/binding -->
+  <line x1="42" y1="168" x2="62" y2="168" stroke="#3B2A1A" stroke-width="2"/>
+  <line x1="42" y1="176" x2="62" y2="176" stroke="#3B2A1A" stroke-width="2"/>
+  <!-- Flame (animated glow using layers) -->
+  <!-- Outer flame glow -->
+  <ellipse cx="52" cy="148" rx="18" ry="22" fill="#FF6B35" opacity="0.3"/>
+  <!-- Main flame shape -->
+  <path d="M40 165 Q42 148 52 135 Q62 148 64 165" fill="#FF8C00"/>
+  <!-- Inner flame -->
+  <path d="M44 165 Q46 152 52 142 Q58 152 60 165" fill="#FFA500"/>
+  <!-- Hot core -->
+  <path d="M47 165 Q49 155 52 148 Q55 155 57 165" fill="#FFD700"/>
+  <!-- White hot tip -->
+  <ellipse cx="52" cy="148" rx="4" ry="6" fill="#FFFACD" opacity="0.8"/>
+  <!-- Flame sparkles -->
+  <circle cx="44" cy="144" r="2" fill="#FF6B35" opacity="0.6"/>
+  <circle cx="60" cy="140" r="2" fill="#FF6B35" opacity="0.5"/>
+  <circle cx="48" cy="135" r="1.5" fill="#FFA500" opacity="0.5"/>
+  <!-- Smoke wisps -->
+  <path d="M52 133 Q48 124 52 116 Q56 122 52 130" stroke="#888" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <path d="M52 133 Q55 120 58 115" stroke="#888" stroke-width="1" fill="none" opacity="0.2"/>
+</svg>
