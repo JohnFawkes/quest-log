@@ -25,6 +25,16 @@ from werkzeug.utils import secure_filename
 
 logger = logging.getLogger(__name__)
 
+# Timezone helper — used by the `localtime` Jinja2 filter
+def _get_localtz():
+    from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+    tz_name = os.environ.get('TZ', 'UTC')
+    try:
+        return ZoneInfo(tz_name)
+    except (ZoneInfoNotFoundError, KeyError):
+        logger.warning("Unknown TZ value %r, falling back to UTC", tz_name)
+        return ZoneInfo('UTC')
+
 # Allow OAuth over HTTP
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
@@ -67,6 +77,15 @@ os.makedirs(data_dir, exist_ok=True)
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
+
+@app.template_filter('localtime')
+def localtime_filter(dt):
+    """Convert a UTC datetime to the server's local timezone for display."""
+    if dt is None:
+        return dt
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(_get_localtz())
 login_manager.login_view = 'login'
 
 oauth = OAuth(app)
@@ -934,6 +953,29 @@ def delete_habit(habit_id):
     db.session.delete(habit)
     db.session.commit()
     flash('Quest deleted.', 'info')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/user/delete', methods=['POST'])
+@login_required
+def delete_user():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    user_id = request.form.get('user_id')
+    user = db.session.get(User, int(user_id))
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('admin_panel'))
+    if user.email == DEMO_EMAIL:
+        flash('Cannot delete the Demo user.', 'error')
+        return redirect(url_for('admin_panel'))
+    if user.id == current_user.id:
+        flash('You cannot delete your own account.', 'error')
+        return redirect(url_for('admin_panel'))
+    # Delete completions, remove from habit assignments, then delete user
+    Completion.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    user.assigned_habits.clear()
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'Adventurer "{user.name}" has been removed from the guild.', 'info')
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/user/create', methods=['POST'])
