@@ -239,6 +239,8 @@ jobs:
           cp screenshot-rewards.png    screenshots/rewards.png
           cp screenshot-calendar.png   screenshots/calendar.png
           cp screenshot-settings.png   screenshots/settings.png
+          # Remove any stale screenshots no longer generated
+          git rm --ignore-unmatch screenshots/invites.png screenshots/screenshot-*.png
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add screenshots/
