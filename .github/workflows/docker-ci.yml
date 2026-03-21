@@ -204,10 +204,10 @@ jobs:
                   await page.wait_for_load_state("networkidle")
                   await screenshot_page(page, "screenshot-avatar.png")
 
-                  # Avatar shop (Guild Hall)
+                  # Avatar Shop
                   await page.goto(f"{BASE}/avatar/shop")
                   await page.wait_for_load_state("networkidle")
-                  await screenshot_page(page, "screenshot-guild-hall.png")
+                  await screenshot_page(page, "screenshot-avatar-shop.png")
 
                   # Rewards
                   await page.goto(f"{BASE}/rewards")
@@ -235,7 +235,7 @@ jobs:
           cp screenshot-login.png      screenshots/login.png
           cp screenshot-dashboard.png  screenshots/dashboard.png
           cp screenshot-avatar.png     screenshots/avatar.png
-          cp screenshot-guild-hall.png screenshots/guild-hall.png
+          cp screenshot-avatar-shop.png screenshots/avatar-shop.png
           cp screenshot-rewards.png    screenshots/rewards.png
           cp screenshot-calendar.png   screenshots/calendar.png
           cp screenshot-settings.png   screenshots/settings.png

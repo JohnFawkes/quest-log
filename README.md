@@ -40,7 +40,7 @@ Quest Log is a gamified habit tracker that transforms your daily tasks into an R
 
 | Avatar | Avatar Shop |
 |---|---|
-| ![Avatar](screenshots/avatar.png) | ![Avatar Shop](screenshots/avatar_shop.png) |
+| ![Avatar](screenshots/avatar.png) | ![Avatar Shop](screenshots/avatar-shop.png) |
 
 | Rewards | Calendar |
 |---|---|
