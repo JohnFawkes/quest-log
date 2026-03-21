@@ -168,26 +168,62 @@ jobs:
           import asyncio
           from playwright.async_api import async_playwright
           BASE = "http://localhost:5000"
+
+          async def screenshot_page(page, path):
+              """Scroll to bottom then back to top so lazy-loaded content renders, then full-page capture."""
+              await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+              await page.wait_for_timeout(400)
+              await page.evaluate("window.scrollTo(0, 0)")
+              await page.wait_for_timeout(200)
+              await page.screenshot(path=path, full_page=True)
+              print(f"Saved {path}")
+
           async def main():
               async with async_playwright() as p:
                   browser = await p.chromium.launch()
                   ctx = await browser.new_context(viewport={"width": 1280, "height": 900})
                   page = await ctx.new_page()
+
+                  # Login page (unauthenticated)
                   await page.goto(f"{BASE}/login")
                   await page.wait_for_load_state("networkidle")
-                  await page.screenshot(path="screenshot-login.png", full_page=True)
-                  print("Saved screenshot-login.png")
+                  await screenshot_page(page, "screenshot-login.png")
+
+                  # Log in as demo user
                   await page.goto(f"{BASE}/login/demo")
                   await page.wait_for_load_state("networkidle")
-                  await page.goto(f"{BASE}/")
+
+                  # Dashboard
+                  await page.goto(f"{BASE}/dashboard")
                   await page.wait_for_load_state("networkidle")
-                  await page.wait_for_timeout(1500)
-                  await page.screenshot(path="screenshot-webui.png", full_page=True)
-                  print("Saved screenshot-webui.png")
-                  await page.goto(f"{BASE}/invites")
+                  await page.wait_for_timeout(1000)
+                  await screenshot_page(page, "screenshot-dashboard.png")
+
+                  # Avatar
+                  await page.goto(f"{BASE}/avatar")
                   await page.wait_for_load_state("networkidle")
-                  await page.screenshot(path="screenshot-invites.png", full_page=True)
-                  print("Saved screenshot-invites.png")
+                  await screenshot_page(page, "screenshot-avatar.png")
+
+                  # Avatar shop (Guild Hall)
+                  await page.goto(f"{BASE}/avatar/shop")
+                  await page.wait_for_load_state("networkidle")
+                  await screenshot_page(page, "screenshot-guild-hall.png")
+
+                  # Rewards
+                  await page.goto(f"{BASE}/rewards")
+                  await page.wait_for_load_state("networkidle")
+                  await screenshot_page(page, "screenshot-rewards.png")
+
+                  # Calendar
+                  await page.goto(f"{BASE}/calendar")
+                  await page.wait_for_load_state("networkidle")
+                  await screenshot_page(page, "screenshot-calendar.png")
+
+                  # Settings / Profile
+                  await page.goto(f"{BASE}/settings/profile")
+                  await page.wait_for_load_state("networkidle")
+                  await screenshot_page(page, "screenshot-settings.png")
+
                   await browser.close()
           asyncio.run(main())
           EOF
@@ -196,9 +232,13 @@ jobs:
         if: github.event_name == 'push'
         run: |
           mkdir -p screenshots
-          cp screenshot-login.png   screenshots/login.png
-          cp screenshot-webui.png   screenshots/webui.png
-          cp screenshot-invites.png screenshots/invites.png
+          cp screenshot-login.png      screenshots/login.png
+          cp screenshot-dashboard.png  screenshots/dashboard.png
+          cp screenshot-avatar.png     screenshots/avatar.png
+          cp screenshot-guild-hall.png screenshots/guild-hall.png
+          cp screenshot-rewards.png    screenshots/rewards.png
+          cp screenshot-calendar.png   screenshots/calendar.png
+          cp screenshot-settings.png   screenshots/settings.png
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add screenshots/
@@ -211,7 +251,7 @@ jobs:
         if: always()
         with:
           name: demo-screenshots-${{ github.sha }}
-          path: screenshots/
+          path: screenshot-*.png
           retention-days: 30
 
       - name: Stop Test Container
