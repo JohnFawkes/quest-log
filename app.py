@@ -58,6 +58,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Database Setup
 basedir = os.path.abspath(os.path.dirname(__file__))
+_AVATARS_DIR = os.path.realpath(os.path.join(basedir, 'static', 'avatars'))
 data_dir = os.environ.get('DATA_DIR', basedir)
 db_path = os.path.join(data_dir, 'questlog.db') 
 
@@ -1651,7 +1652,9 @@ def avatar_body_svg():
     skin = _clean_hex(request.args.get('skin'), 'F5CBA7')
     hair = _clean_hex(request.args.get('hair'), '5C3317')
     eye  = _clean_hex(request.args.get('eye'),  '2C1810')
-    svg_path = os.path.join(basedir, 'static', 'avatars', f'body_{gender}.svg')
+    svg_path = os.path.realpath(os.path.join(_AVATARS_DIR, f'body_{gender}.svg'))
+    if not svg_path.startswith(_AVATARS_DIR + os.sep):
+        abort(400)
     with open(svg_path, 'r') as f:
         content = _recolor_svg(f.read(), skin, hair, eye)
     resp = make_response(content)
@@ -1667,7 +1670,9 @@ def avatar_hair_svg():
         style = 'none'
     skin = _clean_hex(request.args.get('skin'), 'F5CBA7')
     hair = _clean_hex(request.args.get('hair'), '5C3317')
-    svg_path = os.path.join(basedir, 'static', 'avatars', f'hair_{style}.svg')
+    svg_path = os.path.realpath(os.path.join(_AVATARS_DIR, f'hair_{style}.svg'))
+    if not svg_path.startswith(_AVATARS_DIR + os.sep):
+        abort(400)
     with open(svg_path, 'r') as f:
         content = _recolor_svg(f.read(), skin, hair, '2C1810')
     resp = make_response(content)
