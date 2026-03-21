@@ -391,6 +391,57 @@
                         </button>
                     </form>
                 </div>
+
+                <!-- Approved image cleanup -->
+                <div class="p-4 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-100 dark:border-rose-900/50">
+                    <p class="text-sm font-bold text-rose-800 dark:text-rose-300 mb-1">Clean Up Approved Proof Images</p>
+                    <p class="text-xs text-rose-700 dark:text-rose-400 mb-3">
+                        Delete proof images from approved completions to free disk space.
+                        <strong>Quest records and streaks are never affected</strong> — only the image files are removed.
+                    </p>
+                    <form action="{{ url_for('cleanup_approved_images') }}" method="POST"
+                          onsubmit="return confirmApprovedCleanup(this)"
+                          class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <input type="number" name="days" min="0" value="30"
+                                   class="w-20 rounded px-2 py-1 text-sm border"
+                                   style="background:var(--bg-card);border-color:var(--border-color);color:var(--text-body)"
+                                   title="0 = delete all approved images">
+                            <label class="text-xs text-rose-700 dark:text-rose-400">days old (0 = delete all)</label>
+                        </div>
+                        <button type="submit"
+                                class="w-full bg-rose-600 text-white py-2 rounded hover:bg-rose-700 text-sm font-bold transition">
+                            <i class="fas fa-images mr-1"></i> Delete Approved Images
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Auto-delete setting -->
+                <div class="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <p class="text-sm font-bold mb-1" style="color:var(--text-heading)">Auto-Delete Approved Images</p>
+                    <p class="text-xs opacity-60 mb-3">
+                        Automatically remove proof images older than the set number of days each day.
+                        Set to 0 to disable. Streaks are never affected.
+                    </p>
+                    <form action="{{ url_for('admin_image_retention_settings') }}" method="POST" class="flex items-center gap-2">
+                        <input type="number" name="approved_image_retention_days"
+                               min="0" value="{{ approved_image_retention_days }}"
+                               class="w-20 rounded px-2 py-1 text-sm border"
+                               style="background:var(--bg-card);border-color:var(--border-color);color:var(--text-body)">
+                        <label class="text-xs opacity-60 flex-1">days (0 = disabled)</label>
+                        <button type="submit"
+                                class="px-3 py-1.5 rounded text-sm font-bold text-white bg-slate-600 hover:bg-slate-700 transition">
+                            Save
+                        </button>
+                    </form>
+                    {% if approved_image_retention_days and approved_image_retention_days != '0' %}
+                    <p class="text-xs mt-2 text-green-600 dark:text-green-400">
+                        <i class="fas fa-check-circle mr-1"></i>Active: deleting images older than {{ approved_image_retention_days }} day(s) daily.
+                    </p>
+                    {% else %}
+                    <p class="text-xs mt-2 opacity-40">Auto-delete is disabled.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
@@ -592,6 +643,13 @@ function toggleStreak() {
     const checked = document.getElementById('streakCheck').checked;
     if (checked) document.getElementById('streakOptions').classList.remove('hidden');
     else document.getElementById('streakOptions').classList.add('hidden');
+}
+function confirmApprovedCleanup(form) {
+    const days = parseInt(form.querySelector('[name=days]').value, 10);
+    const msg = days > 0
+        ? `Delete proof images from approved completions older than ${days} day(s)? Quest records and streaks will not be affected. This cannot be undone.`
+        : 'Delete ALL proof images from approved completions? Quest records and streaks will not be affected. This cannot be undone.';
+    return confirm(msg);
 }
 </script>
 {% endblock %}

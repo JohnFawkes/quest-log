@@ -311,9 +311,10 @@ def send_notification(content, image_filename=None, completion_id=None, action_t
     except Exception as e:
         logger.warning("Notification error: %s", e)
 
-# --- Backup ---
+# --- Backup & Image Cleanup ---
 _backup_lock = threading.Lock()
-_last_backup_date = [None]  # per-worker mutable cell
+_last_backup_date = [None]       # per-worker mutable cell
+_last_img_cleanup_date = [None]  # per-worker mutable cell
 
 def _perform_backup():
     """Create a timestamped zip of questlog.db; keep only the last 7 daily backups."""
@@ -335,9 +336,36 @@ def _perform_backup():
     except Exception as exc:
         logger.error("Backup failed: %s", exc)
 
+def _delete_approved_images_older_than(days):
+    """
+    Delete image files attached to approved completions older than `days` days.
+    The Completion records are kept intact (status/timestamp unchanged) so that
+    streak calculations are never affected.  Only image_filename is nulled out.
+    Returns (file_count, completion_count).
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    completions = Completion.query.filter(
+        Completion.status == 'approved',
+        Completion.image_filename.isnot(None),
+        Completion.timestamp < cutoff
+    ).all()
+    file_count = 0
+    for c in completions:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], c.image_filename)
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                file_count += 1
+        except OSError as e:
+            logger.warning("Could not delete image %s: %s", file_path, e)
+        c.image_filename = None
+    if completions:
+        db.session.commit()
+    return file_count, len(completions)
+
 @app.before_request
 def _maybe_backup():
-    """Trigger a daily backup on the first request of each calendar day (per worker)."""
+    """Trigger a daily backup and auto-image-cleanup on the first request of each calendar day (per worker)."""
     today = datetime.now(_get_localtz()).date()
     if _last_backup_date[0] != today:
         with _backup_lock:
@@ -345,6 +373,23 @@ def _maybe_backup():
                 _last_backup_date[0] = today
                 threading.Thread(target=_perform_backup, daemon=True,
                                  name='backup').start()
+    if _last_img_cleanup_date[0] != today:
+        with _backup_lock:
+            if _last_img_cleanup_date[0] != today:
+                _last_img_cleanup_date[0] = today
+                retention = get_setting('approved_image_retention_days', '0')
+                try:
+                    days = int(retention)
+                except (TypeError, ValueError):
+                    days = 0
+                if days > 0:
+                    def _auto_cleanup(d=days):
+                        with app.app_context():
+                            fc, cc = _delete_approved_images_older_than(d)
+                            if cc:
+                                logger.info("Auto-cleanup: removed %d image(s) from %d approved completions older than %d days", fc, cc, d)
+                    threading.Thread(target=_auto_cleanup, daemon=True,
+                                     name='img_cleanup').start()
 
 def is_habit_due_on_date(habit, check_date):
     local_tz = _get_localtz()
@@ -1233,6 +1278,7 @@ def admin_panel():
     apprise_urls_setting = get_setting('apprise_urls', '')
     discord_webhook_setting = get_setting('discord_webhook_url', '')
     week_start_day = get_setting('week_start_day', '0')
+    approved_image_retention_days = get_setting('approved_image_retention_days', '0')
     avatar_items = AvatarItem.query.order_by(AvatarItem.item_type, AvatarItem.coin_cost).all()
     return render_template('admin.html',
                          pending=pending,
@@ -1244,6 +1290,7 @@ def admin_panel():
                          apprise_urls_setting=apprise_urls_setting,
                          discord_webhook_setting=discord_webhook_setting,
                          week_start_day=week_start_day,
+                         approved_image_retention_days=approved_image_retention_days,
                          avatar_items=avatar_items)
 
 @app.route('/admin/reward/create', methods=['POST'])
@@ -1624,6 +1671,61 @@ def cleanup_rejected_images():
     Completion.query.filter_by(status='rejected').delete(synchronize_session=False)
     db.session.commit()
     flash(f'Removed {entry_count} rejected log entr{"y" if entry_count == 1 else "ies"} and {file_count} image file(s).', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/cleanup-approved-images', methods=['POST'])
+@login_required
+def cleanup_approved_images():
+    """Delete image files from approved completions, keeping the completion records (streaks unaffected)."""
+    if not current_user.is_admin: return redirect(url_for('index'))
+    days_raw = request.form.get('days', '').strip()
+    try:
+        days = int(days_raw)
+        if days < 0:
+            raise ValueError
+    except (ValueError, TypeError):
+        days = 0  # 0 means delete all
+    file_count, comp_count = _delete_approved_images_older_than(days) if days > 0 else _delete_all_approved_images()
+    flash(f'Removed {file_count} image file(s) from {comp_count} approved completion(s). Quest records and streaks are unchanged.', 'success')
+    return redirect(url_for('admin_panel'))
+
+def _delete_all_approved_images():
+    """Delete ALL image files from approved completions regardless of age."""
+    completions = Completion.query.filter(
+        Completion.status == 'approved',
+        Completion.image_filename.isnot(None)
+    ).all()
+    file_count = 0
+    for c in completions:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], c.image_filename)
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                file_count += 1
+        except OSError as e:
+            logger.warning("Could not delete image %s: %s", file_path, e)
+        c.image_filename = None
+    if completions:
+        db.session.commit()
+    return file_count, len(completions)
+
+@app.route('/admin/settings/image-retention', methods=['POST'])
+@login_required
+def admin_image_retention_settings():
+    """Save the auto-delete retention period for approved completion images."""
+    if not current_user.is_admin: return redirect(url_for('index'))
+    days_raw = request.form.get('approved_image_retention_days', '0').strip()
+    try:
+        days = int(days_raw)
+        if days < 0:
+            days = 0
+    except (ValueError, TypeError):
+        days = 0
+    set_setting('approved_image_retention_days', str(days))
+    if days == 0:
+        flash('Auto-delete disabled. Approved images will be kept indefinitely.', 'success')
+    else:
+        flash(f'Auto-delete enabled: approved images older than {days} day(s) will be removed daily.', 'success')
     return redirect(url_for('admin_panel'))
 
 AVATAR_ROLES = {
