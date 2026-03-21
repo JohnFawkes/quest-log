@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto">
+
+  <!-- Header row -->
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div class="flex items-center gap-3">
+      <a href="{{ url_for('admin_panel') }}"
+         class="text-sm px-3 py-1.5 rounded-lg font-medium transition"
+         style="background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-body)">
+        <i class="fas fa-shield-alt mr-1"></i> Guild Hall
+      </a>
+      <h1 class="text-2xl font-bold flex items-center gap-2" style="color:var(--text-heading)">
+        <i class="fas fa-book-open text-indigo-400"></i> Quest History
+      </h1>
+    </div>
+
+    <!-- Date picker form -->
+    <form method="GET" action="{{ url_for('admin_history') }}" class="flex items-center gap-2">
+      <input type="date" name="date"
+             value="{{ view_date.strftime('%Y-%m-%d') }}"
+             max="{{ today_str }}"
+             class="rounded-lg px-3 py-1.5 text-sm"
+             style="background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-body)"
+             onchange="this.form.submit()">
+      <button type="submit" class="text-sm px-3 py-1.5 rounded-lg font-medium transition"
+              style="background:var(--btn-bg);color:var(--btn-text)">Go</button>
+    </form>
+  </div>
+
+  <!-- Prev / date title / Next -->
+  <div class="flex items-center justify-between mb-5">
+    <a href="{{ url_for('admin_history', date=prev_date) }}"
+       class="flex items-center gap-1 text-sm font-medium px-3 py-1.5 rounded-lg transition"
+       style="background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-body)">
+      <i class="fas fa-chevron-left"></i> Prev
+    </a>
+
+    <h2 class="text-lg font-bold" style="color:var(--text-heading)">
+      {{ view_date.strftime('%A, %B %-d, %Y') }}
+      {% if view_date.strftime('%Y-%m-%d') == today_str %}
+        <span class="text-xs font-normal opacity-60 ml-1">(today)</span>
+      {% endif %}
+    </h2>
+
+    <a href="{% if view_date.strftime('%Y-%m-%d') < today_str %}{{ url_for('admin_history', date=next_date) }}{% else %}#{% endif %}"
+       class="flex items-center gap-1 text-sm font-medium px-3 py-1.5 rounded-lg transition
+              {% if view_date.strftime('%Y-%m-%d') >= today_str %}opacity-30 pointer-events-none{% endif %}"
+       style="background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-body)">
+      Next <i class="fas fa-chevron-right"></i>
+    </a>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="flex flex-wrap gap-3 mb-6">
+    {% set approved = completions | selectattr('status','eq','approved') | list %}
+    {% set pending  = completions | selectattr('status','eq','pending')  | list %}
+    {% set rejected = completions | selectattr('status','eq','rejected') | list %}
+    {% set penalty  = completions | selectattr('status','eq','penalty')  | list %}
+    {% for label, items, color in [
+        ('Total',    completions, 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'),
+        ('Approved', approved,    'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'),
+        ('Pending',  pending,     'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300'),
+        ('Rejected', rejected,    'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300'),
+        ('Penalties',penalty,     'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'),
+    ] %}
+    <div class="px-4 py-2 rounded-lg text-sm font-bold {{ color }}">
+      {{ label }}: {{ items | length }}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Completion grid -->
+  {% if completions %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    {% for c in completions %}
+    <div class="rounded-xl overflow-hidden shadow-sm"
+         style="background:var(--bg-card);border:1px solid var(--border-color)">
+
+      <!-- Proof image -->
+      {% if c.image_filename %}
+      <a href="{{ url_for('uploaded_file', filename=c.image_filename) }}"
+         target="_blank" rel="noopener noreferrer" class="block group relative">
+        <img src="{{ url_for('uploaded_file', filename=c.image_filename) }}"
+             class="w-full h-40 object-cover group-hover:brightness-90 transition"
+             alt="Proof" loading="lazy">
+        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/30">
+          <span class="text-white text-xs font-bold bg-black/50 px-2 py-1 rounded">
+            <i class="fas fa-expand-alt mr-1"></i>View Full
+          </span>
+        </div>
+      </a>
+      {% else %}
+      <div class="w-full h-24 flex items-center justify-center opacity-20"
+           style="background:var(--bg-body)">
+        <i class="fas fa-image text-3xl"></i>
+      </div>
+      {% endif %}
+
+      <!-- Card body -->
+      <div class="p-3">
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <p class="font-bold text-sm leading-tight" style="color:var(--text-heading)">
+            {{ c.habit_name }}
+          </p>
+          {% if c.status == 'approved' %}
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded flex-shrink-0 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300">✓ Approved</span>
+          {% elif c.status == 'pending' %}
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded flex-shrink-0 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300">⏳ Pending</span>
+          {% elif c.status == 'rejected' %}
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded flex-shrink-0 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300">✗ Rejected</span>
+          {% elif c.status == 'penalty' %}
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded flex-shrink-0 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300">⚠ Missed</span>
+          {% endif %}
+        </div>
+
+        <p class="text-xs opacity-60 flex items-center gap-1 mb-1">
+          <i class="fas fa-user"></i> {{ c.user.name }}
+        </p>
+        <p class="text-xs opacity-50">
+          <i class="far fa-clock mr-0.5"></i>{{ (c.timestamp | localtime).strftime('%H:%M') }}
+        </p>
+
+        <!-- Quick approve/reject for pending -->
+        {% if c.status == 'pending' and c.image_filename %}
+        <div class="flex gap-2 mt-3">
+          <form action="{{ url_for('approve_completion', completion_id=c.id) }}" method="POST" class="flex-1">
+            <button type="submit"
+                    class="w-full text-xs py-1.5 rounded font-bold bg-green-600 hover:bg-green-700 text-white transition">
+              ✓ Approve
+            </button>
+          </form>
+          <form action="{{ url_for('reject_completion', completion_id=c.id) }}" method="POST" class="flex-1">
+            <button type="submit"
+                    class="w-full text-xs py-1.5 rounded font-bold bg-red-600 hover:bg-red-700 text-white transition">
+              ✗ Reject
+            </button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="text-center py-16 opacity-40">
+    <i class="fas fa-scroll text-5xl mb-4 block"></i>
+    <p class="text-lg font-semibold">No quest submissions recorded for this day.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

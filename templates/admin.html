@@ -374,6 +374,14 @@
                 <i class="fas fa-tools text-amber-500"></i> Maintenance
             </h3>
             <div class="space-y-4">
+                <!-- Quest History link -->
+                <div class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-900/50">
+                    <p class="text-sm font-bold text-indigo-800 dark:text-indigo-300 mb-1">Quest History</p>
+                    <p class="text-xs text-indigo-700 dark:text-indigo-400 mb-3">Browse all quest submissions and proof images by date.</p>
+                    <a href="{{ url_for('admin_history') }}" class="block w-full text-center bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 text-sm font-bold transition">
+                        <i class="fas fa-book-open mr-1"></i> View Quest History
+                    </a>
+                </div>
                 <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-900/50">
                     <p class="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">Clean Up Rejected Entries</p>
                     <p class="text-xs text-amber-700 dark:text-amber-400 mb-3">Permanently delete all rejected quest entries from the adventure log, including any attached image files. This frees disk space and cannot be undone.</p>
