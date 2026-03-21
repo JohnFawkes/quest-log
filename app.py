@@ -1,4 +1,5 @@
 import glob as _glob
+import html
 import logging
 import mimetypes
 import os
@@ -1751,9 +1752,9 @@ def avatar_body_svg():
     gender = request.args.get('gender', 'male')
     if gender not in ('male', 'female'):
         gender = 'male'
-    skin = _clean_hex(request.args.get('skin'), 'F5CBA7')
-    hair = _clean_hex(request.args.get('hair'), '5C3317')
-    eye  = _clean_hex(request.args.get('eye'),  '2C1810')
+    skin = html.escape(_clean_hex(request.args.get('skin'), 'F5CBA7'))
+    hair = html.escape(_clean_hex(request.args.get('hair'), '5C3317'))
+    eye  = html.escape(_clean_hex(request.args.get('eye'),  '2C1810'))
     svg_path = os.path.realpath(os.path.join(_AVATARS_DIR, f'body_{gender}.svg'))
     if not svg_path.startswith(_AVATARS_DIR + os.sep):
         abort(400)
@@ -1770,8 +1771,8 @@ def avatar_hair_svg():
     style = request.args.get('style', 'none')
     if style not in ('none', 'short', 'long', 'bun'):
         style = 'none'
-    skin = _clean_hex(request.args.get('skin'), 'F5CBA7')
-    hair = _clean_hex(request.args.get('hair'), '5C3317')
+    skin = html.escape(_clean_hex(request.args.get('skin'), 'F5CBA7'))
+    hair = html.escape(_clean_hex(request.args.get('hair'), '5C3317'))
     svg_path = os.path.realpath(os.path.join(_AVATARS_DIR, f'hair_{style}.svg'))
     if not svg_path.startswith(_AVATARS_DIR + os.sep):
         abort(400)
