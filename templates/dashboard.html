@@ -118,9 +118,9 @@
 
     </div>
 
-    <!-- Recent Activity -->
+    <!-- Today's Activity -->
     <div class="md:col-span-1">
-        <h2 class="text-xl font-bold mb-4 dark:text-slate-200">Adventure Log</h2>
+        <h2 class="text-xl font-bold mb-4 dark:text-slate-200">Today's Log</h2>
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 max-h-screen overflow-y-auto border border-slate-100 dark:border-slate-700">
             {% for c in completions %}
             <div class="mb-4 border-b border-gray-100 dark:border-slate-700 last:border-0 pb-4">
@@ -159,7 +159,7 @@
                 </div>
             </div>
             {% else %}
-            <p class="text-gray-500 dark:text-slate-500 text-center text-sm italic">The log is empty.</p>
+            <p class="text-gray-500 dark:text-slate-500 text-center text-sm italic">No submissions yet today.</p>
             {% endfor %}
         </div>
     </div>

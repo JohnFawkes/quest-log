@@ -968,13 +968,34 @@ def dashboard():
     upcoming_habits = []
 
     demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
+    start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_of_day   = start_of_day + timedelta(days=1)
+
     if current_user.is_admin:
         all_habits = Habit.query.all()
-        completions_query = Completion.query.join(User, Completion.user_id == User.id).filter(User.email != DEMO_EMAIL)
-        my_completions = completions_query.order_by(Completion.timestamp.desc()).limit(10).all()
+        my_completions = (
+            Completion.query
+            .join(User, Completion.user_id == User.id)
+            .filter(
+                User.email != DEMO_EMAIL,
+                Completion.status.in_(['pending', 'approved']),
+                Completion.timestamp >= start_of_day,
+                Completion.timestamp < end_of_day,
+            )
+            .order_by(Completion.timestamp.desc()).all()
+        )
     else:
         all_habits = Habit.query.filter(Habit.assigned_users.any(User.id == current_user.id)).all()
-        my_completions = Completion.query.filter_by(user_id=current_user.id).order_by(Completion.timestamp.desc()).limit(10).all()
+        my_completions = (
+            Completion.query
+            .filter(
+                Completion.user_id == current_user.id,
+                Completion.status.in_(['pending', 'approved']),
+                Completion.timestamp >= start_of_day,
+                Completion.timestamp < end_of_day,
+            )
+            .order_by(Completion.timestamp.desc()).all()
+        )
 
     is_due_today_cache = {}
     for h in all_habits:
@@ -1520,6 +1541,46 @@ def quick_reject(completion_id, token):
     completion.action_token = None  # invalidate token
     db.session.commit()
     return f"<html><body style='font-family:sans-serif;text-align:center;padding:2rem'><h2>❌ Quest Rejected</h2><p><strong>{user.name}</strong> — <em>{completion.habit_name}</em></p></body></html>", 200
+
+@app.route('/admin/history')
+@login_required
+def admin_history():
+    if not current_user.is_admin:
+        return redirect(url_for('dashboard'))
+    local_tz = _get_localtz()
+
+    # Parse requested date; default to today
+    date_str = request.args.get('date', '')
+    try:
+        view_date = datetime.strptime(date_str, '%Y-%m-%d').replace(tzinfo=local_tz)
+    except ValueError:
+        view_date = datetime.now(local_tz)
+
+    start_of_day = view_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_of_day   = start_of_day + timedelta(days=1)
+    prev_date    = (start_of_day - timedelta(days=1)).strftime('%Y-%m-%d')
+    next_date    = (start_of_day + timedelta(days=1)).strftime('%Y-%m-%d')
+    today_str    = datetime.now(local_tz).strftime('%Y-%m-%d')
+
+    demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
+    q = (
+        Completion.query
+        .join(User, Completion.user_id == User.id)
+        .filter(
+            Completion.timestamp >= start_of_day,
+            Completion.timestamp < end_of_day,
+        )
+    )
+    if demo_user:
+        q = q.filter(User.email != DEMO_EMAIL)
+    completions = q.order_by(Completion.timestamp.desc()).all()
+
+    return render_template('admin_history.html',
+                           completions=completions,
+                           view_date=start_of_day,
+                           prev_date=prev_date,
+                           next_date=next_date,
+                           today_str=today_str)
 
 @app.route('/admin/settings/notification', methods=['POST'])
 @login_required
