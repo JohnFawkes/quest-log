@@ -60,6 +60,11 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 # Database Setup
 basedir = os.path.abspath(os.path.dirname(__file__))
 _AVATARS_DIR = os.path.realpath(os.path.join(basedir, 'static', 'avatars'))
+# Hardcoded filename maps — user input is used only as a dict key; the value
+# that reaches open() is always a literal string, never user-controlled.
+_BODY_SVG_MAP  = {'male': 'body_male.svg', 'female': 'body_female.svg'}
+_HAIR_SVG_MAP  = {'none': 'hair_none.svg', 'short': 'hair_short.svg',
+                  'long': 'hair_long.svg',  'bun':   'hair_bun.svg'}
 data_dir = os.environ.get('DATA_DIR', basedir)
 db_path = os.path.join(data_dir, 'questlog.db') 
 
@@ -1749,15 +1754,12 @@ RARITY_COLORS = {
 @app.route('/avatar/body.svg')
 def avatar_body_svg():
     """Return a body SVG with the user's chosen skin / hair / eye colours substituted."""
-    gender = request.args.get('gender', 'male')
-    if gender not in ('male', 'female'):
-        gender = 'male'
+    # Use dict lookup so user input never flows into the file path (CWE-22)
+    svg_filename = _BODY_SVG_MAP.get(request.args.get('gender'), 'body_male.svg')
     skin = html.escape(_clean_hex(request.args.get('skin'), 'F5CBA7'))
     hair = html.escape(_clean_hex(request.args.get('hair'), '5C3317'))
     eye  = html.escape(_clean_hex(request.args.get('eye'),  '2C1810'))
-    svg_path = os.path.realpath(os.path.join(_AVATARS_DIR, f'body_{gender}.svg'))
-    if not svg_path.startswith(_AVATARS_DIR + os.sep):
-        abort(400)
+    svg_path = os.path.join(_AVATARS_DIR, svg_filename)
     with open(svg_path, 'r') as f:
         content = _recolor_svg(f.read(), skin, hair, eye)
     resp = make_response(content)
@@ -1768,14 +1770,11 @@ def avatar_body_svg():
 @app.route('/avatar/hair.svg')
 def avatar_hair_svg():
     """Return a hair-style overlay SVG with user hair + skin colours substituted."""
-    style = request.args.get('style', 'none')
-    if style not in ('none', 'short', 'long', 'bun'):
-        style = 'none'
+    # Use dict lookup so user input never flows into the file path (CWE-22)
+    svg_filename = _HAIR_SVG_MAP.get(request.args.get('style'), 'hair_none.svg')
     skin = html.escape(_clean_hex(request.args.get('skin'), 'F5CBA7'))
     hair = html.escape(_clean_hex(request.args.get('hair'), '5C3317'))
-    svg_path = os.path.realpath(os.path.join(_AVATARS_DIR, f'hair_{style}.svg'))
-    if not svg_path.startswith(_AVATARS_DIR + os.sep):
-        abort(400)
+    svg_path = os.path.join(_AVATARS_DIR, svg_filename)
     with open(svg_path, 'r') as f:
         content = _recolor_svg(f.read(), skin, hair, '2C1810')
     resp = make_response(content)
