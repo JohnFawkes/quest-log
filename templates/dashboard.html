@@ -66,6 +66,7 @@
                             {% endif %}
                         {% elif habit.assigned_user_id == current_user.id %}
                         <form action="{{ url_for('complete_habit', habit_id=habit.id) }}" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <label class="cursor-pointer bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow transition flex items-center">
                                 <i class="fas fa-camera mr-2"></i> Prove It
                                 <input type="file" name="proof" accept=".png,.jpg,.jpeg,.gif,.webp" capture="environment" class="hidden" onchange="this.form.submit()">

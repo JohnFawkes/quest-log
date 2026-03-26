@@ -49,7 +49,10 @@ EXPOSE ${PORT}
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD /bin/sh -c 'curl -sf http://localhost:${PORT:-5000}/health || exit 1'
 
-# Entrypoint fixes bind-mount permissions then drops to non-root user
+# Run as non-root user
+USER questlog
+
+# Entrypoint runs as questlog; no privilege drop needed
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Run with Gunicorn for production-grade performance

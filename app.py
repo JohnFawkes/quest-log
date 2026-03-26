@@ -17,13 +17,14 @@ import apprise
 import requests as http_requests
 from authlib.integrations.flask_client import OAuth
 from flask import (
-    Flask, flash, make_response, redirect, render_template, request,
+    Flask, Response, flash, make_response, redirect, render_template, request,
     send_from_directory, session, url_for,
 )
 from flask_login import (
     LoginManager, UserMixin, current_user, login_required, login_user, logout_user,
 )
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.exc import IntegrityError
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -89,6 +90,7 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(data_dir, exist_ok=True)
 
 db = SQLAlchemy(app)
+csrf = CSRFProtect(app)
 login_manager = LoginManager(app)
 
 @app.template_filter('localtime')
@@ -520,6 +522,18 @@ def check_setup_required():
             return redirect(url_for('change_password'))
 
 # --- Initialization Function ---
+_SAFE_COL_NAME_RE = re.compile(r'^[a-z_][a-z0-9_]*$')
+_SAFE_COL_DEF_RE  = re.compile(r"^[A-Za-z0-9_()\s'#.]+$")
+
+def _ddl_add_column(cursor, table, col_name, col_def):
+    """Execute ALTER TABLE … ADD COLUMN using only hardcoded identifiers.
+    Validates both arguments so static analysis can confirm no injection path."""
+    if not _SAFE_COL_NAME_RE.match(col_name):
+        raise ValueError(f"Unsafe column name rejected: {col_name!r}")
+    if not _SAFE_COL_DEF_RE.match(col_def):
+        raise ValueError(f"Unsafe column definition rejected: {col_def!r}")
+    cursor.execute("ALTER TABLE " + table + " ADD COLUMN " + col_name + " " + col_def)
+
 def perform_db_migration():
     """Checks for missing columns and adds them if necessary."""
     if not os.path.exists(db_path): return # DB not created yet
@@ -554,7 +568,7 @@ def perform_db_migration():
         ('avatar_hair_style', "VARCHAR(20) DEFAULT 'none'"),
     ]:
         if col_name not in user_cols:
-            cursor.execute(f"ALTER TABLE user ADD COLUMN {col_name} {col_def}")
+            _ddl_add_column(cursor, 'user', col_name, col_def)
 
     # Habit Table
     cursor.execute("PRAGMA table_info(habit)")
@@ -575,7 +589,7 @@ def perform_db_migration():
     ]
     for col_name, col_type in habit_updates:
         if col_name not in habit_cols:
-            cursor.execute(f"ALTER TABLE habit ADD COLUMN {col_name} {col_type}")
+            _ddl_add_column(cursor, 'habit', col_name, col_type)
 
     # habit_users junction table (many-to-many) — migrate from legacy assigned_user_id
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='habit_users'")
@@ -648,7 +662,7 @@ def perform_db_migration():
     ]
     for col_name, col_type in reward_updates:
         if col_name not in reward_cols:
-            cursor.execute(f"ALTER TABLE reward ADD COLUMN {col_name} {col_type}")
+            _ddl_add_column(cursor, 'reward', col_name, col_type)
             if col_name == 'is_approved':
                 cursor.execute("UPDATE reward SET is_approved = 1 WHERE is_approved IS NULL")
             if col_name == 'is_demo':
@@ -1447,7 +1461,11 @@ def create_habit():
     name = request.form.get('name')
     description = request.form.get('description')
     points = int(request.form.get('points'))
-    user_ids = request.form.getlist('assigned_user_ids')
+    try:
+        user_ids = [int(uid) for uid in request.form.getlist('assigned_user_ids')]
+    except (ValueError, TypeError):
+        flash('Invalid user selection.', 'error')
+        return redirect(url_for('admin_panel'))
     if not user_ids:
         flash('Please assign at least one adventurer.', 'error')
         return redirect(url_for('admin_panel'))
@@ -1578,7 +1596,7 @@ def quick_approve(completion_id, token):
     completion.action_token = None  # invalidate token
     db.session.commit()
     send_notification(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved via link){bonus_msg}", completion.image_filename)
-    return f"<html><body style='font-family:sans-serif;text-align:center;padding:2rem'><h2>✅ Quest Approved!</h2><p><strong>{user.name}</strong> — <em>{completion.habit_name}</em></p><p>Gems awarded.{bonus_msg}</p></body></html>", 200
+    return f"<html><body style='font-family:sans-serif;text-align:center;padding:2rem'><h2>✅ Quest Approved!</h2><p><strong>{html.escape(user.name)}</strong> — <em>{html.escape(completion.habit_name)}</em></p><p>Gems awarded.{html.escape(bonus_msg)}</p></body></html>", 200
 
 @app.route('/quest/reject/<int:completion_id>/<token>')
 def quick_reject(completion_id, token):
@@ -1594,7 +1612,7 @@ def quick_reject(completion_id, token):
     completion.status = 'rejected'
     completion.action_token = None  # invalidate token
     db.session.commit()
-    return f"<html><body style='font-family:sans-serif;text-align:center;padding:2rem'><h2>❌ Quest Rejected</h2><p><strong>{user.name}</strong> — <em>{completion.habit_name}</em></p></body></html>", 200
+    return f"<html><body style='font-family:sans-serif;text-align:center;padding:2rem'><h2>❌ Quest Rejected</h2><p><strong>{html.escape(user.name)}</strong> — <em>{html.escape(completion.habit_name)}</em></p></body></html>", 200
 
 @app.route('/admin/history')
 @login_required
@@ -1759,13 +1777,12 @@ def avatar_body_svg():
     skin = html.escape(_clean_hex(request.args.get('skin'), 'F5CBA7'))
     hair = html.escape(_clean_hex(request.args.get('hair'), '5C3317'))
     eye  = html.escape(_clean_hex(request.args.get('eye'),  '2C1810'))
-    svg_path = os.path.join(_AVATARS_DIR, svg_filename)
+    svg_path = os.path.realpath(os.path.join(_AVATARS_DIR, svg_filename))
+    if not svg_path.startswith(_AVATARS_DIR + os.sep):
+        abort(400)
     with open(svg_path, 'r') as f:
         content = _recolor_svg(f.read(), skin, hair, eye)
-    resp = make_response(content)
-    resp.headers['Content-Type'] = 'image/svg+xml'
-    resp.headers['Cache-Control'] = 'no-store'
-    return resp
+    return Response(content, mimetype='image/svg+xml', headers={'Cache-Control': 'no-store'})
 
 @app.route('/avatar/hair.svg')
 def avatar_hair_svg():
@@ -1774,13 +1791,12 @@ def avatar_hair_svg():
     svg_filename = _HAIR_SVG_MAP.get(request.args.get('style'), 'hair_none.svg')
     skin = html.escape(_clean_hex(request.args.get('skin'), 'F5CBA7'))
     hair = html.escape(_clean_hex(request.args.get('hair'), '5C3317'))
-    svg_path = os.path.join(_AVATARS_DIR, svg_filename)
+    svg_path = os.path.realpath(os.path.join(_AVATARS_DIR, svg_filename))
+    if not svg_path.startswith(_AVATARS_DIR + os.sep):
+        abort(400)
     with open(svg_path, 'r') as f:
         content = _recolor_svg(f.read(), skin, hair, '2C1810')
-    resp = make_response(content)
-    resp.headers['Content-Type'] = 'image/svg+xml'
-    resp.headers['Cache-Control'] = 'no-store'
-    return resp
+    return Response(content, mimetype='image/svg+xml', headers={'Cache-Control': 'no-store'})
 
 @app.route('/avatar')
 @login_required
@@ -1935,12 +1951,11 @@ def uploaded_file(filename):
         else:
             mime_type = 'application/octet-stream'
 
-    response = make_response(send_from_directory(app.config['UPLOAD_FOLDER'], filename))
-    response.headers['Content-Type'] = mime_type
+    response = send_from_directory(app.config['UPLOAD_FOLDER'], filename, mimetype=mime_type)
     response.headers['Content-Disposition'] = 'inline'
     return response
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
-    app.run(debug=debug, host='0.0.0.0', port=port)
+    app.run(debug=debug, host='127.0.0.1', port=port)

@@ -125,12 +125,14 @@
         {% if c.status == 'pending' and c.image_filename %}
         <div class="flex gap-2 mt-3">
           <form action="{{ url_for('approve_completion', completion_id=c.id) }}" method="POST" class="flex-1">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit"
                     class="w-full text-xs py-1.5 rounded font-bold bg-green-600 hover:bg-green-700 text-white transition">
               ✓ Approve
             </button>
           </form>
           <form action="{{ url_for('reject_completion', completion_id=c.id) }}" method="POST" class="flex-1">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit"
                     class="w-full text-xs py-1.5 rounded font-bold bg-red-600 hover:bg-red-700 text-white transition">
               ✗ Reject

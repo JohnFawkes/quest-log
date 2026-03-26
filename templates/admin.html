@@ -7,6 +7,7 @@
     </h1>
     <div class="flex items-center gap-3">
         <form action="{{ url_for('test_webhook') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider border border-slate-200 dark:border-slate-600 transition flex items-center gap-1" title="Send a test notification to all configured channels">
                 <i class="fas fa-bell"></i> Test Notifications
             </button>
@@ -46,11 +47,13 @@
                         {% endif %}
                         <div class="mt-auto flex gap-2">
                             <form action="{{ url_for('approve_completion', completion_id=p.id) }}" method="POST" class="flex-1">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-center py-2 rounded text-sm font-bold transition shadow-sm">
                                     <i class="fas fa-check mr-1"></i> Approve
                                 </button>
                             </form>
                             <form action="{{ url_for('reject_completion', completion_id=p.id) }}" method="POST" class="flex-1">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white text-center py-2 rounded text-sm font-bold transition shadow-sm">
                                     <i class="fas fa-times mr-1"></i> Reject
                                 </button>
@@ -75,6 +78,7 @@
             <i class="fas fa-feather-alt text-indigo-500"></i> Assign New Quest
         </h3>
         <form action="{{ url_for('create_habit') }}" method="POST" class="space-y-5">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label for="habit-name" class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Quest Name</label>
@@ -192,6 +196,7 @@
                             <i class="fas fa-edit"></i>
                         </a>
                         <form action="{{ url_for('delete_habit', habit_id=h.id) }}" method="POST" onsubmit="return confirm('Delete this quest? All history for it will be lost.')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="text-red-400 hover:text-red-600 p-2" title="Delete quest">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -212,6 +217,7 @@
         </h3>
         <div class="space-y-6">
             <form action="{{ url_for('create_user_admin') }}" method="POST" class="space-y-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="text" name="name" placeholder="Full Name" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
                 <input type="email" name="email" placeholder="Email" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
                 <input type="password" name="password" placeholder="Password" required minlength="4" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
@@ -219,6 +225,7 @@
             </form>
             <div class="border-t dark:border-slate-700 pt-4">
                 <form action="{{ url_for('promote_user') }}" method="POST" class="flex gap-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <select name="user_id" class="flex-1 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
                         {% for u in users %}
                         <option value="{{ u.id }}">{{ u.name }} {% if u.is_admin %}(Admin){% endif %}</option>
@@ -230,6 +237,7 @@
             <div class="border-t dark:border-slate-700 pt-4">
                 <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-1"><i class="fas fa-gem text-purple-500"></i> Adjust Gems</p>
                 <form action="{{ url_for('adjust_gems') }}" method="POST" class="space-y-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <select name="user_id" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
                         {% for u in users %}
                         <option value="{{ u.id }}">{{ u.name }} ({{ u.points }} gems)</option>
@@ -245,6 +253,7 @@
             <div class="border-t dark:border-slate-700 pt-4">
                 <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-1"><i class="fas fa-coins text-yellow-500"></i> Adjust Coins</p>
                 <form action="{{ url_for('adjust_coins') }}" method="POST" class="space-y-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <select name="user_id" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
                         {% for u in users %}
                         <option value="{{ u.id }}">{{ u.name }} ({{ u.coins }} coins)</option>
@@ -260,6 +269,7 @@
             <div class="border-t dark:border-slate-700 pt-4">
                 <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-1"><i class="fas fa-key text-amber-500"></i> Reset Password</p>
                 <form action="{{ url_for('reset_user_password') }}" method="POST" class="space-y-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <select name="user_id" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
                         {% for u in users %}
                         <option value="{{ u.id }}">{{ u.name }}</option>
@@ -275,6 +285,7 @@
             <div class="border-t dark:border-slate-700 pt-4">
                 <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-1"><i class="fas fa-user-times text-red-500"></i> Remove Adventurer</p>
                 <form action="{{ url_for('delete_user') }}" method="POST" class="space-y-2" onsubmit="return confirm('Permanently delete this adventurer and all their quest history? This cannot be undone.')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <select name="user_id" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm dark:text-white">
                         {% for u in users %}
                         {% if u.id != current_user.id %}
@@ -297,6 +308,7 @@
                 <i class="fas fa-cog text-slate-500"></i> General Settings
             </h3>
             <form action="{{ url_for('admin_general_settings') }}" method="POST" class="space-y-5">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <!-- APPRISE URLs -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
@@ -352,6 +364,7 @@
                 <i class="fas fa-bell text-indigo-500"></i> Notification Settings
             </h3>
             <form action="{{ url_for('admin_notification_settings') }}" method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Notification Icon / Avatar URL</label>
                     <input type="url" name="notification_icon_url" value="{{ notification_icon_url }}" placeholder="https://example.com/icon.png"
@@ -386,6 +399,7 @@
                     <p class="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">Clean Up Rejected Entries</p>
                     <p class="text-xs text-amber-700 dark:text-amber-400 mb-3">Permanently delete all rejected quest entries from the adventure log, including any attached image files. This frees disk space and cannot be undone.</p>
                     <form action="{{ url_for('cleanup_rejected_images') }}" method="POST" onsubmit="return confirm('Permanently delete all rejected log entries and their images? This cannot be undone.')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="w-full bg-amber-600 text-white py-2 rounded hover:bg-amber-700 text-sm font-bold transition">
                             <i class="fas fa-trash-alt mr-1"></i> Delete Rejected Entries
                         </button>
@@ -402,6 +416,7 @@
                     <form action="{{ url_for('cleanup_approved_images') }}" method="POST"
                           onsubmit="return confirmApprovedCleanup(this)"
                           class="space-y-2">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="flex items-center gap-2">
                             <input type="number" name="days" min="0" value="30"
                                    class="w-20 rounded px-2 py-1 text-sm border"
@@ -424,6 +439,7 @@
                         Set to 0 to disable. Streaks are never affected.
                     </p>
                     <form action="{{ url_for('admin_image_retention_settings') }}" method="POST" class="flex items-center gap-2">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="number" name="approved_image_retention_days"
                                min="0" value="{{ approved_image_retention_days }}"
                                class="w-20 rounded px-2 py-1 text-sm border"
@@ -474,9 +490,11 @@
                         </div>
                         <div class="flex gap-2">
                             <form action="{{ url_for('approve_reward', reward_id=r.id) }}" method="POST" class="flex-1">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="w-full bg-green-500 text-white text-center py-1 rounded hover:bg-green-600 text-sm transition">Approve</button>
                             </form>
                             <form action="{{ url_for('delete_reward', reward_id=r.id) }}" method="POST" class="flex-1">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="w-full bg-red-500 text-white text-center py-1 rounded hover:bg-red-600 text-sm transition">Reject</button>
                             </form>
                         </div>
@@ -495,6 +513,7 @@
                     <i class="fas fa-store text-indigo-500"></i> Stock The Shop
                 </h3>
                 <form action="{{ url_for('create_reward_admin') }}" method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="text" name="name" placeholder="Reward Name" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
                     <input type="number" name="cost" placeholder="Cost (Gems)" min="1" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white">
                     <textarea name="description" placeholder="Description" rows="2" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white"></textarea>
@@ -525,6 +544,7 @@
                             </div>
                         </div>
                         <form action="{{ url_for('delete_reward', reward_id=r.id) }}" method="POST" onsubmit="return confirm('Delete this reward?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="text-red-400 hover:text-red-600 p-2" title="Delete reward">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -548,6 +568,7 @@
             <div class="h-fit">
                 <h3 class="font-bold text-base mb-4 text-slate-700 dark:text-slate-300">Add New Item</h3>
                 <form action="{{ url_for('admin_avatar_item_create') }}" method="POST" class="space-y-3">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="text" name="name" placeholder="Item Name" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm">
                     <textarea name="description" placeholder="Description" rows="2" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm"></textarea>
                     <select name="item_type" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm">
@@ -606,6 +627,7 @@
                         </div>
                         {% if not item.is_starter %}
                         <form action="{{ url_for('admin_avatar_item_delete', item_id=item.id) }}" method="POST" onsubmit="return confirm('Delete {{ item.name }}?')" class="ml-2 flex-shrink-0">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="text-red-400 hover:text-red-600 p-1" title="Delete item">
                                 <i class="fas fa-trash text-sm"></i>
                             </button>

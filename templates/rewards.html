@@ -28,6 +28,7 @@
         <p class="text-slate-500 dark:text-slate-400 text-sm mb-6">Ask the Guild Master to stock a specific item.</p>
         
         <form action="{{ url_for('request_reward') }}" method="POST" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div>
                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Item Name</label>
                 <input type="text" name="name" required class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-indigo-500 focus:outline-none dark:text-white">
@@ -63,6 +64,7 @@
                 </div>
                 
                 <form action="{{ url_for('redeem_reward', reward_id=reward.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" 
                         class="w-full py-2 px-4 rounded-lg font-bold transition flex items-center justify-center gap-2
                         {{ 'bg-slate-200 dark:bg-slate-700 cursor-not-allowed text-slate-400 dark:text-slate-500' if current_user.points < reward.cost else 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl' }}"

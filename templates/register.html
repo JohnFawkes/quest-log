@@ -11,6 +11,7 @@
     </div>
 
     <form method="POST" action="{{ url_for('register') }}" class="space-y-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div>
             <label class="block text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-2" for="name">Display Name</label>
             <input type="text" name="name" id="name" required placeholder="John Doe"

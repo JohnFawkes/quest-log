@@ -66,6 +66,7 @@
         <div class="text-xs text-green-400 font-semibold"><i class="fas fa-check mr-1"></i>Owned</div>
         {% else %}
         <form method="POST" action="{{ url_for('avatar_shop_buy', item_id=item.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           {% set can_afford = current_user.coins >= item.coin_cost %}
           <div class="flex items-center justify-between gap-2">
             <span class="text-sm font-bold {{ 'text-yellow-400' if can_afford else 'text-red-400' }}">
