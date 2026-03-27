@@ -204,6 +204,9 @@
                         <a href="{{ url_for('calendar') }}" class="hover:opacity-80 transition flex items-center gap-1">
                             <i class="fas fa-calendar-alt text-green-400"></i> Calendar
                         </a>
+                        <a href="{{ url_for('stats') }}" class="hover:opacity-80 transition flex items-center gap-1">
+                            <i class="fas fa-chart-bar text-cyan-400"></i> Stats
+                        </a>
                         {% if current_user.is_admin %}
                             <a href="{{ url_for('admin_panel') }}" class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 flex items-center gap-1">
                                 <i class="fas fa-shield-alt"></i> Guild Hall
@@ -244,6 +247,9 @@
         </a>
         <a href="{{ url_for('calendar') }}" class="flex flex-col items-center p-2 hover:text-green-600 dark:hover:text-green-400">
             <i class="fas fa-calendar-alt mb-1"></i> Calendar
+        </a>
+        <a href="{{ url_for('stats') }}" class="flex flex-col items-center p-2 hover:text-cyan-600 dark:hover:text-cyan-400">
+            <i class="fas fa-chart-bar mb-1"></i> Stats
         </a>
         <a href="{{ url_for('settings_profile') }}" class="flex flex-col items-center p-2 hover:text-indigo-600 dark:hover:text-indigo-400">
             <i class="fas fa-user-cog mb-1"></i> Profile

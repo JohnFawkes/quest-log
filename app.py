@@ -375,6 +375,90 @@ def _delete_approved_images_older_than(days):
         db.session.commit()
     return file_count, len(completions)
 
+
+def _compute_user_stats(user_id, local_tz):
+    """Compute quest and currency stats for a user across time periods and as rolling averages."""
+    now = datetime.now(local_tz)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start_setting = int(get_setting('week_start_day', '0'))
+    days_since_week_start = (now.weekday() - week_start_setting) % 7
+    week_start = (now - timedelta(days=days_since_week_start)).replace(hour=0, minute=0, second=0, microsecond=0)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    year_start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    completions = (
+        Completion.query
+        .filter(Completion.user_id == user_id, Completion.status.in_(['approved', 'penalty']))
+        .all()
+    )
+
+    habit_cache = {}
+    for c in completions:
+        if c.habit_id not in habit_cache:
+            habit_cache[c.habit_id] = db.session.get(Habit, c.habit_id)
+
+    def _stats_since(start):
+        quests_done = quests_failed = gems = coins = 0
+        for c in completions:
+            ts = c.timestamp
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=timezone.utc)
+            if start and ts.astimezone(local_tz) < start:
+                continue
+            if c.status == 'approved':
+                quests_done += 1
+                h = habit_cache.get(c.habit_id)
+                if h:
+                    gems += h.points_reward
+                    coins += h.coins_reward or 0
+            else:
+                quests_failed += 1
+        return {'quests_done': quests_done, 'quests_failed': quests_failed,
+                'gems_earned': gems, 'coins_earned': coins}
+
+    periods = {
+        'today': _stats_since(today_start),
+        'week': _stats_since(week_start),
+        'month': _stats_since(month_start),
+        'year': _stats_since(year_start),
+        'all_time': _stats_since(None),
+    }
+
+    at = periods['all_time']
+    first_ts = min((c.timestamp for c in completions), default=None)
+    if first_ts:
+        if first_ts.tzinfo is None:
+            first_ts = first_ts.replace(tzinfo=timezone.utc)
+        days_active = max(1, (now - first_ts.astimezone(local_tz)).days + 1)
+        averages = {
+            'gems_per_day': round(at['gems_earned'] / days_active, 1),
+            'gems_per_week': round(at['gems_earned'] / max(1, days_active / 7), 1),
+            'gems_per_month': round(at['gems_earned'] / max(1, days_active / 30.44), 1),
+            'gems_per_year': round(at['gems_earned'] / max(1, days_active / 365.25), 1),
+            'coins_per_day': round(at['coins_earned'] / days_active, 1),
+            'coins_per_week': round(at['coins_earned'] / max(1, days_active / 7), 1),
+            'coins_per_month': round(at['coins_earned'] / max(1, days_active / 30.44), 1),
+            'coins_per_year': round(at['coins_earned'] / max(1, days_active / 365.25), 1),
+            'quests_done_per_day': round(at['quests_done'] / days_active, 1),
+            'quests_done_per_week': round(at['quests_done'] / max(1, days_active / 7), 1),
+            'quests_done_per_month': round(at['quests_done'] / max(1, days_active / 30.44), 1),
+            'quests_done_per_year': round(at['quests_done'] / max(1, days_active / 365.25), 1),
+            'quests_failed_per_day': round(at['quests_failed'] / days_active, 1),
+            'quests_failed_per_week': round(at['quests_failed'] / max(1, days_active / 7), 1),
+            'quests_failed_per_month': round(at['quests_failed'] / max(1, days_active / 30.44), 1),
+            'quests_failed_per_year': round(at['quests_failed'] / max(1, days_active / 365.25), 1),
+        }
+    else:
+        averages = {k: 0.0 for k in [
+            'gems_per_day', 'gems_per_week', 'gems_per_month', 'gems_per_year',
+            'coins_per_day', 'coins_per_week', 'coins_per_month', 'coins_per_year',
+            'quests_done_per_day', 'quests_done_per_week', 'quests_done_per_month', 'quests_done_per_year',
+            'quests_failed_per_day', 'quests_failed_per_week', 'quests_failed_per_month', 'quests_failed_per_year',
+        ]}
+
+    return periods, averages
+
+
 @app.before_request
 def _maybe_backup():
     """Trigger a daily backup and auto-image-cleanup on the first request of each calendar day (per worker)."""
@@ -2029,6 +2113,44 @@ def uploaded_file(filename):
     response = send_from_directory(app.config['UPLOAD_FOLDER'], filename, mimetype=mime_type)
     response.headers['Content-Disposition'] = 'inline'
     return response
+
+
+@app.route('/stats')
+@login_required
+def stats():
+    local_tz = _get_localtz()
+    periods, averages = _compute_user_stats(current_user.id, local_tz)
+    return render_template('stats.html', periods=periods, averages=averages,
+                           user=current_user, is_admin_view=False)
+
+
+@app.route('/admin/stats')
+@login_required
+def admin_stats():
+    if not current_user.is_admin:
+        return redirect(url_for('dashboard'))
+    local_tz = _get_localtz()
+    users = User.query.filter(User.email != DEMO_EMAIL).all()
+    user_stats = []
+    for u in users:
+        periods, averages = _compute_user_stats(u.id, local_tz)
+        user_stats.append({'user': u, 'periods': periods, 'averages': averages})
+    return render_template('admin_stats.html', user_stats=user_stats)
+
+
+@app.route('/admin/stats/<int:user_id>')
+@login_required
+def admin_user_stats(user_id):
+    if not current_user.is_admin:
+        return redirect(url_for('dashboard'))
+    user = db.session.get(User, user_id)
+    if not user or user.email == DEMO_EMAIL:
+        return redirect(url_for('admin_stats'))
+    local_tz = _get_localtz()
+    periods, averages = _compute_user_stats(user.id, local_tz)
+    return render_template('stats.html', periods=periods, averages=averages,
+                           user=user, is_admin_view=True)
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

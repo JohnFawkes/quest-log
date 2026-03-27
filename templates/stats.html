@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center flex-wrap gap-3">
+    <h1 class="text-3xl font-black flex items-center gap-3" style="color: var(--accent-text);">
+        <i class="fas fa-chart-bar"></i>
+        {% if is_admin_view %}{{ user.name }}'s Chronicle{% else %}My Chronicle{% endif %}
+    </h1>
+    {% if is_admin_view %}
+    <a href="{{ url_for('admin_stats') }}" class="text-sm hover:underline flex items-center gap-1 opacity-70 hover:opacity-100 transition" style="color: var(--accent-text);">
+        <i class="fas fa-arrow-left"></i> All Adventurers
+    </a>
+    {% endif %}
+</div>
+
+<!-- Period Summary Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    {% for period_key, period_label in [('today', 'Today'), ('week', 'This Week'), ('month', 'This Month'), ('year', 'This Year')] %}
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow border border-slate-200 dark:border-slate-700 p-4">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">{{ period_label }}</h3>
+        <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <i class="fas fa-gem text-purple-400 w-3 text-center"></i> Gems
+                </span>
+                <span class="font-bold text-indigo-600 dark:text-indigo-300">{{ periods[period_key]['gems_earned'] }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <i class="fas fa-coins text-yellow-400 w-3 text-center"></i> Coins
+                </span>
+                <span class="font-bold text-yellow-600 dark:text-yellow-300">{{ periods[period_key]['coins_earned'] }}</span>
+            </div>
+            <div class="border-t border-slate-100 dark:border-slate-700 pt-1.5 mt-1.5 space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                        <i class="fas fa-check-circle text-green-400 w-3 text-center"></i> Done
+                    </span>
+                    <span class="font-bold text-green-600 dark:text-green-400">{{ periods[period_key]['quests_done'] }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                        <i class="fas fa-times-circle text-red-400 w-3 text-center"></i> Failed
+                    </span>
+                    <span class="font-bold text-red-600 dark:text-red-400">{{ periods[period_key]['quests_failed'] }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Rolling Averages Table -->
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow border border-slate-200 dark:border-slate-700 mb-8 overflow-hidden">
+    <div class="bg-slate-800 dark:bg-slate-900 p-4 text-white font-bold flex items-center gap-2">
+        <i class="fas fa-chart-line"></i> Rolling Averages
+        <span class="text-xs font-normal text-slate-400 ml-1">(calculated from all-time activity)</span>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+                    <th class="p-3 text-left">Metric</th>
+                    <th class="p-3 text-center">Per Day</th>
+                    <th class="p-3 text-center">Per Week</th>
+                    <th class="p-3 text-center">Per Month</th>
+                    <th class="p-3 text-center">Per Year</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="p-3 font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-gem text-purple-400 w-4 mr-1"></i> Gems Earned
+                    </td>
+                    <td class="p-3 text-center font-mono font-bold text-indigo-600 dark:text-indigo-300">{{ averages.gems_per_day }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-indigo-600 dark:text-indigo-300">{{ averages.gems_per_week }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-indigo-600 dark:text-indigo-300">{{ averages.gems_per_month }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-indigo-600 dark:text-indigo-300">{{ averages.gems_per_year }}</td>
+                </tr>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="p-3 font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-coins text-yellow-400 w-4 mr-1"></i> Coins Earned
+                    </td>
+                    <td class="p-3 text-center font-mono font-bold text-yellow-600 dark:text-yellow-300">{{ averages.coins_per_day }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-yellow-600 dark:text-yellow-300">{{ averages.coins_per_week }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-yellow-600 dark:text-yellow-300">{{ averages.coins_per_month }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-yellow-600 dark:text-yellow-300">{{ averages.coins_per_year }}</td>
+                </tr>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="p-3 font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-check-circle text-green-400 w-4 mr-1"></i> Quests Done
+                    </td>
+                    <td class="p-3 text-center font-mono font-bold text-green-600 dark:text-green-400">{{ averages.quests_done_per_day }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-green-600 dark:text-green-400">{{ averages.quests_done_per_week }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-green-600 dark:text-green-400">{{ averages.quests_done_per_month }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-green-600 dark:text-green-400">{{ averages.quests_done_per_year }}</td>
+                </tr>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="p-3 font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-times-circle text-red-400 w-4 mr-1"></i> Quests Failed
+                    </td>
+                    <td class="p-3 text-center font-mono font-bold text-red-600 dark:text-red-400">{{ averages.quests_failed_per_day }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-red-600 dark:text-red-400">{{ averages.quests_failed_per_week }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-red-600 dark:text-red-400">{{ averages.quests_failed_per_month }}</td>
+                    <td class="p-3 text-center font-mono font-bold text-red-600 dark:text-red-400">{{ averages.quests_failed_per_year }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- All-Time Totals -->
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow border border-slate-200 dark:border-slate-700 p-6">
+    <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-slate-800 dark:text-slate-100">
+        <i class="fas fa-trophy text-yellow-500"></i> All-Time Totals
+    </h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-800">
+            <div class="text-3xl font-black text-indigo-600 dark:text-indigo-300 mb-1">{{ periods.all_time['gems_earned'] }}</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <i class="fas fa-gem text-purple-400 mr-1"></i>Gems Earned
+            </div>
+        </div>
+        <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-100 dark:border-yellow-800">
+            <div class="text-3xl font-black text-yellow-600 dark:text-yellow-300 mb-1">{{ periods.all_time['coins_earned'] }}</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <i class="fas fa-coins text-yellow-400 mr-1"></i>Coins Earned
+            </div>
+        </div>
+        <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+            <div class="text-3xl font-black text-green-600 dark:text-green-400 mb-1">{{ periods.all_time['quests_done'] }}</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <i class="fas fa-check-circle text-green-400 mr-1"></i>Quests Done
+            </div>
+        </div>
+        <div class="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800">
+            <div class="text-3xl font-black text-red-600 dark:text-red-400 mb-1">{{ periods.all_time['quests_failed'] }}</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <i class="fas fa-times-circle text-red-400 mr-1"></i>Quests Failed
+            </div>
+        </div>
+    </div>
+    <p class="text-xs text-slate-400 dark:text-slate-600 mt-4 text-center">
+        * Gem and coin totals are approximate — they use current quest reward values and exclude streak bonuses.
+    </p>
+</div>
+{% endblock %}

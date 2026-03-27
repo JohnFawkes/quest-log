@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center flex-wrap gap-3">
+    <h1 class="text-3xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3">
+        <i class="fas fa-chart-bar text-red-500 dark:text-red-400"></i> Guild Chronicle
+    </h1>
+    <a href="{{ url_for('admin_panel') }}" class="text-sm text-red-600 dark:text-red-400 hover:underline flex items-center gap-1">
+        <i class="fas fa-arrow-left"></i> Guild Hall
+    </a>
+</div>
+
+{% for entry in user_stats %}
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow border border-slate-200 dark:border-slate-700 mb-6 overflow-hidden">
+    <div class="bg-slate-800 dark:bg-slate-900 p-4 text-white font-bold flex justify-between items-center">
+        <span class="flex items-center gap-2">
+            <i class="fas fa-user-circle text-slate-400"></i>
+            {{ entry.user.name }}
+            {% if entry.user.is_admin %}
+            <span class="text-xs bg-red-700 px-2 py-0.5 rounded font-normal">Guild Master</span>
+            {% endif %}
+        </span>
+        <a href="{{ url_for('admin_user_stats', user_id=entry.user.id) }}"
+           class="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded font-bold transition flex items-center gap-1">
+            Full Stats <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    <div class="p-4 overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
+                    <th class="pb-2 text-left pr-4">Metric</th>
+                    <th class="pb-2 text-center px-3">Today</th>
+                    <th class="pb-2 text-center px-3">This Week</th>
+                    <th class="pb-2 text-center px-3">This Month</th>
+                    <th class="pb-2 text-center px-3">This Year</th>
+                    <th class="pb-2 text-center px-3">All Time</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="py-2 pr-4 font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-gem text-purple-400 w-4 mr-1"></i> Gems
+                    </td>
+                    {% for p in ['today', 'week', 'month', 'year', 'all_time'] %}
+                    <td class="py-2 text-center px-3 font-mono font-bold text-indigo-600 dark:text-indigo-300">
+                        {{ entry.periods[p]['gems_earned'] }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="py-2 pr-4 font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-coins text-yellow-400 w-4 mr-1"></i> Coins
+                    </td>
+                    {% for p in ['today', 'week', 'month', 'year', 'all_time'] %}
+                    <td class="py-2 text-center px-3 font-mono font-bold text-yellow-600 dark:text-yellow-300">
+                        {{ entry.periods[p]['coins_earned'] }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="py-2 pr-4 font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-check-circle text-green-400 w-4 mr-1"></i> Quests Done
+                    </td>
+                    {% for p in ['today', 'week', 'month', 'year', 'all_time'] %}
+                    <td class="py-2 text-center px-3 font-mono font-bold text-green-600 dark:text-green-400">
+                        {{ entry.periods[p]['quests_done'] }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="py-2 pr-4 font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-times-circle text-red-400 w-4 mr-1"></i> Quests Failed
+                    </td>
+                    {% for p in ['today', 'week', 'month', 'year', 'all_time'] %}
+                    <td class="py-2 text-center px-3 font-mono font-bold text-red-600 dark:text-red-400">
+                        {{ entry.periods[p]['quests_failed'] }}
+                    </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="text-center text-slate-400 dark:text-slate-600 py-16">
+    <i class="fas fa-users text-5xl mb-3 block"></i>
+    <p class="font-medium">No adventurers found.</p>
+</div>
+{% endfor %}
+{% endblock %}

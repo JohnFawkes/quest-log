@@ -29,6 +29,7 @@ Quest Log is a gamified habit tracker that transforms your daily tasks into an R
 | **Google → Local Migration** | Convert a Google OAuth account to local email/password login from Settings |
 | **User Management** | Create, promote, reset passwords, adjust gems, and delete adventurers from the Guild Hall |
 | **Flexible Auth** | Local email/password or Google OAuth |
+| **Chronicle (Stats)** | Per-adventurer stats page showing gem/coin earnings and quest completion counts across today, week, month, year — plus rolling daily/weekly/monthly/yearly averages. Guild Masters get a full Guild Chronicle overview of all adventurers |
 | **Themes** | Multiple medieval-inspired themes — Dungeon, Royal Court, Ranger's Lodge, and more |
 
 ---
