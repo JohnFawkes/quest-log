@@ -261,10 +261,10 @@ def _build_apprise():
             url = url.strip()
             if not url:
                 continue
-            # Inject avatar_url into discord:// URLs when an icon is configured
+            # Inject avatar params into discord:// URLs when an icon is configured
             if icon_url and url.lower().startswith('discord://') and 'avatar_url' not in url:
                 sep = '&' if '?' in url else '?'
-                url = f"{url}{sep}avatar_url={_urlquote(icon_url, safe='')}"
+                url = f"{url}{sep}avatar=yes&avatar_url={_urlquote(icon_url, safe='')}"
             ap.add(url)
     return ap
 
