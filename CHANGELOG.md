@@ -18,7 +18,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Admin General Settings panel — Guild Masters can now configure Apprise notification URLs, Discord webhook URL, and week start day directly from the Guild Hall UI (DB values override env vars).
 - README Backups section — documents `docker cp` extraction, volume mounting, and the `BACKUP_DIR` env var.
 
+### Removed
+- Google SSO — removed Google OAuth login (`/login/google`, `/authorize`), the Google-to-local account migration route (`/settings/convert-to-local`), all related config (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `ADMIN_EMAIL`), and the `authlib` dependency.
+- Standalone Discord webhook — removed the dedicated `DISCORD_WEBHOOK_URL` env var and its special-case handling in `_build_apprise()`; Discord can be configured via `APPRISE_URLS` using the `discord://` scheme instead.
+
 ### Fixed
+- Quest rejection notifications — `reject_completion` and `quick_reject` (token link) were missing `send_notification` calls; rejecting a quest now fires an ❌ notification to all configured channels.
 - Avatar UI — spell slot no longer shows a redundant "None" unequip card; use the owned "No Aura" item instead.
 - Avatar SVG — iron helm raised 10 px so the brow ridge clears the character's eyes.
 - Avatar SVG — ranger hood redesigned as a split-panel cowl (left/right panels + crown + chin wrap) leaving the face fully visible.

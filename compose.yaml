@@ -9,6 +9,8 @@ services:
       - ./data:/data
       # Persist user uploaded images
       - ./static/uploads:/app/static/uploads
+      # Persist daily database backups
+      - ./backups:/backups
     environment:
       # These variables are read from your .env file
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-prod}

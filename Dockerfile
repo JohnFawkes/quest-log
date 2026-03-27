@@ -31,12 +31,13 @@ RUN echo "${COMMIT_SHA}" > /dev/null
 # Copy application code
 COPY . .
 
-# Create non-root user
-RUN groupadd -r questlog && useradd -r -g questlog -s /bin/false questlog
+# Create non-root user with a home directory
+RUN groupadd -r questlog && useradd -r -g questlog -s /bin/false -d /home/questlog questlog \
+    && mkdir -p /home/questlog && chown questlog:questlog /home/questlog
 
-# Create directory for persistent data and uploads, owned by app user
-RUN mkdir -p /data /app/static/uploads \
-    && chown -R questlog:questlog /data /app/static/uploads
+# Create directory for persistent data, uploads, and backups, owned by app user
+RUN mkdir -p /data /app/static/uploads /backups \
+    && chown -R questlog:questlog /data /app/static/uploads /backups
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh

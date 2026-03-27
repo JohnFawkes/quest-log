@@ -11,11 +11,9 @@ import time
 import types
 import zipfile
 from datetime import datetime, timedelta, timezone
-from urllib.parse import quote as _urlquote
 
 import apprise
 import requests as http_requests
-from authlib.integrations.flask_client import OAuth
 from flask import (
     Flask, Response, flash, make_response, redirect, render_template, request,
     send_from_directory, session, url_for,
@@ -42,15 +40,8 @@ def _get_localtz():
         logger.warning("Unknown TZ value %r, falling back to UTC", tz_name)
         return ZoneInfo('UTC')
 
-# Allow OAuth over HTTP
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
 # --- CONFIGURATION ---
-DISCORD_WEBHOOK_URL = os.environ.get('DISCORD_WEBHOOK_URL', "")
 APPRISE_URLS = os.environ.get('APPRISE_URLS', "")
-GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', "")
-GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', "")
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', "")
 PUBLIC_DOMAIN = os.environ.get('PUBLIC_DOMAIN', "http://localhost:5000")
 BACKUP_DIR = os.environ.get('BACKUP_DIR', '/backups')
 DEMO_EMAIL = "demo@questlog.app"
@@ -76,10 +67,6 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static/uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-app.config['DISCORD_WEBHOOK_URL'] = DISCORD_WEBHOOK_URL
-app.config['GOOGLE_CLIENT_ID'] = GOOGLE_CLIENT_ID
-app.config['GOOGLE_CLIENT_SECRET'] = GOOGLE_CLIENT_SECRET
-app.config['ADMIN_EMAIL'] = ADMIN_EMAIL
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
@@ -102,15 +89,6 @@ def localtime_filter(dt):
         dt = dt.replace(tzinfo=timezone.utc)
     return dt.astimezone(_get_localtz())
 login_manager.login_view = 'login'
-
-oauth = OAuth(app)
-google = oauth.register(
-    name='google',
-    client_id=app.config['GOOGLE_CLIENT_ID'],
-    client_secret=app.config['GOOGLE_CLIENT_SECRET'],
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'},
-)
 
 # --- Models ---
 class User(UserMixin, db.Model):
@@ -272,27 +250,15 @@ def _recolor_svg(text, skin, hair, eye):
     return text
 
 def _build_apprise():
-    """Build an Apprise instance from configured URLs, injecting icon URL where supported."""
+    """Build an Apprise instance from configured URLs."""
     ap = apprise.Apprise()
-    icon_url = get_setting('notification_icon_url', '')
     # DB setting overrides env var if set
     apprise_urls = get_setting('apprise_urls', '') or APPRISE_URLS
-    discord_url = get_setting('discord_webhook_url', '') or DISCORD_WEBHOOK_URL
     if apprise_urls:
         for url in apprise_urls.split(','):
             url = url.strip()
             if url:
                 ap.add(url)
-    if discord_url:
-        # Convert to Apprise discord:// format so we can inject avatar_url.
-        # Token must exclude trailing slashes and '?' to avoid double-slash in
-        # the assembled URL.  The avatar_url value must be percent-encoded so
-        # that its own '://' and '/' don't confuse Apprise's URL parser.
-        m = re.match(r'https://discord(?:app)?\.com/api/webhooks/(\d+)/([^/?]+)', discord_url)
-        if m and icon_url:
-            ap.add(f"discord://{m.group(1)}/{m.group(2)}/?avatar_url={_urlquote(icon_url, safe='')}")
-        else:
-            ap.add(discord_url)
     return ap
 
 def send_notification(content, image_filename=None, completion_id=None, action_token=None):
@@ -303,7 +269,7 @@ def send_notification(content, image_filename=None, completion_id=None, action_t
         content += f"\n✅ **Approve:** {approve_url}\n❌ **Reject:** {reject_url}"
     ap = _build_apprise()
     if not len(ap):
-        logger.warning("No notification services configured (set APPRISE_URLS or DISCORD_WEBHOOK_URL)")
+        logger.warning("No notification services configured (set APPRISE_URLS)")
         return
     attach = None
     if image_filename:
@@ -1047,28 +1013,6 @@ def login_demo():
     flash("Demo user not found.", "error")
     return redirect(url_for('login'))
 
-@app.route('/settings/convert-to-local', methods=['POST'])
-@login_required
-def convert_to_local():
-    if current_user.email == DEMO_EMAIL:
-        flash("Settings are read-only for the Demo user.", "warning")
-        return redirect(url_for('settings_profile'))
-    if current_user.password_hash:
-        flash("This account already has a password set.", "info")
-        return redirect(url_for('settings_profile'))
-    password = request.form.get('password', '').strip()
-    confirm = request.form.get('confirm_password', '').strip()
-    if len(password) < 4:
-        flash("Password must be at least 4 characters.", "error")
-        return redirect(url_for('settings_profile'))
-    if password != confirm:
-        flash("Passwords do not match.", "error")
-        return redirect(url_for('settings_profile'))
-    current_user.password_hash = generate_password_hash(password, method='scrypt')
-    db.session.commit()
-    flash("Password set! You can now log in with your email and password without Google.", "success")
-    return redirect(url_for('settings_profile'))
-
 @app.route('/settings/profile', methods=['GET', 'POST'])
 @login_required
 def settings_profile():
@@ -1142,7 +1086,6 @@ def register():
             return redirect(url_for('register'))
         new_user = User(email=email, name=name, password_hash=generate_password_hash(password, method='scrypt'))
         if User.query.count() == 0: new_user.is_admin = True
-        if app.config['ADMIN_EMAIL'] and email == app.config['ADMIN_EMAIL']: new_user.is_admin = True
         db.session.add(new_user)
         db.session.commit()
         _grant_starter_items(new_user)
@@ -1150,36 +1093,6 @@ def register():
         login_user(new_user)
         return redirect(url_for('index'))
     return render_template('register.html')
-
-@app.route('/login/google')
-def google_login():
-    if not app.config['GOOGLE_CLIENT_ID']: return redirect(url_for('login'))
-    redirect_uri = f"{PUBLIC_DOMAIN.rstrip('/')}/authorize" if PUBLIC_DOMAIN else url_for('authorize', _external=True)
-    return google.authorize_redirect(redirect_uri)
-
-@app.route('/authorize')
-def authorize():
-    try:
-        token = google.authorize_access_token()
-        user_info = google.userinfo()
-        email = user_info['email']
-        user = User.query.filter_by(email=email).first()
-        should_be_admin = (app.config['ADMIN_EMAIL'] and email == app.config['ADMIN_EMAIL'])
-        if not user:
-            user = User(email=email, name=user_info['name'], picture=user_info['picture'], is_admin=should_be_admin)
-            db.session.add(user)
-            db.session.commit()
-            _grant_starter_items(user)
-            db.session.commit()
-        elif should_be_admin and not user.is_admin:
-            user.is_admin = True
-            db.session.commit()
-        login_user(user)
-        return redirect(url_for('index'))
-    except Exception as e:
-        logger.error("Google OAuth error: %s", e)
-        flash("Login failed. Please try again.", 'error')
-        return redirect(url_for('login'))
 
 @app.route('/logout')
 @login_required
@@ -1420,7 +1333,7 @@ def test_webhook():
     if not current_user.is_admin: return redirect(url_for('index'))
     ap = _build_apprise()
     if not len(ap):
-        flash('No notification services configured. Set APPRISE_URLS or DISCORD_WEBHOOK_URL.', 'error')
+        flash('No notification services configured. Set APPRISE_URLS in your environment.', 'error')
     else:
         send_notification("🔔 Quest Log test notification — working!")
         flash('Test notification sent. Check your configured channels.', 'success')
@@ -1458,7 +1371,6 @@ def admin_panel():
     
     notification_icon_url = get_setting('notification_icon_url', '')
     apprise_urls_setting = get_setting('apprise_urls', '')
-    discord_webhook_setting = get_setting('discord_webhook_url', '')
     week_start_day = get_setting('week_start_day', '0')
     approved_image_retention_days = get_setting('approved_image_retention_days', '0')
     avatar_items = AvatarItem.query.order_by(AvatarItem.item_type, AvatarItem.coin_cost).all()
@@ -1470,7 +1382,6 @@ def admin_panel():
                          active_rewards=active_rewards,
                          notification_icon_url=notification_icon_url,
                          apprise_urls_setting=apprise_urls_setting,
-                         discord_webhook_setting=discord_webhook_setting,
                          week_start_day=week_start_day,
                          approved_image_retention_days=approved_image_retention_days,
                          avatar_items=avatar_items)
@@ -1727,6 +1638,7 @@ def reject_completion(completion_id):
         return redirect(url_for('admin_panel'))
     completion.status = 'rejected'
     db.session.commit()
+    send_notification(f"❌ **{user.name}**'s quest **{completion.habit_name}** was rejected.")
     return redirect(url_for('admin_panel'))
 
 @app.route('/quest/approve/<int:completion_id>/<token>')
@@ -1774,6 +1686,7 @@ def quick_reject(completion_id, token):
     completion.status = 'rejected'
     completion.action_token = None  # invalidate token
     db.session.commit()
+    send_notification(f"❌ **{user.name}**'s quest **{completion.habit_name}** was rejected (via link).")
     return f"<html><body style='font-family:sans-serif;text-align:center;padding:2rem'><h2>❌ Quest Rejected</h2><p><strong>{html.escape(user.name)}</strong> — <em>{html.escape(completion.habit_name)}</em></p></body></html>", 200
 
 @app.route('/admin/history')
@@ -1830,7 +1743,6 @@ def admin_notification_settings():
 def admin_general_settings():
     if not current_user.is_admin: return redirect(url_for('index'))
     set_setting('apprise_urls', request.form.get('apprise_urls', '').strip())
-    set_setting('discord_webhook_url', request.form.get('discord_webhook_url', '').strip())
     week_start = request.form.get('week_start_day', '0')
     if week_start not in ('0', '6'):
         week_start = '0'
