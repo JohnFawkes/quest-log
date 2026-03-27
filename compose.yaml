@@ -18,8 +18,6 @@ services:
       - PORT=${PORT:-5000}
       - TZ=${TZ:-UTC}
       - APPRISE_URLS=${APPRISE_URLS}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - PUBLIC_DOMAIN=${PUBLIC_DOMAIN:-http://localhost:5000}
     healthcheck:

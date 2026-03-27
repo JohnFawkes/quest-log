@@ -16,11 +16,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Quest Calendar — new `/calendar` page (linked in nav) shows 5 weeks of upcoming quests in a grid, respecting the configured week start day.
 - Auto-backup — app writes a daily zip of `questlog.db` to `/backups/` (configurable via `BACKUP_DIR` env var), keeping the 7 most recent backups; backup is triggered on the first request of each day.
 - Admin General Settings panel — Guild Masters can now configure Apprise notification URLs, Discord webhook URL, and week start day directly from the Guild Hall UI (DB values override env vars).
+- Discord bot avatar injection — `_build_apprise()` now automatically appends `avatar_url` to any `discord://` Apprise URL when a Notification Icon URL is configured, so the bot posts with the custom avatar instead of the default Apprise icon.
 - README Backups section — documents `docker cp` extraction, volume mounting, and the `BACKUP_DIR` env var.
 
 ### Removed
 - Google SSO — removed Google OAuth login (`/login/google`, `/authorize`), the Google-to-local account migration route (`/settings/convert-to-local`), all related config (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `ADMIN_EMAIL`), and the `authlib` dependency.
 - Standalone Discord webhook — removed the dedicated `DISCORD_WEBHOOK_URL` env var and its special-case handling in `_build_apprise()`; Discord can be configured via `APPRISE_URLS` using the `discord://` scheme instead.
+
+### Changed
+- Notification Settings panel — Apprise URLs moved from General Settings into the Notification Settings section so all notification config lives in one place; General Settings now only contains Week Start Day.
+- Docker — `questlog` user now has a proper home directory (`/home/questlog`) to resolve Gunicorn control server permission errors; `/backups` directory created in image and mounted as a named volume in `compose.yaml`.
 
 ### Fixed
 - Quest rejection notifications — `reject_completion` and `quick_reject` (token link) were missing `send_notification` calls; rejecting a quest now fires an ❌ notification to all configured channels.

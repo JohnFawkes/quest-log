@@ -312,31 +312,6 @@
             </h3>
             <form action="{{ url_for('admin_general_settings') }}" method="POST" class="space-y-5">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <!-- APPRISE URLs -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
-                        Apprise Notification URLs
-                    </label>
-                    <textarea name="apprise_urls" rows="3"
-                        class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm font-mono"
-                        placeholder="discord://webhook_id/token, tgram://bot_token/chat_id">{{ apprise_urls_setting }}</textarea>
-                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                        Comma-separated <a href="https://github.com/caronc/apprise/wiki" target="_blank" class="underline">Apprise URLs</a> for notifications.
-                        Overrides the <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">APPRISE_URLS</code> environment variable.
-                    </p>
-                </div>
-                <!-- Discord Webhook URL -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
-                        Discord Webhook URL
-                    </label>
-                    <input type="url" name="discord_webhook_url" value="{{ discord_webhook_setting }}"
-                        placeholder="https://discord.com/api/webhooks/..."
-                        class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm">
-                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                        Overrides the <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">DISCORD_WEBHOOK_URL</code> environment variable.
-                    </p>
-                </div>
                 <!-- Week Start Day -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
@@ -369,10 +344,20 @@
             <form action="{{ url_for('admin_notification_settings') }}" method="POST" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Apprise Notification URLs</label>
+                    <textarea name="apprise_urls" rows="3"
+                        class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm font-mono"
+                        placeholder="discord://webhook_id/token, tgram://bot_token/chat_id">{{ apprise_urls_setting }}</textarea>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        Comma-separated <a href="https://github.com/caronc/apprise/wiki" target="_blank" class="underline">Apprise URLs</a>.
+                        Overrides the <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">APPRISE_URLS</code> env var.
+                    </p>
+                </div>
+                <div>
                     <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Notification Icon / Avatar URL</label>
                     <input type="url" name="notification_icon_url" value="{{ notification_icon_url }}" placeholder="https://example.com/icon.png"
                         class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded dark:text-white text-sm">
-                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Used as the avatar/icon in Discord and other supported services.</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Used as the bot avatar in Discord and other supported services.</p>
                 </div>
                 {% if notification_icon_url %}
                 <div class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700">
@@ -380,7 +365,7 @@
                     <span class="text-xs text-slate-500 dark:text-slate-400">Current icon preview</span>
                 </div>
                 {% endif %}
-                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 font-bold text-sm transition">Save Settings</button>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 font-bold text-sm transition">Save Notification Settings</button>
             </form>
         </div>
 

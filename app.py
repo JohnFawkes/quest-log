@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 
 import apprise
 import requests as http_requests
+from urllib.parse import quote as _urlquote
 from flask import (
     Flask, Response, flash, make_response, redirect, render_template, request,
     send_from_directory, session, url_for,
@@ -250,15 +251,21 @@ def _recolor_svg(text, skin, hair, eye):
     return text
 
 def _build_apprise():
-    """Build an Apprise instance from configured URLs."""
+    """Build an Apprise instance from configured URLs, injecting avatar_url into discord:// entries."""
     ap = apprise.Apprise()
+    icon_url = get_setting('notification_icon_url', '')
     # DB setting overrides env var if set
     apprise_urls = get_setting('apprise_urls', '') or APPRISE_URLS
     if apprise_urls:
         for url in apprise_urls.split(','):
             url = url.strip()
-            if url:
-                ap.add(url)
+            if not url:
+                continue
+            # Inject avatar_url into discord:// URLs when an icon is configured
+            if icon_url and url.lower().startswith('discord://') and 'avatar_url' not in url:
+                sep = '&' if '?' in url else '?'
+                url = f"{url}{sep}avatar_url={_urlquote(icon_url, safe='')}"
+            ap.add(url)
     return ap
 
 def send_notification(content, image_filename=None, completion_id=None, action_token=None):
@@ -1733,8 +1740,8 @@ def admin_history():
 @login_required
 def admin_notification_settings():
     if not current_user.is_admin: return redirect(url_for('index'))
-    icon_url = request.form.get('notification_icon_url', '').strip()
-    set_setting('notification_icon_url', icon_url)
+    set_setting('apprise_urls', request.form.get('apprise_urls', '').strip())
+    set_setting('notification_icon_url', request.form.get('notification_icon_url', '').strip())
     flash('Notification settings saved.', 'success')
     return redirect(url_for('admin_panel'))
 
@@ -1742,7 +1749,6 @@ def admin_notification_settings():
 @login_required
 def admin_general_settings():
     if not current_user.is_admin: return redirect(url_for('index'))
-    set_setting('apprise_urls', request.form.get('apprise_urls', '').strip())
     week_start = request.form.get('week_start_day', '0')
     if week_start not in ('0', '6'):
         week_start = '0'
