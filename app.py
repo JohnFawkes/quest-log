@@ -388,7 +388,7 @@ def _compute_user_stats(user_id, local_tz):
 
     completions = (
         Completion.query
-        .filter(Completion.user_id == user_id, Completion.status.in_(['approved', 'penalty']))
+        .filter(Completion.user_id == user_id, Completion.status.in_(['approved', 'penalty', 'rejected']))
         .all()
     )
 
@@ -502,16 +502,20 @@ def _send_midnight_notifications():
 
         users = User.query.filter(User.email != DEMO_EMAIL).all()
 
+        # Create penalty records for all users before building the report
+        for user in users:
+            check_missed_habits(user)
+
         missed_lines = []
         due_lines = []
 
+        end_of_yesterday = yesterday + timedelta(days=1)
         for user in users:
             habits = Habit.query.filter(
                 Habit.assigned_users.any(User.id == user.id)
             ).all()
             for habit in habits:
                 if is_habit_due_on_date(habit, yesterday):
-                    end_of_yesterday = yesterday + timedelta(days=1)
                     completion = Completion.query.filter(
                         Completion.habit_id == habit.id,
                         Completion.user_id == user.id,
@@ -600,24 +604,23 @@ def calculate_next_due_date(habit):
 def check_missed_habits(user):
     if not user.last_penalty_check:
         user.last_penalty_check = datetime.now(timezone.utc) - timedelta(days=1)
-    
+
     last_check = user.last_penalty_check
     if last_check.tzinfo is None:
         last_check = last_check.replace(tzinfo=timezone.utc)
     now = datetime.now(_get_localtz())
     check_date = last_check.astimezone(_get_localtz()).replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-    
+
     if check_date >= yesterday:
         user.last_penalty_check = now
         db.session.commit()
-        return 
-        
+        return
+
     habits = Habit.query.filter(
-        Habit.assigned_users.any(User.id == user.id),
-        Habit.penalty_enabled == True
+        Habit.assigned_users.any(User.id == user.id)
     ).all()
-    
+
     current_check = check_date
     while current_check <= yesterday:
         for habit in habits:
@@ -626,24 +629,24 @@ def check_missed_habits(user):
             if is_habit_due_on_date(habit, current_check):
                 start_of_day = current_check
                 end_of_day = current_check + timedelta(days=1)
-                completion = Completion.query.filter(
+                existing = Completion.query.filter(
                     Completion.habit_id == habit.id,
                     Completion.user_id == user.id,
                     Completion.timestamp >= start_of_day,
                     Completion.timestamp < end_of_day,
-                    Completion.status.in_(['pending', 'approved'])
+                    Completion.status.in_(['pending', 'approved', 'penalty'])
                 ).first()
-                
-                if not completion:
-                    user.points -= habit.penalty_amount
-                    penalty_record = Completion(
+
+                if not existing:
+                    if habit.penalty_enabled:
+                        user.points -= habit.penalty_amount
+                    db.session.add(Completion(
                         user_id=user.id,
                         habit_id=habit.id,
                         habit_name=habit.name,
                         status='penalty',
                         timestamp=current_check + timedelta(hours=12)
-                    )
-                    db.session.add(penalty_record)
+                    ))
         current_check += timedelta(days=1)
     user.last_penalty_check = now
     db.session.commit()
@@ -2118,6 +2121,8 @@ def uploaded_file(filename):
 @app.route('/stats')
 @login_required
 def stats():
+    if current_user.is_admin:
+        return redirect(url_for('admin_stats'))
     local_tz = _get_localtz()
     periods, averages = _compute_user_stats(current_user.id, local_tz)
     return render_template('stats.html', periods=periods, averages=averages,

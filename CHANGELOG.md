@@ -10,6 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 > Changes on the current branch, not yet merged to `main`.
 
 ### Added
+- Midnight penalty record creation — the midnight scheduler now runs `check_missed_habits` for every adventurer, ensuring penalty records exist for all missed quests regardless of whether the user loads the dashboard; `check_missed_habits` expanded to cover all habits (not just penalty-enabled ones) so every missed quest gets a record for accurate stats; gem deduction still only applies to habits with penalties enabled.
 - Chronicle (Stats Dashboard) — new `/stats` page for every adventurer showing gem/coin earnings and quest completions/failures across Today, This Week, This Month, This Year, and All Time, plus a rolling-average table (per day/week/month/year). Guild Masters get `/admin/stats` (Guild Chronicle) with an at-a-glance table for every adventurer and drill-down links to each player's full stats. Accessible via the "Stats" nav link and a "Guild Chronicle" button in the Guild Hall.
 - Midnight Quest Report — a background scheduler sends a daily Apprise notification at midnight (local timezone) listing missed quests from the previous day and all quests due today; uses a DB-backed date key to deduplicate across Gunicorn workers.
 - Quest Calendar — new `/calendar` page (linked in nav) shows 5 weeks of upcoming quests in a grid, respecting the configured week start day.
