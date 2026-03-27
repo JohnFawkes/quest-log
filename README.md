@@ -23,6 +23,7 @@ Quest Log is a gamified habit tracker that transforms your daily tasks into an R
 | **Streak Bonuses** | Award a gem multiplier every N consecutive completions per quest |
 | **Penalties** | Miss a critical quest? The Guild Master can set Gem deductions |
 | **Apprise Notifications** | Alerts via Discord, Telegram, Slack, Ntfy, Gotify, and [100+ more](https://github.com/caronc/apprise/wiki) through Apprise |
+| **Midnight Quest Report** | Daily summary sent at midnight listing missed quests from the previous day and quests due today |
 | **One-Click Approvals** | Approve or reject quest submissions directly from Discord/Telegram via a link — no login needed |
 | **Notification Avatar** | Configure a custom icon URL shown as the bot avatar in Discord and other services |
 | **Google → Local Migration** | Convert a Google OAuth account to local email/password login from Settings |
@@ -122,6 +123,12 @@ If notifications are configured, each submission also delivers a message contain
 Set `APPRISE_URLS` to a comma-separated list of [Apprise-compatible URLs](https://github.com/caronc/apprise/wiki) to receive alerts on any supported platform. `DISCORD_WEBHOOK_URL` is also supported for convenience.
 
 Optionally set a **Notification Avatar URL** in the Guild Hall (*Notification Settings*) to display a custom icon alongside bot messages in Discord and other services.
+
+A **Midnight Quest Report** is sent automatically at midnight (local timezone) each day. It includes:
+- **Missed quests** — habits that were due yesterday but not completed or submitted
+- **Quests due today** — habits scheduled for the current day
+
+No configuration is required beyond setting up `APPRISE_URLS` or `DISCORD_WEBHOOK_URL`. The report respects the `TZ` environment variable.
 
 ### User Management
 

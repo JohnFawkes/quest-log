@@ -324,6 +324,10 @@ _backup_lock = threading.Lock()
 _last_backup_date = [None]       # per-worker mutable cell
 _last_img_cleanup_date = [None]  # per-worker mutable cell
 
+# --- Midnight Notifications ---
+_midnight_notif_lock = threading.Lock()
+_midnight_scheduler_started = [False]  # per-worker flag
+
 def _perform_backup():
     """Create a timestamped zip of questlog.db; keep only the last 7 daily backups."""
     try:
@@ -398,6 +402,77 @@ def _maybe_backup():
                                 logger.info("Auto-cleanup: removed %d image(s) from %d approved completions older than %d days", fc, cc, d)
                     threading.Thread(target=_auto_cleanup, daemon=True,
                                      name='img_cleanup').start()
+
+def _send_midnight_notifications():
+    """Send a daily summary: missed quests from yesterday and quests due today."""
+    with app.app_context():
+        local_tz = _get_localtz()
+        today_str = datetime.now(local_tz).strftime('%Y-%m-%d')
+        # Cross-worker deduplication via DB setting
+        if get_setting('last_midnight_notification_date', '') == today_str:
+            return
+        set_setting('last_midnight_notification_date', today_str)
+
+        today = datetime.now(local_tz).replace(hour=0, minute=0, second=0, microsecond=0)
+        yesterday = today - timedelta(days=1)
+
+        users = User.query.filter(User.email != DEMO_EMAIL).all()
+
+        missed_lines = []
+        due_lines = []
+
+        for user in users:
+            habits = Habit.query.filter(
+                Habit.assigned_users.any(User.id == user.id)
+            ).all()
+            for habit in habits:
+                if is_habit_due_on_date(habit, yesterday):
+                    end_of_yesterday = yesterday + timedelta(days=1)
+                    completion = Completion.query.filter(
+                        Completion.habit_id == habit.id,
+                        Completion.user_id == user.id,
+                        Completion.timestamp >= yesterday,
+                        Completion.timestamp < end_of_yesterday,
+                        Completion.status.in_(['pending', 'approved'])
+                    ).first()
+                    if not completion:
+                        missed_lines.append(f"  • {user.name}: {habit.name}")
+                if is_habit_due_on_date(habit, today):
+                    due_lines.append(f"  • {user.name}: {habit.name}")
+
+        parts = []
+        if missed_lines:
+            parts.append("⚠️ **Missed quests (yesterday):**\n" + "\n".join(missed_lines))
+        if due_lines:
+            parts.append("📋 **Quests due today:**\n" + "\n".join(due_lines))
+
+        if parts:
+            send_notification("🌙 **Daily Quest Report**\n\n" + "\n\n".join(parts))
+        else:
+            logger.info("Midnight notification: no missed or due quests to report.")
+
+def _midnight_scheduler_loop():
+    """Background daemon thread: sleeps until next midnight, then fires daily notifications."""
+    while True:
+        local_tz = _get_localtz()
+        now = datetime.now(local_tz)
+        next_midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        sleep_secs = (next_midnight - now).total_seconds()
+        time.sleep(max(sleep_secs, 1))
+        try:
+            _send_midnight_notifications()
+        except Exception as exc:
+            logger.error("Midnight notification error: %s", exc)
+
+@app.before_request
+def _maybe_start_midnight_scheduler():
+    """Start the midnight notification scheduler thread once per worker process."""
+    if not _midnight_scheduler_started[0]:
+        with _midnight_notif_lock:
+            if not _midnight_scheduler_started[0]:
+                _midnight_scheduler_started[0] = True
+                threading.Thread(target=_midnight_scheduler_loop, daemon=True,
+                                 name='midnight_notif').start()
 
 def is_habit_due_on_date(habit, check_date):
     local_tz = _get_localtz()
