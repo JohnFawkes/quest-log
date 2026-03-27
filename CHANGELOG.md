@@ -10,6 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 > Changes on the current branch, not yet merged to `main`.
 
 ### Added
+- Midnight Quest Report — a background scheduler sends a daily Apprise notification at midnight (local timezone) listing missed quests from the previous day and all quests due today; uses a DB-backed date key to deduplicate across Gunicorn workers.
 - Quest Calendar — new `/calendar` page (linked in nav) shows 5 weeks of upcoming quests in a grid, respecting the configured week start day.
 - Auto-backup — app writes a daily zip of `questlog.db` to `/backups/` (configurable via `BACKUP_DIR` env var), keeping the 7 most recent backups; backup is triggered on the first request of each day.
 - Admin General Settings panel — Guild Masters can now configure Apprise notification URLs, Discord webhook URL, and week start day directly from the Guild Hall UI (DB values override env vars).

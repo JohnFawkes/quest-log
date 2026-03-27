@@ -172,6 +172,12 @@ Habits support four schedule types:
 
 Key helper functions: `is_habit_due_on_date()`, `calculate_next_due_date()`, `check_missed_habits()`
 
+## Documentation Requirements
+
+- **New features** — always add an entry to the `README.md` feature table (Core Mechanics) and any relevant section (e.g. Notifications, Guild Master's Guide). Keep the RPG tone.
+- **All changes** — always add an entry to the `[Unreleased]` section of `CHANGELOG.md` under the appropriate heading (`Added`, `Fixed`, `Changed`, `Removed`). Follow the existing format.
+- Both files must be updated in the same commit as the code change.
+
 ## Important Considerations
 
 - **No linter or formatter configured** — no flake8, black, ruff, or pre-commit hooks.
