@@ -28,6 +28,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Docker — `questlog` user now has a proper home directory (`/home/questlog`) to resolve Gunicorn control server permission errors; `/backups` directory created in image and mounted as a named volume in `compose.yaml`.
 
 ### Fixed
+- Pending quest not visible to user after proof upload — dashboard timestamp range queries were comparing local-timezone-aware datetimes against naive UTC values stored in the database; SQLAlchemy's SQLite driver strips timezone offsets without converting, causing the range check to fail for non-UTC users (especially UTC-negative timezones in the evening). All date-range filters in `dashboard`, `check_missed_habits`, and `_send_midnight_notifications` now convert local midnight boundaries to naive UTC before querying.
 - Quest rejection notifications — `reject_completion` and `quick_reject` (token link) were missing `send_notification` calls; rejecting a quest now fires an ❌ notification to all configured channels.
 - Avatar UI — spell slot no longer shows a redundant "None" unequip card; use the owned "No Aura" item instead.
 - Avatar SVG — iron helm raised 10 px so the brow ridge clears the character's eyes.

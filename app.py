@@ -482,7 +482,8 @@ def _send_midnight_notifications():
         missed_lines = []
         due_lines = []
 
-        end_of_yesterday = yesterday + timedelta(days=1)
+        yesterday_start_utc = yesterday.astimezone(timezone.utc).replace(tzinfo=None)
+        yesterday_end_utc = (yesterday + timedelta(days=1)).astimezone(timezone.utc).replace(tzinfo=None)
         for user in users:
             habits = Habit.query.filter(
                 Habit.assigned_users.any(User.id == user.id)
@@ -492,8 +493,8 @@ def _send_midnight_notifications():
                     completion = Completion.query.filter(
                         Completion.habit_id == habit.id,
                         Completion.user_id == user.id,
-                        Completion.timestamp >= yesterday,
-                        Completion.timestamp < end_of_yesterday,
+                        Completion.timestamp >= yesterday_start_utc,
+                        Completion.timestamp < yesterday_end_utc,
                         Completion.status.in_(['pending', 'approved'])
                     ).first()
                     if not completion:
@@ -600,13 +601,13 @@ def check_missed_habits(user):
             created = habit.created_at if habit.created_at.tzinfo else habit.created_at.replace(tzinfo=timezone.utc)
             if created > current_check: continue
             if is_habit_due_on_date(habit, current_check):
-                start_of_day = current_check
-                end_of_day = current_check + timedelta(days=1)
+                day_start_utc = current_check.astimezone(timezone.utc).replace(tzinfo=None)
+                day_end_utc = (current_check + timedelta(days=1)).astimezone(timezone.utc).replace(tzinfo=None)
                 existing = Completion.query.filter(
                     Completion.habit_id == habit.id,
                     Completion.user_id == user.id,
-                    Completion.timestamp >= start_of_day,
-                    Completion.timestamp < end_of_day,
+                    Completion.timestamp >= day_start_utc,
+                    Completion.timestamp < day_end_utc,
                     Completion.status.in_(['pending', 'approved', 'penalty'])
                 ).first()
 
@@ -1118,6 +1119,9 @@ def dashboard():
     demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
     start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_day   = start_of_day + timedelta(days=1)
+    # Timestamps stored as naive UTC; convert local boundaries to naive UTC for correct comparisons
+    start_utc = start_of_day.astimezone(timezone.utc).replace(tzinfo=None)
+    end_utc   = end_of_day.astimezone(timezone.utc).replace(tzinfo=None)
 
     if current_user.is_admin:
         all_habits = Habit.query.all()
@@ -1127,8 +1131,8 @@ def dashboard():
             .filter(
                 User.email != DEMO_EMAIL,
                 Completion.status.in_(['pending', 'approved']),
-                Completion.timestamp >= start_of_day,
-                Completion.timestamp < end_of_day,
+                Completion.timestamp >= start_utc,
+                Completion.timestamp < end_utc,
             )
             .order_by(Completion.timestamp.desc()).all()
         )
@@ -1139,8 +1143,8 @@ def dashboard():
             .filter(
                 Completion.user_id == current_user.id,
                 Completion.status.in_(['pending', 'approved']),
-                Completion.timestamp >= start_of_day,
-                Completion.timestamp < end_of_day,
+                Completion.timestamp >= start_utc,
+                Completion.timestamp < end_utc,
             )
             .order_by(Completion.timestamp.desc()).all()
         )
@@ -1171,13 +1175,11 @@ def dashboard():
                 entry.next_milestone = h.streak_milestone - (entry.current_streak % h.streak_milestone)
 
             if is_due_today_cache[h.id]:
-                start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
-                end_of_day = start_of_day + timedelta(days=1)
                 done = Completion.query.filter(
                     Completion.habit_id == h.id,
                     Completion.user_id == assigned_user.id,
-                    Completion.timestamp >= start_of_day,
-                    Completion.timestamp < end_of_day,
+                    Completion.timestamp >= start_utc,
+                    Completion.timestamp < end_utc,
                     Completion.status != 'rejected'
                 ).first()
                 entry.is_completed = bool(done)
