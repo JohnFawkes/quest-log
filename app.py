@@ -176,6 +176,7 @@ class Redemption(db.Model):
     reward_name = db.Column(db.String(100))
     cost = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    user = db.relationship('User', foreign_keys=[user_id])
 
 user_avatar_items = db.Table('user_avatar_items',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
@@ -1383,6 +1384,14 @@ def admin_panel():
     week_start_day = get_setting('week_start_day', '0')
     approved_image_retention_days = get_setting('approved_image_retention_days', '0')
     avatar_items = AvatarItem.query.order_by(AvatarItem.item_type, AvatarItem.coin_cost).all()
+    recent_redemptions = (
+        Redemption.query
+        .join(User, Redemption.user_id == User.id)
+        .filter(User.email != DEMO_EMAIL)
+        .order_by(Redemption.timestamp.desc())
+        .limit(50)
+        .all()
+    )
     return render_template('admin.html',
                          pending=pending,
                          users=users,
@@ -1393,7 +1402,8 @@ def admin_panel():
                          apprise_urls_setting=apprise_urls_setting,
                          week_start_day=week_start_day,
                          approved_image_retention_days=approved_image_retention_days,
-                         avatar_items=avatar_items)
+                         avatar_items=avatar_items,
+                         recent_redemptions=recent_redemptions)
 
 @app.route('/admin/reward/create', methods=['POST'])
 @login_required
