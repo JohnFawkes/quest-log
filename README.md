@@ -1,5 +1,9 @@
 <p align="center">
   <img src="https://img.shields.io/badge/%F0%9F%8F%B0-Quest%20Log-7c3aed?style=for-the-badge" alt="Quest Log">
+  <a href="https://github.com/JohnFawkes/quest-log/actions/workflows/docker-ci.yml">
+    <img src="https://github.com/JohnFawkes/quest-log/actions/workflows/docker-ci.yml/badge.svg" alt="CI Status">
+  </a>
+  <img src="https://img.shields.io/badge/ghcr.io-quest--log-blue?logo=docker" alt="Docker Image">
 </p>
 
 # Quest Log
@@ -210,11 +214,10 @@ environment:
 
 ## Join the Guild
 
-Pull requests are welcome from all adventurers!
+Pull requests are welcome from all adventurers. Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started — it covers dev setup, commit conventions, coding style, and the RPG theme rules.
 
-1. **Branch** — forge your feature branch
-2. **Test** — ensure the Docker build succeeds (CI included)
-3. **Style** — keep the RPG theme alive
+[![Open Issues](https://img.shields.io/github/issues/JohnFawkes/quest-log)](https://github.com/JohnFawkes/quest-log/issues)
+[![GitHub Discussions](https://img.shields.io/badge/discussions-GitHub-purple)](https://github.com/JohnFawkes/quest-log/discussions)
 
 ---
 

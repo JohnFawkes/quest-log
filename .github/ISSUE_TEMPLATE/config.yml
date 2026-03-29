@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question or start a discussion
+    url: https://github.com/JohnFawkes/quest-log/discussions
+    about: For questions, ideas, and general conversation about Quest Log.

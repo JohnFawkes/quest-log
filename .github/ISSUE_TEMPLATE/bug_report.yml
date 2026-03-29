@@ -1,0 +1,80 @@
+name: Bug Report
+description: Report a problem with Quest Log
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Fill out as much as you can — it helps a lot.
+
+  - type: input
+    id: version
+    attributes:
+      label: Quest Log version
+      description: Found in the GitHub Releases tab or the footer of the login page.
+      placeholder: "e.g. v0.2.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment method
+      options:
+        - Docker Compose (compose.yaml — pulling ghcr.io image)
+        - Docker Compose (compose-dev.yaml — building from source)
+        - Local Python (python app.py)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what went wrong.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or screenshots
+      description: |
+        Paste container logs (`docker logs <container>`), browser console errors, or screenshots.
+        This field supports Markdown.
+      render: shell
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser (for UI bugs)
+      placeholder: "e.g. Firefox 124, Chrome 123, Safari 17"
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment details
+      description: Any relevant environment variables set (redact secrets). Host OS, Docker version, etc.
+      placeholder: |
+        - Host OS: Ubuntu 24.04
+        - Docker: 26.1.0
+        - TZ=America/New_York

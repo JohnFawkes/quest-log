@@ -175,7 +175,7 @@ Key helper functions: `is_habit_due_on_date()`, `calculate_next_due_date()`, `ch
 ## Documentation Requirements
 
 - **New features** — always add an entry to the `README.md` feature table (Core Mechanics) and any relevant section (e.g. Notifications, Guild Master's Guide). Keep the RPG tone.
-- **All changes** — always add an entry to the `[Unreleased]` section of `CHANGELOG.md` under the appropriate heading (`Added`, `Fixed`, `Changed`, `Removed`). Follow the existing format.
+- **All changes** — always add an entry to `CHANGELOG.md` under the top versioned section (e.g. `## [v0.3.0] - 2026-03-29`) and the appropriate heading (`Added`, `Fixed`, `Changed`, `Removed`). If no versioned section exists at the top yet, create one. Follow the existing format. There is no `[Unreleased]` section — changes go directly into the versioned section.
 - Both files must be updated in the same commit as the code change.
 
 ## Important Considerations

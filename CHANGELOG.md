@@ -5,11 +5,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [Unreleased]
-
-> Changes on the current branch, not yet merged to `main`.
+## [v0.3.0] - 2026-03-29
 
 ### Added
+- GitHub community health files: issue templates (bug report, feature request), PR template, `CONTRIBUTING.md`, `SECURITY.md`, `CODEOWNERS`, and Dependabot config for GitHub Actions updates.
 - Reward Redemption Log in Guild Hall — Guild Masters can now see the 50 most recent reward claims in a new table in the admin panel, showing adventurer name, reward name, gems spent, and timestamp.
 - Midnight penalty record creation — the midnight scheduler now runs `check_missed_habits` for every adventurer, ensuring penalty records exist for all missed quests regardless of whether the user loads the dashboard; `check_missed_habits` expanded to cover all habits (not just penalty-enabled ones) so every missed quest gets a record for accurate stats; gem deduction still only applies to habits with penalties enabled.
 - Chronicle (Stats Dashboard) — new `/stats` page for every adventurer showing gem/coin earnings and quest completions/failures across Today, This Week, This Month, This Year, and All Time, plus a rolling-average table (per day/week/month/year). Guild Masters get `/admin/stats` (Guild Chronicle) with an at-a-glance table for every adventurer and drill-down links to each player's full stats. Accessible via the "Stats" nav link and a "Guild Chronicle" button in the Guild Hall.

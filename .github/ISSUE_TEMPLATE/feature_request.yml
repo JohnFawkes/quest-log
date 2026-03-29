@@ -1,0 +1,62 @@
+name: Feature Request
+description: Suggest a new quest for the Guild
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Got an idea to make Quest Log better? Describe it below.
+        Check [existing issues](../../issues) and [discussions](../../discussions) first to avoid duplicates.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What problem does this solve, or what use case does it address?
+      placeholder: "I find myself wanting to... / There's no way to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe what you'd like to see added or changed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you thought about?
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature area
+      options:
+        - Quest management
+        - Gem economy / rewards
+        - Avatar / themes
+        - Notifications (Apprise)
+        - Admin / Guild Hall
+        - Authentication
+        - CI/CD / deployment
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: theme
+    attributes:
+      label: RPG theme fit
+      description: Quest Log has a deliberate RPG theme. Does this feature fit?
+      options:
+        - label: This feature fits the existing RPG theme or can be adapted to it
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots, mockups, links to similar apps, anything else helpful.
