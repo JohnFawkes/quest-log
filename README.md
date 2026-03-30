@@ -125,7 +125,7 @@ If notifications are configured, each submission also delivers a message contain
 
 ### Notifications
 
-Set `APPRISE_URLS` to a comma-separated list of [Apprise-compatible URLs](https://github.com/caronc/apprise/wiki) to receive alerts on any supported platform. `DISCORD_WEBHOOK_URL` is also supported for convenience.
+Set `APPRISE_URLS` to a comma-separated list of [Apprise-compatible URLs](https://github.com/caronc/apprise/wiki) to receive alerts on any supported platform.
 
 Optionally set a **Notification Avatar URL** in the Guild Hall (*Notification Settings*) to display a custom icon alongside bot messages in Discord and other services.
 
@@ -133,15 +133,9 @@ A **Midnight Quest Report** is sent automatically at midnight (local timezone) e
 - **Missed quests** — habits that were due yesterday but not completed or submitted
 - **Quests due today** — habits scheduled for the current day
 
-No configuration is required beyond setting up `APPRISE_URLS` or `DISCORD_WEBHOOK_URL`. The report respects the `TZ` environment variable.
-
 ### User Management
 
 The **Recruit & Promote** section of the Guild Hall lets you create users, promote them to Guild Master, adjust gems, reset passwords, and **delete adventurers** (removing all their quest history).
-
-### Google → Local Account Migration
-
-Adventurers who signed up via Google can set a local password under *Adventurer Settings → Set a Local Password*. Once set, they can log in with email and password without needing Google.
 
 ### Maintenance
 
@@ -204,7 +198,6 @@ environment:
 | `ADMIN_EMAIL` | No | Email that auto-receives Guild Master rights |
 | `PUBLIC_DOMAIN` | No | Public URL for OAuth redirects |
 | `APPRISE_URLS` | No | Comma-separated [Apprise URLs](https://github.com/caronc/apprise/wiki) (Discord, Telegram, Slack, etc.) |
-| `DISCORD_WEBHOOK_URL` | No | Discord webhook URL (automatically converted to Apprise format) |
 | `DATA_DIR` | No | Directory for the SQLite database |
 | `BACKUP_DIR` | No | Directory for daily backup zip files (default: `/backups`) |
 | `PORT` | No | Application port (default: `5000`) |
