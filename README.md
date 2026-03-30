@@ -14,6 +14,11 @@ Quest Log is a gamified habit tracker that transforms your daily tasks into an R
 
 ---
 
+> [!WARNING]
+> Quest Log is developed with the assistance of [Claude Code](https://claude.ai/claude-code) (AI-generated code). Container images are scanned for vulnerabilities with [Trivy](https://github.com/aquasecurity/trivy). Source code is analyzed with [Semgrep](https://semgrep.dev/) and [GitHub CodeQL](https://codeql.github.com/). Review the code and scan results before deploying in sensitive environments.
+
+---
+
 ## The Adventurer's Handbook
 
 ### Core Mechanics
