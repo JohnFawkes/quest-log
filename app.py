@@ -17,9 +17,10 @@ import apprise
 import requests as http_requests
 from authlib.integrations.flask_client import OAuth
 from flask import (
-    Flask, Response, flash, make_response, redirect, render_template, request,
-    send_from_directory, session, url_for,
+    Flask, Blueprint, Response, flash, g, jsonify, make_response, redirect,
+    render_template, request, send_from_directory, session, url_for,
 )
+from functools import wraps
 from flask_login import (
     LoginManager, UserMixin, current_user, login_required, login_user, logout_user,
 )
@@ -132,6 +133,7 @@ class User(UserMixin, db.Model):
     avatar_hair_color = db.Column(db.String(7), default='#5C3317')
     avatar_eye_color = db.Column(db.String(7), default='#2C1810')
     avatar_hair_style = db.Column(db.String(20), default='none')
+    api_token = db.Column(db.String(64), unique=True)
     avatar_head_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
     avatar_chest_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
     avatar_weapon_id = db.Column(db.Integer, db.ForeignKey('avatar_item.id'), nullable=True)
@@ -641,6 +643,7 @@ def perform_db_migration():
         ('avatar_hair_color', "VARCHAR(7) DEFAULT '#5C3317'"),
         ('avatar_eye_color', "VARCHAR(7) DEFAULT '#2C1810'"),
         ('avatar_hair_style', "VARCHAR(20) DEFAULT 'none'"),
+        ('api_token', 'VARCHAR(64)'),
     ]:
         if col_name not in user_cols:
             _ddl_add_column(cursor, 'user', col_name, col_def)
@@ -2029,6 +2032,583 @@ def uploaded_file(filename):
     response = send_from_directory(app.config['UPLOAD_FOLDER'], filename, mimetype=mime_type)
     response.headers['Content-Disposition'] = 'inline'
     return response
+
+# ---------------------------------------------------------------------------
+# JSON REST API  — Bearer-token auth, CSRF-exempt
+# ---------------------------------------------------------------------------
+
+def _api_current_user():
+    auth = request.headers.get('Authorization', '')
+    token = auth[7:].strip() if auth.lower().startswith('bearer ') else ''
+    if not token:
+        return None
+    return User.query.filter_by(api_token=token).first()
+
+def _require_api_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        user = _api_current_user()
+        if not user:
+            return jsonify({'error': 'Unauthorized'}), 401
+        g.api_user = user
+        return f(*args, **kwargs)
+    return decorated
+
+def _require_api_admin(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        user = _api_current_user()
+        if not user:
+            return jsonify({'error': 'Unauthorized'}), 401
+        if not user.is_admin:
+            return jsonify({'error': 'Forbidden'}), 403
+        g.api_user = user
+        return f(*args, **kwargs)
+    return decorated
+
+def _user_json(u):
+    return {
+        'id': u.id, 'email': u.email, 'name': u.name,
+        'points': u.points, 'coins': u.coins, 'is_admin': u.is_admin,
+        'theme': u.theme, 'picture': u.picture,
+        'avatar_body': u.avatar_body, 'avatar_role': u.avatar_role,
+        'avatar_skin_tone': u.avatar_skin_tone,
+        'avatar_hair_color': u.avatar_hair_color,
+        'avatar_eye_color': u.avatar_eye_color,
+        'avatar_hair_style': u.avatar_hair_style,
+    }
+
+def _habit_json(h):
+    return {
+        'id': h.id, 'name': h.name, 'description': h.description,
+        'points_reward': h.points_reward, 'coins_reward': h.coins_reward,
+        'schedule_type': h.schedule_type, 'schedule_days': h.schedule_days,
+        'interval_days': h.interval_days,
+        'penalty_enabled': h.penalty_enabled, 'penalty_amount': h.penalty_amount,
+        'streak_enabled': h.streak_enabled, 'streak_milestone': h.streak_milestone,
+        'streak_multiplier': h.streak_multiplier, 'coins_streak_bonus': h.coins_streak_bonus,
+        'created_at': h.created_at.isoformat() if h.created_at else None,
+        'assigned_users': [{'id': u.id, 'name': u.name} for u in h.assigned_users],
+    }
+
+def _completion_json(c):
+    return {
+        'id': c.id, 'habit_id': c.habit_id, 'habit_name': c.habit_name,
+        'user_id': c.user_id,
+        'user_name': c.user.name if c.user else None,
+        'status': c.status,
+        'timestamp': c.timestamp.isoformat() if c.timestamp else None,
+        'image_url': f'/uploads/{c.image_filename}' if c.image_filename else None,
+    }
+
+def _reward_json(r):
+    return {
+        'id': r.id, 'name': r.name, 'cost': r.cost,
+        'description': r.description, 'icon': r.icon,
+        'is_approved': r.is_approved, 'is_demo': r.is_demo,
+        'requested_by_id': r.requested_by_id,
+    }
+
+api = Blueprint('api', __name__, url_prefix='/api')
+csrf.exempt(api)
+
+# --- Auth ---
+
+@api.route('/auth/login', methods=['POST'])
+def api_login():
+    data = request.get_json(silent=True) or {}
+    email = (data.get('email') or '').strip()
+    password = data.get('password') or ''
+    if not email or not password:
+        return jsonify({'error': 'Email and password required'}), 400
+    user = User.query.filter_by(email=email).first()
+    if not user or not user.password_hash or not check_password_hash(user.password_hash, password):
+        return jsonify({'error': 'Invalid credentials'}), 401
+    if not user.api_token:
+        user.api_token = secrets.token_urlsafe(32)
+        db.session.commit()
+    return jsonify({'token': user.api_token, 'user': _user_json(user)})
+
+@api.route('/auth/logout', methods=['POST'])
+@_require_api_auth
+def api_logout():
+    g.api_user.api_token = None
+    db.session.commit()
+    return jsonify({'message': 'Logged out'})
+
+@api.route('/auth/me')
+@_require_api_auth
+def api_me():
+    return jsonify({'user': _user_json(g.api_user)})
+
+# --- Habits / Dashboard ---
+
+@api.route('/habits/today')
+@_require_api_auth
+def api_habits_today():
+    user = g.api_user
+    check_missed_habits(user)
+    local_tz = _get_localtz()
+    today = datetime.now(local_tz).replace(hour=0, minute=0, second=0, microsecond=0)
+    tomorrow = today + timedelta(days=1)
+    habits = Habit.query.filter(Habit.assigned_users.any(User.id == user.id)).all()
+    result = []
+    for h in habits:
+        if not is_habit_due_on_date(h, today):
+            continue
+        completion = Completion.query.filter(
+            Completion.habit_id == h.id, Completion.user_id == user.id,
+            Completion.timestamp >= today, Completion.timestamp < tomorrow,
+            Completion.status.in_(['pending', 'approved'])
+        ).first()
+        result.append({
+            'habit': _habit_json(h),
+            'completion': _completion_json(completion) if completion else None,
+            'streak': get_habit_streak(user.id, h.id),
+        })
+    return jsonify({'habits': result})
+
+@api.route('/habits/upcoming')
+@_require_api_auth
+def api_habits_upcoming():
+    user = g.api_user
+    local_tz = _get_localtz()
+    today = datetime.now(local_tz).replace(hour=0, minute=0, second=0, microsecond=0)
+    habits = Habit.query.filter(Habit.assigned_users.any(User.id == user.id)).all()
+    upcoming = []
+    for h in habits:
+        if is_habit_due_on_date(h, today):
+            continue
+        next_due = calculate_next_due_date(h)
+        if next_due:
+            upcoming.append({'habit': _habit_json(h), 'next_due': next_due.strftime('%Y-%m-%d')})
+    upcoming.sort(key=lambda x: x['next_due'])
+    return jsonify({'habits': upcoming})
+
+@api.route('/habits/<int:habit_id>/complete', methods=['POST'])
+@_require_api_auth
+def api_complete_habit(habit_id):
+    user = g.api_user
+    if user.email == DEMO_EMAIL:
+        return jsonify({'error': 'Demo account is read-only'}), 403
+    habit = db.session.get(Habit, habit_id)
+    if not habit:
+        return jsonify({'error': 'Not found'}), 404
+    if not any(u.id == user.id for u in habit.assigned_users):
+        return jsonify({'error': 'Not assigned to this habit'}), 403
+    filename = None
+    if 'proof' in request.files:
+        file = request.files['proof']
+        if file and file.filename:
+            ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+            if ext not in {'png', 'jpg', 'jpeg', 'gif', 'webp'}:
+                return jsonify({'error': 'Invalid file type'}), 400
+            filename = secrets.token_hex(16) + '.' + ext
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)))
+    token = secrets.token_urlsafe(32)
+    completion = Completion(
+        user_id=user.id, habit_id=habit.id, habit_name=habit.name,
+        image_filename=filename, status='pending', action_token=token
+    )
+    db.session.add(completion)
+    db.session.commit()
+    send_notification(
+        f"📸 **{user.name}** quest update: **{habit.name}**! (Pending Review)",
+        filename, completion_id=completion.id, action_token=token
+    )
+    return jsonify({'completion': _completion_json(completion)}), 201
+
+# --- Rewards ---
+
+@api.route('/rewards')
+@_require_api_auth
+def api_rewards():
+    user = g.api_user
+    if user.email == DEMO_EMAIL:
+        rewards = Reward.query.filter_by(is_demo=True).all()
+    else:
+        rewards = Reward.query.filter(
+            Reward.is_approved == True,
+            (Reward.is_demo == False) | (Reward.is_demo == None)
+        ).all()
+    return jsonify({'rewards': [_reward_json(r) for r in rewards], 'points': user.points})
+
+@api.route('/rewards/request', methods=['POST'])
+@_require_api_auth
+def api_request_reward():
+    user = g.api_user
+    if user.email == DEMO_EMAIL:
+        return jsonify({'error': 'Demo account is read-only'}), 403
+    data = request.get_json(silent=True) or {}
+    name = (data.get('name') or '').strip()
+    try:
+        cost = int(data.get('cost', 0))
+        if cost <= 0:
+            raise ValueError
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Cost must be a positive integer'}), 400
+    if not name:
+        return jsonify({'error': 'Name required'}), 400
+    reward = Reward(name=name, cost=cost, description=data.get('description', ''),
+                    is_approved=False, requested_by_id=user.id)
+    db.session.add(reward)
+    db.session.commit()
+    send_notification(f"💡 **{user.name}** requested a new reward: **{name}** ({cost} Gems).")
+    return jsonify({'reward': _reward_json(reward)}), 201
+
+@api.route('/rewards/<int:reward_id>/redeem', methods=['POST'])
+@_require_api_auth
+def api_redeem_reward(reward_id):
+    user = g.api_user
+    reward = db.session.get(Reward, reward_id)
+    if not reward:
+        return jsonify({'error': 'Not found'}), 404
+    if user.email == DEMO_EMAIL and not reward.is_demo:
+        return jsonify({'error': 'Demo users can only redeem demo rewards'}), 403
+    if user.points < reward.cost:
+        return jsonify({'error': 'Not enough Gems'}), 400
+    user.points -= reward.cost
+    db.session.add(Redemption(user_id=user.id, reward_name=reward.name, cost=reward.cost))
+    db.session.commit()
+    send_notification(f"🎁 **{user.name}** claimed **{reward.name}**!")
+    return jsonify({'points': user.points})
+
+# --- History ---
+
+@api.route('/history')
+@_require_api_auth
+def api_history():
+    user = g.api_user
+    local_tz = _get_localtz()
+    date_str = request.args.get('date', datetime.now(local_tz).strftime('%Y-%m-%d'))
+    try:
+        date = datetime.strptime(date_str, '%Y-%m-%d').replace(tzinfo=local_tz)
+    except ValueError:
+        return jsonify({'error': 'Invalid date, use YYYY-MM-DD'}), 400
+    start = date.replace(hour=0, minute=0, second=0, microsecond=0)
+    end = start + timedelta(days=1)
+    if user.is_admin:
+        completions = (Completion.query.join(User)
+            .filter(User.email != DEMO_EMAIL, Completion.timestamp >= start, Completion.timestamp < end)
+            .order_by(Completion.timestamp.desc()).all())
+    else:
+        completions = (Completion.query
+            .filter(Completion.user_id == user.id, Completion.timestamp >= start, Completion.timestamp < end)
+            .order_by(Completion.timestamp.desc()).all())
+    return jsonify({'completions': [_completion_json(c) for c in completions], 'date': date_str})
+
+# --- User Settings ---
+
+@api.route('/settings', methods=['PATCH'])
+@_require_api_auth
+def api_update_settings():
+    user = g.api_user
+    if user.email == DEMO_EMAIL:
+        return jsonify({'error': 'Demo account is read-only'}), 403
+    data = request.get_json(silent=True) or {}
+    if 'name' in data and data['name'].strip():
+        user.name = data['name'].strip()
+    if 'theme' in data and data['theme'] in ('dark', 'princess', 'forest'):
+        user.theme = data['theme']
+    db.session.commit()
+    return jsonify({'user': _user_json(user)})
+
+# --- Admin: Completions ---
+
+@api.route('/admin/completions/pending')
+@_require_api_admin
+def api_admin_pending():
+    pending = (Completion.query.join(User)
+        .filter(Completion.status == 'pending', User.email != DEMO_EMAIL).all())
+    return jsonify({'completions': [_completion_json(c) for c in pending]})
+
+@api.route('/admin/completions/<int:cid>/approve', methods=['POST'])
+@_require_api_admin
+def api_admin_approve(cid):
+    completion = db.session.get(Completion, cid)
+    if not completion:
+        return jsonify({'error': 'Not found'}), 404
+    user = db.session.get(User, completion.user_id)
+    if not user or user.email == DEMO_EMAIL:
+        return jsonify({'error': 'Cannot approve this completion'}), 403
+    completion.status = 'approved'
+    habit = db.session.get(Habit, completion.habit_id)
+    points = habit.points_reward if habit else 0
+    coins = habit.coins_reward if habit else 0
+    bonus_msg = ''
+    if habit and habit.streak_enabled:
+        streak = get_habit_streak(user.id, habit.id, exclude_id=completion.id) + 1
+        if habit.streak_milestone and streak % habit.streak_milestone == 0:
+            points = int(points * habit.streak_multiplier)
+            coins += habit.coins_streak_bonus
+            bonus_msg = f' 🔥 Streak x{habit.streak_multiplier}!'
+    user.points += points
+    user.coins += coins
+    db.session.commit()
+    send_notification(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved){bonus_msg}", completion.image_filename)
+    return jsonify({'completion': _completion_json(completion)})
+
+@api.route('/admin/completions/<int:cid>/reject', methods=['POST'])
+@_require_api_admin
+def api_admin_reject(cid):
+    completion = db.session.get(Completion, cid)
+    if not completion:
+        return jsonify({'error': 'Not found'}), 404
+    user = db.session.get(User, completion.user_id)
+    if not user or user.email == DEMO_EMAIL:
+        return jsonify({'error': 'Cannot reject this completion'}), 403
+    completion.status = 'rejected'
+    db.session.commit()
+    return jsonify({'completion': _completion_json(completion)})
+
+# --- Admin: Habits ---
+
+@api.route('/admin/habits')
+@_require_api_admin
+def api_admin_habits():
+    demo_user = User.query.filter_by(email=DEMO_EMAIL).first()
+    habits = Habit.query.all()
+    if demo_user:
+        habits = [h for h in habits if not any(u.id == demo_user.id for u in h.assigned_users)]
+    return jsonify({'habits': [_habit_json(h) for h in habits]})
+
+@api.route('/admin/habits', methods=['POST'])
+@_require_api_admin
+def api_admin_create_habit():
+    data = request.get_json(silent=True) or {}
+    name = (data.get('name') or '').strip()
+    user_ids = data.get('assigned_user_ids', [])
+    if not name:
+        return jsonify({'error': 'Name required'}), 400
+    if not user_ids:
+        return jsonify({'error': 'At least one user required'}), 400
+    schedule_type = data.get('schedule_type', 'daily')
+    schedule_days = ','.join(str(d) for d in data.get('schedule_days', [])) if schedule_type in ('weekly', 'biweekly') else None
+    interval_days = int(data.get('interval_days', 1)) if schedule_type == 'interval' else None
+    habit = Habit(
+        name=name, description=data.get('description', ''),
+        points_reward=int(data.get('points_reward', 10)),
+        coins_reward=int(data.get('coins_reward', 1)),
+        schedule_type=schedule_type, schedule_days=schedule_days, interval_days=interval_days,
+        penalty_enabled=bool(data.get('penalty_enabled', False)),
+        penalty_amount=int(data.get('penalty_amount', 0)),
+        streak_enabled=bool(data.get('streak_enabled', False)),
+        streak_milestone=int(data.get('streak_milestone', 5)),
+        streak_multiplier=float(data.get('streak_multiplier', 2.0)),
+        coins_streak_bonus=int(data.get('coins_streak_bonus', 0)),
+        assigned_users=User.query.filter(User.id.in_(user_ids)).all(),
+    )
+    db.session.add(habit)
+    db.session.commit()
+    return jsonify({'habit': _habit_json(habit)}), 201
+
+@api.route('/admin/habits/<int:habit_id>', methods=['PATCH'])
+@_require_api_admin
+def api_admin_update_habit(habit_id):
+    habit = db.session.get(Habit, habit_id)
+    if not habit:
+        return jsonify({'error': 'Not found'}), 404
+    data = request.get_json(silent=True) or {}
+    if 'name' in data and data['name'].strip():
+        habit.name = data['name'].strip()
+    if 'description' in data:
+        habit.description = data['description']
+    if 'points_reward' in data:
+        habit.points_reward = int(data['points_reward'])
+    if 'coins_reward' in data:
+        habit.coins_reward = int(data['coins_reward'])
+    if 'schedule_type' in data:
+        habit.schedule_type = data['schedule_type']
+        habit.schedule_days = ','.join(str(d) for d in data.get('schedule_days', [])) if habit.schedule_type in ('weekly', 'biweekly') else None
+        habit.interval_days = int(data.get('interval_days', 1)) if habit.schedule_type == 'interval' else None
+    if 'penalty_enabled' in data:
+        habit.penalty_enabled = bool(data['penalty_enabled'])
+    if 'penalty_amount' in data:
+        habit.penalty_amount = int(data['penalty_amount'])
+    if 'assigned_user_ids' in data:
+        habit.assigned_users = User.query.filter(User.id.in_(data['assigned_user_ids'])).all()
+    db.session.commit()
+    return jsonify({'habit': _habit_json(habit)})
+
+@api.route('/admin/habits/<int:habit_id>', methods=['DELETE'])
+@_require_api_admin
+def api_admin_delete_habit(habit_id):
+    habit = db.session.get(Habit, habit_id)
+    if not habit:
+        return jsonify({'error': 'Not found'}), 404
+    db.session.delete(habit)
+    db.session.commit()
+    return jsonify({'message': 'Deleted'})
+
+# --- Admin: Users ---
+
+@api.route('/admin/users')
+@_require_api_admin
+def api_admin_users():
+    users = User.query.filter(User.email != DEMO_EMAIL).all()
+    return jsonify({'users': [_user_json(u) for u in users]})
+
+@api.route('/admin/users', methods=['POST'])
+@_require_api_admin
+def api_admin_create_user():
+    data = request.get_json(silent=True) or {}
+    email = (data.get('email') or '').strip()
+    name = (data.get('name') or '').strip()
+    password = data.get('password') or ''
+    if not email or not name or not password:
+        return jsonify({'error': 'email, name, and password required'}), 400
+    if User.query.filter_by(email=email).first():
+        return jsonify({'error': 'Email already registered'}), 409
+    user = User(email=email, name=name,
+                password_hash=generate_password_hash(password, method='scrypt'))
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({'user': _user_json(user)}), 201
+
+@api.route('/admin/users/<int:user_id>', methods=['DELETE'])
+@_require_api_admin
+def api_admin_delete_user(user_id):
+    user = db.session.get(User, user_id)
+    if not user or user.email == DEMO_EMAIL:
+        return jsonify({'error': 'User not found'}), 404
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({'message': 'Deleted'})
+
+@api.route('/admin/users/<int:user_id>/promote', methods=['POST'])
+@_require_api_admin
+def api_admin_promote_user(user_id):
+    user = db.session.get(User, user_id)
+    if not user or user.email == DEMO_EMAIL:
+        return jsonify({'error': 'User not found'}), 404
+    user.is_admin = True
+    db.session.commit()
+    return jsonify({'user': _user_json(user)})
+
+@api.route('/admin/users/<int:user_id>/reset-password', methods=['POST'])
+@_require_api_admin
+def api_admin_reset_password(user_id):
+    user = db.session.get(User, user_id)
+    if not user or user.email == DEMO_EMAIL:
+        return jsonify({'error': 'User not found'}), 404
+    data = request.get_json(silent=True) or {}
+    new_password = data.get('new_password') or ''
+    if not new_password:
+        return jsonify({'error': 'new_password required'}), 400
+    user.password_hash = generate_password_hash(new_password, method='scrypt')
+    user.force_password_change = True
+    db.session.commit()
+    return jsonify({'message': 'Password reset'})
+
+@api.route('/admin/users/<int:user_id>/adjust-gems', methods=['POST'])
+@_require_api_admin
+def api_admin_adjust_gems(user_id):
+    user = db.session.get(User, user_id)
+    if not user or user.email == DEMO_EMAIL:
+        return jsonify({'error': 'User not found'}), 404
+    data = request.get_json(silent=True) or {}
+    try:
+        amount = int(data.get('amount', 0))
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid amount'}), 400
+    user.points = max(0, user.points + amount)
+    db.session.commit()
+    return jsonify({'user': _user_json(user)})
+
+@api.route('/admin/users/<int:user_id>/adjust-coins', methods=['POST'])
+@_require_api_admin
+def api_admin_adjust_coins(user_id):
+    user = db.session.get(User, user_id)
+    if not user or user.email == DEMO_EMAIL:
+        return jsonify({'error': 'User not found'}), 404
+    data = request.get_json(silent=True) or {}
+    try:
+        amount = int(data.get('amount', 0))
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid amount'}), 400
+    user.coins = max(0, user.coins + amount)
+    db.session.commit()
+    return jsonify({'user': _user_json(user)})
+
+# --- Admin: Rewards ---
+
+@api.route('/admin/rewards')
+@_require_api_admin
+def api_admin_rewards():
+    rewards = Reward.query.filter(
+        (Reward.is_demo == False) | (Reward.is_demo == None)
+    ).all()
+    return jsonify({'rewards': [_reward_json(r) for r in rewards]})
+
+@api.route('/admin/rewards', methods=['POST'])
+@_require_api_admin
+def api_admin_create_reward():
+    data = request.get_json(silent=True) or {}
+    name = (data.get('name') or '').strip()
+    try:
+        cost = int(data.get('cost', 0))
+        if cost <= 0:
+            raise ValueError
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Valid positive cost required'}), 400
+    if not name:
+        return jsonify({'error': 'Name required'}), 400
+    reward = Reward(name=name, cost=cost, description=data.get('description', ''),
+                    icon=data.get('icon', 'fas fa-gift'), is_approved=True, is_demo=False)
+    db.session.add(reward)
+    db.session.commit()
+    return jsonify({'reward': _reward_json(reward)}), 201
+
+@api.route('/admin/rewards/<int:reward_id>/approve', methods=['POST'])
+@_require_api_admin
+def api_admin_approve_reward(reward_id):
+    reward = db.session.get(Reward, reward_id)
+    if not reward:
+        return jsonify({'error': 'Not found'}), 404
+    reward.is_approved = True
+    db.session.commit()
+    return jsonify({'reward': _reward_json(reward)})
+
+@api.route('/admin/rewards/<int:reward_id>', methods=['DELETE'])
+@_require_api_admin
+def api_admin_delete_reward(reward_id):
+    reward = db.session.get(Reward, reward_id)
+    if not reward:
+        return jsonify({'error': 'Not found'}), 404
+    db.session.delete(reward)
+    db.session.commit()
+    return jsonify({'message': 'Deleted'})
+
+# --- Admin: App Settings ---
+
+@api.route('/admin/settings')
+@_require_api_admin
+def api_admin_get_settings():
+    return jsonify({
+        'apprise_urls': get_setting('apprise_urls', ''),
+        'discord_webhook_url': get_setting('discord_webhook_url', ''),
+        'notification_icon_url': get_setting('notification_icon_url', ''),
+        'week_start_day': get_setting('week_start_day', '0'),
+        'approved_image_retention_days': get_setting('approved_image_retention_days', '0'),
+    })
+
+@api.route('/admin/settings', methods=['PATCH'])
+@_require_api_admin
+def api_admin_update_settings():
+    data = request.get_json(silent=True) or {}
+    for key in ('apprise_urls', 'discord_webhook_url', 'notification_icon_url'):
+        if key in data:
+            set_setting(key, str(data[key]).strip())
+    if 'week_start_day' in data and str(data['week_start_day']) in ('0', '6'):
+        set_setting('week_start_day', str(data['week_start_day']))
+    if 'approved_image_retention_days' in data:
+        try:
+            set_setting('approved_image_retention_days', str(max(0, int(data['approved_image_retention_days']))))
+        except (TypeError, ValueError):
+            pass
+    return jsonify({'message': 'Settings updated'})
+
+app.register_blueprint(api)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

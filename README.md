@@ -26,6 +26,7 @@ Quest Log is a gamified habit tracker that transforms your daily tasks into an R
 | **Midnight Quest Report** | Daily summary sent at midnight listing missed quests from the previous day and quests due today |
 | **One-Click Approvals** | Approve or reject quest submissions directly from Discord/Telegram via a link — no login needed |
 | **Notification Avatar** | Configure a custom icon URL shown as the bot avatar in Discord and other services |
+| **Android App** | Native Android companion app — full feature parity with the web UI via a REST API |
 | **Google → Local Migration** | Convert a Google OAuth account to local email/password login from Settings |
 | **User Management** | Create, promote, reset passwords, adjust gems, and delete adventurers from the Guild Hall |
 | **Flexible Auth** | Local email/password or Google OAuth |
@@ -204,6 +205,28 @@ environment:
 | `BACKUP_DIR` | No | Directory for daily backup zip files (default: `/backups`) |
 | `PORT` | No | Application port (default: `5000`) |
 | `TZ` | No | Timezone in IANA format (default: `UTC`) |
+
+---
+
+## Android App
+
+A native Android companion app lives in the `android-app/` directory. It mirrors every feature of the web UI.
+
+### Features
+- Login with server URL + email/password (no Google OAuth on mobile)
+- Dashboard — today's quests with one-tap submit (camera, gallery, or proof-free)
+- Rewards — view, request, and redeem
+- History — day-by-day quest log with proof images
+- Settings — display name and theme
+- Guild Hall (admin only) — approve/reject pending quests, manage quests/adventurers/rewards, and configure server settings
+
+### Building
+Open `android-app/` in Android Studio (Hedgehog or newer). Set `minSdk 26`, build variant `debug` or `release`.
+
+### Connecting
+Enter your server URL (e.g. `http://192.168.1.x:5000`) and your email/password on the login screen. The app authenticates via the REST API at `/api/`.
+
+> **Note:** `android:usesCleartextTraffic="true"` is set in the manifest to allow plain HTTP on local networks. For production use, serve Quest Log over HTTPS.
 
 ---
 
