@@ -2,8 +2,10 @@ package com.questlog.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import com.questlog.app.data.AuthPreferences
 import com.questlog.app.data.QuestLogRepository
+import com.questlog.app.data.api.ErrorResponse
 import com.questlog.app.data.api.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -66,7 +68,16 @@ class AuthViewModel(
                     prefs.save(body.token, url)
                     _state.value = AuthState.LoggedIn(body.user, body.token, url)
                 } else {
-                    _state.value = AuthState.Error("Invalid credentials")
+                    val serverMsg = try {
+                        Gson().fromJson(resp.errorBody()?.string(), ErrorResponse::class.java).error
+                    } catch (_: Exception) { null }
+                    val msg = when {
+                        serverMsg != null -> serverMsg
+                        resp.code() == 401 -> "Wrong email or password. Note: Google OAuth accounts need a local password set in the web app first."
+                        resp.code() == 400 -> "Email and password are required"
+                        else -> "Login failed (HTTP ${resp.code()})"
+                    }
+                    _state.value = AuthState.Error(msg)
                 }
             } catch (e: Exception) {
                 _state.value = AuthState.Error("Cannot reach server: ${e.message}")

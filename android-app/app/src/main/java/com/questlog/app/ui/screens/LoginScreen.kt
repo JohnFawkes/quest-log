@@ -50,7 +50,8 @@ fun LoginScreen(vm: AuthViewModel) {
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
             value = email, onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text("Email / Username") },
+            placeholder = { Text("e.g. admin or user@example.com") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth(),
