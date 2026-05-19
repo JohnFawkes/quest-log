@@ -6,8 +6,6 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    labels:
-      - "chore"
     commit-message:
       prefix: "chore"
       include: "scope"
