@@ -34,7 +34,7 @@ jobs:
           fi
 
       - name: Checkout PR branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set PR metadata
         id: pr
