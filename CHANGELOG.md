@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v0.3.1] - 2026-06-26
+
+### Fixed
+- Security: path traversal in `/uploads/<filename>` — route now sanitises the filename with `secure_filename()` before passing it to `send_from_directory`, and returns 404 for empty/invalid names.
+- Security: NaN/Infinity injection — `streak_multiplier` from form input is now validated with `math.isnan`/`math.isinf`; invalid or non-positive values fall back to `2.0`.
+- Security: raw HTML in token-based approve/reject responses — `quick_approve` and `quick_reject` now use `render_template_string` with Jinja2 auto-escaping instead of manually-constructed f-string HTML.
+- Security: shell injection in CI — `${{ github.ref_name }}` in the screenshot commit step is now passed through an `env:` variable (`BRANCH_NAME`) and quoted in the `run:` script, preventing expression injection.
+
 ## [v0.3.0] - 2026-03-29
 
 ### Added
