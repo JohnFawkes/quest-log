@@ -49,6 +49,7 @@
                         </a>
                         {% endif %}
                         <div class="mt-auto flex gap-2">
+                            {# nosemgrep: python.django.security.audit.templates.missing-csrf-token #}
                             <form action="{{ url_for('approve_completion', completion_id=p.id) }}" method="POST" class="flex-1">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-center py-2 rounded text-sm font-bold transition shadow-sm">
