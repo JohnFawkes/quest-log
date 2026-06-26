@@ -1,6 +1,7 @@
 import glob as _glob
 import html
 import logging
+import math
 import mimetypes
 import os
 import re
@@ -16,8 +17,8 @@ import apprise
 import requests as http_requests
 from urllib.parse import quote as _urlquote
 from flask import (
-    Flask, Response, flash, make_response, redirect, render_template, request,
-    send_from_directory, session, url_for,
+    Flask, Response, abort, flash, make_response, redirect, render_template,
+    render_template_string, request, send_from_directory, session, url_for,
 )
 from flask_login import (
     LoginManager, UserMixin, current_user, login_required, login_user, logout_user,
@@ -1569,7 +1570,12 @@ def create_habit():
     penalty_amount = int(request.form.get('penalty_amount') or 0)
     streak_enabled = 'streak_enabled' in request.form
     streak_milestone = int(request.form.get('streak_milestone') or 5)
-    streak_multiplier = float(request.form.get('streak_multiplier') or 2.0)
+    try:
+        streak_multiplier = float(request.form.get('streak_multiplier') or 2.0)
+        if math.isnan(streak_multiplier) or math.isinf(streak_multiplier) or streak_multiplier <= 0:
+            streak_multiplier = 2.0
+    except (ValueError, TypeError):
+        streak_multiplier = 2.0
     coins_reward = int(request.form.get('coins_reward') or 1)
     coins_streak_bonus = int(request.form.get('coins_streak_bonus') or 0)
 
@@ -1689,7 +1695,13 @@ def quick_approve(completion_id, token):
     completion.action_token = None  # invalidate token
     db.session.commit()
     send_notification(f"✅ **{user.name}** completed **{completion.habit_name}**! (Approved via link){bonus_msg}", completion.image_filename)
-    return f"<html><body style='font-family:sans-serif;text-align:center;padding:2rem'><h2>✅ Quest Approved!</h2><p><strong>{html.escape(user.name)}</strong> — <em>{html.escape(completion.habit_name)}</em></p><p>Gems awarded.{html.escape(bonus_msg)}</p></body></html>", 200
+    return render_template_string(
+        "<html><body style='font-family:sans-serif;text-align:center;padding:2rem'>"
+        "<h2>✅ Quest Approved!</h2>"
+        "<p><strong>{{ name }}</strong> — <em>{{ habit }}</em></p>"
+        "<p>Gems awarded.{{ bonus }}</p></body></html>",
+        name=user.name, habit=completion.habit_name, bonus=bonus_msg
+    ), 200
 
 @app.route('/quest/reject/<int:completion_id>/<token>')
 def quick_reject(completion_id, token):
@@ -1706,7 +1718,12 @@ def quick_reject(completion_id, token):
     completion.action_token = None  # invalidate token
     db.session.commit()
     send_notification(f"❌ **{user.name}**'s quest **{completion.habit_name}** was rejected (via link).")
-    return f"<html><body style='font-family:sans-serif;text-align:center;padding:2rem'><h2>❌ Quest Rejected</h2><p><strong>{html.escape(user.name)}</strong> — <em>{html.escape(completion.habit_name)}</em></p></body></html>", 200
+    return render_template_string(
+        "<html><body style='font-family:sans-serif;text-align:center;padding:2rem'>"
+        "<h2>❌ Quest Rejected</h2>"
+        "<p><strong>{{ name }}</strong> — <em>{{ habit }}</em></p></body></html>",
+        name=user.name, habit=completion.habit_name
+    ), 200
 
 @app.route('/admin/history')
 @login_required
@@ -2029,6 +2046,9 @@ def adjust_coins():
 # UPDATED: Add header for inline image display and guess MIME type
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
+    filename = secure_filename(filename)
+    if not filename:
+        abort(404)
     # Guess mime type based on extension
     mime_type, _ = mimetypes.guess_type(filename)
     
