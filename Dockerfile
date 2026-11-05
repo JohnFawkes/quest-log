@@ -17,12 +17,15 @@ ENV TZ=UTC
 RUN apt-get update && apt-get upgrade && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip to fix CVE-2026-1703 (path traversal via crafted wheel archives)
-RUN pip install --no-cache-dir "pip>=26.0"
-
-# Copy requirements and install
+# Copy requirements and install.
+# pip is upgraded first (CVE-2026-1703: path traversal via crafted wheel
+# archives) and then removed in the same layer. pip is not needed at runtime,
+# and its vendored copies of setuptools/pkg_resources, msgpack, and urllib3
+# (declared in pip/_vendor/bom.cdx.json) are flagged by image scanners.
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir "pip>=26.0" \
+    && pip install --no-cache-dir -r requirements.txt \
+    && pip uninstall -y pip
 
 # Bust layer cache when source code changes between builds
 ARG COMMIT_SHA=unknown
