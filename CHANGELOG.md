@@ -8,6 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [v0.3.1] - 2026-06-26
 
 ### Fixed
+- Docker build no longer aborts when Debian has pending package updates — `apt-get upgrade` now runs with `-y` instead of stopping at the interactive confirmation prompt.
 - Security: pip is now uninstalled from the Docker image after dependencies are installed. pip's vendored `setuptools`/`pkg_resources` 70.3.0 and `msgpack` (listed in `pip/_vendor/bom.cdx.json`) were flagged by Trivy for setuptools PackageIndex path traversal, setuptools MANIFEST.in NFC/NFD exclusion bypass, and msgpack Unpacker out-of-bounds read. pip is not used at runtime, and the app never imports these packages.
 - Security: path traversal in `/uploads/<filename>` — route now sanitises the filename with `secure_filename()` before passing it to `send_from_directory`, and returns 404 for empty/invalid names.
 - Security: NaN/Infinity injection — `streak_multiplier` from form input is now validated with `math.isnan`/`math.isinf`; invalid or non-positive values fall back to `2.0`.
