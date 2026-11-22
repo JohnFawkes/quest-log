@@ -4,5 +4,5 @@ flask-sqlalchemy>=3.1,<4.0
 flask-login>=0.6,<1.0
 requests>=2.32,<3.0
 werkzeug>=3.1,<4.0
-gunicorn>=26,<26.3
+gunicorn>=27,<27.1
 apprise>=2,<2.3
